@@ -1,0 +1,3 @@
+biopython==1.62
+-e git+git@github.com:veg/BioExt.git@1b30d92841e2356d99ca3deaa037138f6b207fd3#egg=bioext-master
+-e git+git@github.com:veg/hivclustering.git@1783bf782fb35fa20b1eea3aacb3790369a7b094#egg=hivclustering-master
