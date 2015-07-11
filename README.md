@@ -4,12 +4,12 @@ potential links against the Los Alamos HIV Sequence Database.
 
 # Installation
 
-HIV Trace requires tn93 be installed.
-https://github.com/veg/tn93
+HIV Trace requires [tn93](https://github.com/veg/tn93) be installed.
 
-pip install git+git://github.com/veg/hivtrace.git@master
+`pip install git+git://github.com/veg/hivtrace.git@master`
 
 # Example
+`hivtrace -i ./INPUT.FASTA -a 500 -r HXB2_prrt -t .015 -m 500 -g .05 -c`
 
 # Options Summary
 
@@ -65,8 +65,6 @@ Mask (with ---) the list of codon sites defined in [Lewis et al](http://journals
  
 ## -c --compare
 Compare uploaded sequences to the all of the public sequences, retrieved
-periodically from (hiv.lanl.gov)
+periodically from (http://hiv.lanl.gov)
 
 
-# Running tests
-nosetests
