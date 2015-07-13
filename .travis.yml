@@ -1,0 +1,27 @@
+language: python
+branches:
+only:
+  - master
+python:
+  - "3.4"
+
+virtualenv:
+  system_site_packages: true
+
+install:
+  - pip install -q -r travis.txt
+  - pip install coveralls
+
+script: 
+  - python setup.py install  >/dev/null
+  - python -c 'import hivtrace'
+  - nosetests --with-coverage
+notifications:
+    email:
+        recipients:
+            - sweaver@ucsd.edu
+        on_success: always
+        on_failure: always
+
+after_success:
+  - coveralls
