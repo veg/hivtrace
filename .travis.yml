@@ -5,9 +5,6 @@ only:
 python:
   - "3.4"
 
-virtualenv:
-  system_site_packages: true
-
 install:
   - pip install -q -r travis.txt
   - pip install coveralls
