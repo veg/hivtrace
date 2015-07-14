@@ -27,22 +27,25 @@
 
 from setuptools import setup
 import os
-import zipfile
+import gzip
 
-def unzip_file(zip_file, dir):
-    zip_ref = zipfile.ZipFile(zip_file, 'r')
-    zip_ref.extractall(dir)
-    zip_ref.close()
+def gunzip_file(zip_file, out_file):
+    with gzip.open(zip_file, 'rb') as f_in:
+        with open(out_file, 'wb') as f_out:
+            f_out.writelines(f_in)
+
 
 
 def setup_package():
 
     # Unzip LANL files
     resource_dir =  os.path.join(os.path.dirname(os.path.realpath(__file__)), 'hivtrace/rsrc')
-    lanl_zip = os.path.join(resource_dir, 'lanl.zip')
-    lanl_tn93output_zip = os.path.join(resource_dir, 'lanl.tn93results.zip')
-    unzip_file(lanl_zip, resource_dir)
-    unzip_file(lanl_tn93output_zip, resource_dir)
+    lanl_zip = os.path.join(resource_dir, 'LANL_FASTA.gz')
+    lanl_tn93output_zip = os.path.join(resource_dir, 'LANL.TN93OUTPUT.csv.gz')
+    lanl_outfile = os.path.join(resource_dir, 'LANL_FASTA')
+    lanl_tn93output_outfile = os.path.join(resource_dir, 'LANL.TN93OUTPUT.csv')
+    gunzip_file(lanl_zip, resource_dir)
+    gunzip_file(lanl_tn93output_zip, resource_dir)
 
     setup(
 
