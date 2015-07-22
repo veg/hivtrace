@@ -31,17 +31,6 @@ before_install:
 install:
   - pip install --upgrade pip
   - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy
-  - git clone git://github.com/veg/hyphy.git -q
-  - cd hyphy/src/lib && python setup.py build && python setup.py install -q >/dev/null && cd ../../../
-  - pip install biopython --cache-dir $HOME/.pip-cache 
-  - pip install fakemp --cache-dir $HOME/.pip-cache
-  - pip install pysam --cache-dir $HOME/.pip-cache
-  - pip install -r travis.txt --cache-dir $HOME/.pip-cache 
-  - pip install https://github.com/veg/BioExt/archive/0.17.1.tar.gz 
-  - pip install git+https://github.com/veg/hppy.git@953c90625fd914335eebe9a45ed02849be36c8da#egg=hppy-master --cache-dir $HOME/.pip-cache
-  - pip install git+https://github.com/veg/idepi.git@cee5b306e0814dbd9bd43c80039d69430f8d819d#egg=idepi-master --cache-dir $HOME/.pip-cache
-  - pip install git+https://github.com/nlhepler/sklmrmr.git@c76bed7598e94d03a0ef7e0311b588da985ddde6#egg=sklmrmr-master --cache-dir $HOME/.pip-cache
-  - pip install git+https://github.com/veg/hivclustering.git@1783bf782fb35fa20b1eea3aacb3790369a7b094#egg=hivclustering-master --cache-dir $HOME/.pip-cache
   - pip install coveralls
 
 script: 

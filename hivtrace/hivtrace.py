@@ -135,7 +135,7 @@ def concatenate_data(output, reference_fn, pairwise_fn, user_fn):
 
 
 
-def create_filter_list(tn93_fn, filter_list_fn) :
+def create_filter_list(tn93_fn, filter_list_fn):
     """
     Creates a CSV filter list that hivclustercsv will use to only return
     clusters that contain ids from the user supplied FASTA file

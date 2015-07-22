@@ -40,15 +40,15 @@ def setup_package():
 
     # Unzip LANL files
     resource_dir =  os.path.join(os.path.dirname(os.path.realpath(__file__)), 'hivtrace/rsrc')
-    lanl_zip = os.path.join(resource_dir, 'LANL_FASTA.gz')
+    lanl_zip = os.path.join(resource_dir, 'LANL.FASTA.gz')
     lanl_tn93output_zip = os.path.join(resource_dir, 'LANL.TN93OUTPUT.csv.gz')
-    lanl_outfile = os.path.join(resource_dir, 'LANL_FASTA')
+    lanl_outfile = os.path.join(resource_dir, 'LANL.FASTA')
     lanl_tn93output_outfile = os.path.join(resource_dir, 'LANL.TN93OUTPUT.csv')
-    gunzip_file(lanl_zip, resource_dir)
-    gunzip_file(lanl_tn93output_zip, resource_dir)
+
+    gunzip_file(lanl_zip, lanl_outfile)
+    gunzip_file(lanl_tn93output_zip, lanl_tn93output_outfile)
 
     setup(
-
         name='hivtrace',
         version='0.1.0',
         description='HIV Trace',
@@ -56,6 +56,23 @@ def setup_package():
         author_email='sweaver@ucsd.edu',
         url='http://www.hivtrace.org',
         packages=['hivtrace'],
+        package_data={
+            'hivtrace': [
+                'rsrc/LANL.FASTA.gz',
+                'rsrc/LANL.TN93OUTPUT.csv.gz'
+                ]
+            },
+        dependency_links = ['git+git://github.com/veg/hyphy-python.git@0.1.1#egg=HyPhy-0.1.1',
+                            'git+git://github.com/veg/BioExt.git@0.17.2#egg=BioExt-0.17.2',
+                            'git+git://github.com/veg/hppy.git@0.9.6#egg=hppy-0.9.6',
+                            'git+git://github.com/veg/hivclustering.git@1.1.3#egg=hivclustering-1.1.3'
+                            ],
+        install_requires=[
+            'BioExt >= 0.17.2',
+            'HyPhy >= 0.1.1',
+            'hppy >= 0.9.6',
+            'hivclustering >= 1.1.3',
+            ],
         entry_points= {
             'console_scripts': [
                 'hivtrace = hivtrace.hivtrace:main',
