@@ -32,6 +32,7 @@ install:
   - pip install --upgrade pip
   - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy
   - pip install coveralls
+  - pip install biopython
 
 script: 
   - travis_wait python setup.py install  >/dev/null
