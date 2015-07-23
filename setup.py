@@ -50,7 +50,7 @@ def setup_package():
 
     setup(
         name='hivtrace',
-        version='0.1.0',
+        version='0.1.1',
         description='HIV Trace',
         author='Steven Weaver',
         author_email='sweaver@ucsd.edu',
