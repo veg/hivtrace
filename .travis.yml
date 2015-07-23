@@ -42,6 +42,8 @@ notifications:
     email:
         recipients:
             - sweaver@ucsd.edu
+            - spond@ucsd.edu
+            - jwertheim@ucsd.edu
         on_success: always
         on_failure: always
 
