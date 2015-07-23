@@ -68,7 +68,7 @@ def setup_package():
                             'git+git://github.com/veg/hivclustering.git@1.1.3#egg=hivclustering-1.1.3'
                             ],
         install_requires=[
-            'biopython >=1.58',
+            'biopython >= 1.58',
             'BioExt >= 0.17.2',
             'HyPhy >= 0.1.1',
             'hppy >= 0.9.6',
