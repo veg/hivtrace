@@ -30,7 +30,7 @@ import subprocess
 from subprocess import PIPE
 import shutil
 import os
-import zipfile
+import gzip
 
 from Bio import SeqIO
 import csv
@@ -76,10 +76,10 @@ def completed(id):
 
     logging.info(msg);
 
-def unzip_file(zip_file, dir):
-    zip_ref = zipfile.ZipFile(zip_file, 'r')
-    zip_ref.extractall(dir)
-    zip_ref.close()
+def gunzip_file(zip_file, out_file):
+    with gzip.open(zip_file, 'rb') as f_in:
+        with open(out_file, 'wb') as f_out:
+            f_out.writelines(f_in)
 
 def rename_duplicates(fasta_fn, delimiter):
     """
@@ -135,7 +135,7 @@ def concatenate_data(output, reference_fn, pairwise_fn, user_fn):
 
 
 
-def create_filter_list(tn93_fn, filter_list_fn) :
+def create_filter_list(tn93_fn, filter_list_fn):
     """
     Creates a CSV filter list that hivclustercsv will use to only return
     clusters that contain ids from the user supplied FASTA file
@@ -369,12 +369,12 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     # otherwise throw error
     try :
         if not os.path.isfile(LANL_FASTA):
-            lanl_zip = os.path.join(resource_dir, 'lanl.zip')
-            unzip_file(lanl_zip, resource_dir)
+            lanl_zip = os.path.join(resource_dir, 'LANL.FASTA.gz')
+            gunzip_file(lanl_zip, LANL_FASTA)
 
         if not os.path.isfile(LANL_TN93OUTPUT_CSV):
-            lanl_tn93output_zip = os.path.join(resource_dir, 'lanl.tn93results.zip')
-            unzip_file(lanl_tn93output_zip, resource_dir)
+            lanl_tn93output_zip = os.path.join(resource_dir, 'LANL.TN93OUTPUT.csv.gz')
+            gunzip_file(lanl_tn93output_zip, LANL_TN93OUTPUT_CSV)
     except e:
         print("Oops, missing a resource file")
         raise

@@ -27,32 +27,53 @@
 
 from setuptools import setup
 import os
-import zipfile
+import gzip
 
-def unzip_file(zip_file, dir):
-    zip_ref = zipfile.ZipFile(zip_file, 'r')
-    zip_ref.extractall(dir)
-    zip_ref.close()
+def gunzip_file(zip_file, out_file):
+    with gzip.open(zip_file, 'rb') as f_in:
+        with open(out_file, 'wb') as f_out:
+            f_out.writelines(f_in)
+
 
 
 def setup_package():
 
     # Unzip LANL files
     resource_dir =  os.path.join(os.path.dirname(os.path.realpath(__file__)), 'hivtrace/rsrc')
-    lanl_zip = os.path.join(resource_dir, 'lanl.zip')
-    lanl_tn93output_zip = os.path.join(resource_dir, 'lanl.tn93results.zip')
-    unzip_file(lanl_zip, resource_dir)
-    unzip_file(lanl_tn93output_zip, resource_dir)
+    lanl_zip = os.path.join(resource_dir, 'LANL.FASTA.gz')
+    lanl_tn93output_zip = os.path.join(resource_dir, 'LANL.TN93OUTPUT.csv.gz')
+    lanl_outfile = os.path.join(resource_dir, 'LANL.FASTA')
+    lanl_tn93output_outfile = os.path.join(resource_dir, 'LANL.TN93OUTPUT.csv')
+
+    gunzip_file(lanl_zip, lanl_outfile)
+    gunzip_file(lanl_tn93output_zip, lanl_tn93output_outfile)
 
     setup(
-
         name='hivtrace',
-        version='0.1.0',
+        version='0.1.1',
         description='HIV Trace',
         author='Steven Weaver',
         author_email='sweaver@ucsd.edu',
         url='http://www.hivtrace.org',
         packages=['hivtrace'],
+        package_data={
+            'hivtrace': [
+                'rsrc/LANL.FASTA.gz',
+                'rsrc/LANL.TN93OUTPUT.csv.gz'
+                ]
+            },
+        dependency_links = ['git+git://github.com/veg/hyphy-python.git@0.1.1#egg=HyPhy-0.1.1',
+                            'git+git://github.com/veg/BioExt.git@0.17.2#egg=BioExt-0.17.2',
+                            'git+git://github.com/veg/hppy.git@0.9.6#egg=hppy-0.9.6',
+                            'git+git://github.com/veg/hivclustering.git@1.1.3#egg=hivclustering-1.1.3'
+                            ],
+        install_requires=[
+            'biopython >= 1.58',
+            'BioExt >= 0.17.2',
+            'HyPhy >= 0.1.1',
+            'hppy >= 0.9.6',
+            'hivclustering >= 1.1.3',
+            ],
         entry_points= {
             'console_scripts': [
                 'hivtrace = hivtrace.hivtrace:main',

@@ -1,8 +1,0 @@
-Cython
-fakemp
-pysam
-scikit-learn
-scipy
-six
-nose
-nose-cprof
