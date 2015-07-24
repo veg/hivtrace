@@ -50,7 +50,7 @@ def setup_package():
 
     setup(
         name='hivtrace',
-        version='0.1.1',
+        version='0.1.2',
         description='HIV Trace',
         author='Steven Weaver',
         author_email='sweaver@ucsd.edu',
@@ -72,7 +72,7 @@ def setup_package():
             'BioExt >= 0.17.2',
             'HyPhy >= 0.1.1',
             'hppy >= 0.9.6',
-            'hivclustering >= 1.1.3',
+            'hivclustering >= 1.1.4',
             ],
         entry_points= {
             'console_scripts': [
