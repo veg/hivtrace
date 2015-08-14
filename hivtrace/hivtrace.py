@@ -31,6 +31,7 @@ from subprocess import PIPE
 import shutil
 import os
 import gzip
+import sys
 
 from Bio import SeqIO
 import csv
@@ -348,17 +349,19 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     PHASE 7)  Run hivclustercsv to return clustering information in json format
     """
 
+    results_json = {}
 
     # Declare reference file
     resource_dir =  os.path.join(os.path.dirname(os.path.realpath(__file__)), 'rsrc')
 
 
     #These should be defined in the user's environment
-    PYTHON='python'
-    BEALIGN='bealign'
-    BAM2MSA='bam2msa'
+    env_dir = os.path.dirname(sys.executable)
+    PYTHON=sys.executable
+    BEALIGN=os.path.join(env_dir, 'bealign')
+    BAM2MSA=os.path.join(env_dir, 'bam2msa')
     TN93DIST='tn93'
-    HIVNETWORKCSV='hivnetworkcsv'
+    HIVNETWORKCSV=os.path.join(env_dir, 'hivnetworkcsv')
 
     # This will have to be another parameter
     LANL_FASTA = os.path.join(resource_dir, 'LANL.FASTA')
@@ -498,17 +501,19 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
         for line in p.stderr:
             complete_stderr += line
             update_status(id, phases.INFERRING_NETWORK, status.RUNNING, complete_stderr)
-        returncode = p.poll()
+        p.wait()
 
-    if returncode != 0:
+    if p.returncode != 0:
         raise subprocess.CalledProcessError(returncode, ' '.join(hivnetworkcsv_process), complete_stderr)
 
     update_status(id, phases.INFERRING_NETWORK, status.COMPLETED, complete_stderr)
     output_cluster_json_fh.close()
 
     # Read and print output_cluster_json
+    results_json["trace_results"] = json.loads(open(OUTPUT_CLUSTER_JSON, 'r').read())
+
     if not compare_to_lanl:
-        return json.loads(open(OUTPUT_CLUSTER_JSON, 'r').read())
+        return results_json
 
     if compare_to_lanl:
 
@@ -581,26 +586,29 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
           for line in p.stderr:
               complete_stderr += line
               update_status(id, phases.PUBLIC_INFERRING_CONNECTIONS, status.RUNNING, complete_stderr)
+          p.wait()
+
+      if p.returncode != 0:
+        raise subprocess.CalledProcessError(returncode, ' '.join(lanl_hivnetworkcsv_process), complete_stderr)
+
 
       lanl_output_cluster_json_fh.close()
 
       update_status(id, phases.PUBLIC_INFERRING_CONNECTIONS, status.COMPLETED)
-
-
-      # Adapt ids to attributes
-      #annotate_attributes(LANL_OUTPUT_CLUSTER_JSON, lanl_id_dict)
 
       #Annotate LANL nodes with id
       json_info = open(LANL_OUTPUT_CLUSTER_JSON, 'r').read()
 
       if json_info:
         annotate_lanl(LANL_OUTPUT_CLUSTER_JSON, LANL_FASTA)
-        return json.loads(json_info)
+        lanl_trace_results = json.loads(json_info)
+        results_json["lanl_trace_results"] = lanl_trace_results
       else:
-        return 'no results!'
+        logging.debug('no lanl results!')
 
     DEVNULL.close()
     completed(id)
+    return results_json
 
 
 def main():
