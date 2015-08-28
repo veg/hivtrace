@@ -93,10 +93,20 @@ class TestHIVTrace(unittest.TestCase):
                               self.output_usertolanl_tn93_fn,
                               self.output_tn93_fn)
 
+    with open(self.lanl_tn93output_csv, 'r') as tn93_file:
+        lanl_length = len(tn93_file.readlines()) - 1
+
+    with open(self.output_usertolanl_tn93_fn, 'r') as tn93_file:
+        u2l_length = len(tn93_file.readlines()) - 1
+
+    with open(self.output_tn93_fn, 'r') as tn93_file:
+        output_length = len(tn93_file.readlines()) - 1
+
+
     #Check that there are five test_ids
-    with open(self.user_lanl_tn93output, 'r') as fasta_f:
-      length = len(fasta_f.readlines())
-      self.assertTrue(length == 787243)
+    with open(self.user_lanl_tn93output, 'r') as tn93_file:
+      total_length = len(tn93_file.readlines()) - 1
+      self.assertTrue(lanl_length + u2l_length + output_length == total_length)
     return
 
   def test_annotate_lanl(self):
