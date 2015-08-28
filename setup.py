@@ -65,7 +65,7 @@ def setup_package():
         dependency_links = ['git+git://github.com/veg/hyphy-python.git@0.1.1#egg=HyPhy-0.1.1',
                             'git+git://github.com/veg/BioExt.git@0.17.2#egg=BioExt-0.17.2',
                             'git+git://github.com/veg/hppy.git@0.9.6#egg=hppy-0.9.6',
-                            'git+git://github.com/veg/hivclustering.git@1.1.4#egg=hivclustering-1.1.4'
+                            'git+git://github.com/veg/hivclustering.git@1.1.4#egg=hivclustering-1.2.0'
                             ],
         install_requires=[
             'biopython >= 1.58',
