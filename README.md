@@ -15,7 +15,11 @@ potential links against the Los Alamos HIV Sequence Database.
 HIV Trace requires [tn93](https://github.com/veg/tn93) be installed.
 ## Install using pip
 
-`pip install . -e`
+`pip install numpy`
+
+`pip install biopython`
+
+`pip install https://github.com/veg/hivtrace/archive/0.1.1.tar.gz --process-dependency-links`
 
 # Example Usage
 
