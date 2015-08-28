@@ -65,17 +65,7 @@ def update_status(id, phase, status, msg = ""):
       'msg'    : msg
     }
 
-    logging.info(msg);
-
-def completed(id):
-
-    msg = {
-      'type'   : 'completed',
-      'status' : 'job completed',
-      'msg'    : 'job completed succesfully'
-    }
-
-    logging.info(msg);
+    logging.info(json.dumps(msg))
 
 def gunzip_file(zip_file, out_file):
     with gzip.open(zip_file, 'rb') as f_in:
@@ -393,7 +383,7 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     basename = os.path.basename(input)
 
     BAM_FN                        = os.path.join(tmp_path, basename+'_output.bam')
-    OUTPUT_FASTA_FN               = os.path.join(tmp_path, basename+'_output.fasta')
+    OUTPUT_FASTA_FN               = input+'_output.fasta'
     OUTPUT_TN93_FN                = os.path.join(tmp_path, basename+'_user.tn93output.csv')
     JSON_TN93_FN                  = os.path.join(tmp_path, basename+'_user.tn93output.json')
     OUTPUT_COMBINED_SEQUENCE_FILE = os.path.join(tmp_path, basename+"_combined_user_lanl.fasta")
@@ -526,17 +516,16 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
           lanl_tn93_process = [TN93DIST, '-q', '-o', OUTPUT_USERTOLANL_TN93_FN, '-t',
                                  threshold, '-a', ambiguities,
                                  '-f', OUTPUT_FORMAT, '-l', min_overlap, '-s',
-                                 OUTPUT_FASTA_FN, LANL_FASTA]
+                                 LANL_FASTA, OUTPUT_FASTA_FN]
       else:
           lanl_tn93_process = [TN93DIST, '-q', '-o', OUTPUT_USERTOLANL_TN93_FN, '-t',
                                threshold, '-a', ambiguities,
                                '-f', OUTPUT_FORMAT, '-g', fraction, '-l',
-                               min_overlap, '-s', OUTPUT_FASTA_FN,
-                               LANL_FASTA]
+                               min_overlap, '-s', LANL_FASTA,
+                               OUTPUT_FASTA_FN]
 
 
-      #logging.debug(' '.join(lanl_tn93_process))
-      logging.debug(lanl_tn93_process)
+      logging.debug(' '.join(lanl_tn93_process))
       subprocess.check_call(lanl_tn93_process, stdout=DEVNULL)
       update_status(id, phases.PUBLIC_COMPUTE_TN93_DISTANCE, status.COMPLETED)
 
@@ -600,14 +589,14 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
       json_info = open(LANL_OUTPUT_CLUSTER_JSON, 'r').read()
 
       if json_info:
+        # Only include clusters that are connected to supplied nodes
         annotate_lanl(LANL_OUTPUT_CLUSTER_JSON, LANL_FASTA)
         lanl_trace_results = json.loads(json_info)
-        results_json["lanl_trace_results"] = lanl_trace_results
+        results_json['lanl_trace_results'] = lanl_trace_results
       else:
         logging.debug('no lanl results!')
 
     DEVNULL.close()
-    completed(id)
     return results_json
 
 
@@ -627,10 +616,17 @@ def main():
                                                      with these sites removed. It requires input/output file names along with the list of \
                                                      DRAM sites to remove: 'lewis' or 'wheeler'.")
     parser.add_argument('-c', '--compare', help='Compare to supplied FASTA file', action='store_true')
+    parser.add_argument('--log', help='Write logs to specified directory')
 
 
     args = parser.parse_args()
-    logging.basicConfig (filename = "hivtrace.log", level=logging.DEBUG)
+
+    if args.log:
+        log_fn = args.log
+    else:
+        log_fn = "hivtrace.log"
+
+    logging.basicConfig (filename = log_fn, level=logging.DEBUG)
 
     FN=args.input
     ID=os.path.basename(FN)
@@ -646,7 +642,7 @@ def main():
         STRIP_DRAMS = False
 
     results = hivtrace(ID, FN, REFERENCE, AMBIGUITY_HANDLING, DISTANCE_THRESHOLD, MIN_OVERLAP, COMPARE_TO_LANL, FRACTION, strip_drams_flag =STRIP_DRAMS, filter_edges = args.filter, handle_contaminants = args.curate)
-    print(results)
+    print(json.dumps(results))
 
 
 if __name__ == "__main__":

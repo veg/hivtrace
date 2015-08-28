@@ -118,10 +118,12 @@ class TestHIVTrace(unittest.TestCase):
 
     tmp_file = tempfile.mktemp()
     hivtrace.create_filter_list(self.output_tn93_fn, tmp_file)
+    print(tmp_file)
 
     #Check that file exists and that there are five ids named correctly
     with open(tmp_file, 'r') as filter_list:
       lines = filter_list.readlines()
+      print(lines)
       length = len(lines)
       self.assertTrue(length == 5)
     return
@@ -248,11 +250,11 @@ class TestHIVTrace(unittest.TestCase):
                       compare_to_lanl, '0.025')
 
 
-    [self.assertTrue("removed" in edge) for edge in results["Edges"]]
+    [self.assertTrue("removed" in edge) for edge in results["trace_results"]["Edges"]]
 
     # Read output json
     known_contaminants = ['B|FR|A04321|1983', '08_BC_HXB2_SABOTAGE|CN|AB078686|2000']
-    [self.assertTrue(not any([k in node for k in known_contaminants])) for node in results["Nodes"]]
+    [self.assertTrue(not any([k in node for k in known_contaminants])) for node in results["trace_results"]["Nodes"]]
 
     return
 
@@ -292,7 +294,7 @@ class TestHIVTrace(unittest.TestCase):
     # Read output json
     known_contaminants = ['B|FR|A04321|1983', '08_BC_HXB2_SABOTAGE|CN|AB078686|2000']
 
-    [self.assertTrue(not any([k in node for k in known_contaminants])) for node in results["Nodes"]]
+    [self.assertTrue(not any([k in node for k in known_contaminants])) for node in results["trace_results"]["Nodes"]]
 
   def test_empty_contaminants(self):
 
