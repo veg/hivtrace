@@ -19,7 +19,7 @@ HIV Trace requires [tn93](https://github.com/veg/tn93) be installed.
 
 `pip install biopython`
 
-`pip install pip install https://github.com/veg/hivtrace.git --process-dependency-links`
+`pip install https://github.com/veg/hivtrace.git --process-dependency-links`
 
 # Example Usage
 
