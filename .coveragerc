@@ -1,0 +1,12 @@
+[report]
+exclude_lines =
+    pragma: no cover
+    def gunzip_file(zip_file, out_file)
+    if not os.path.isfile(LANL_FASTA):
+    if not os.path.isfile(LANL_TN93OUTPUT_CSV):
+    raise
+    def main()
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if rt_only:

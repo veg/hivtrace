@@ -29,6 +29,7 @@ import os
 from os import path
 
 from hivtrace import hivtrace
+from hivtrace.strip_drams import strip_drams
 import subprocess
 import unittest
 import json
@@ -235,20 +236,22 @@ class TestHIVTrace(unittest.TestCase):
 
   def test_hivtrace_lanl(self):
 
-    id              = os.path.basename(self.fn)
+    id = os.path.basename(self.fn)
     compare_to_lanl = True
 
     #run the whole thing and make sure it completed via the status file
-    hivtrace.hivtrace(id, self.fn, self.reference, self.ambiguities,
+    results = hivtrace.hivtrace(id, self.fn, self.reference, self.ambiguities,
                       self.distance_threshold, self.min_overlap,
-                      compare_to_lanl, '0.025')
+                      compare_to_lanl, '0.025', False, "report")
 
     # Read output json
-    self.assertTrue(True)
+    self.assertTrue(results["lanl_trace_results"]["Network Summary"]["Clusters"] == 2)
+    self.assertTrue(results["lanl_trace_results"]["Network Summary"]["Edges"] == 31)
+    self.assertTrue(results["lanl_trace_results"]["Network Summary"]["Nodes"] == 13)
+    self.assertTrue(set(results["lanl_trace_results"].keys()) == set(['Cluster sizes', 'Edge Stages', 'Edges', 'HIV Stages', 'Network Summary', 'Settings', 'Degrees', 'Directed Edges', 'Multiple sequences', 'Nodes']))
 
     return
 
-  # TODO: Explain what is going on
   def test_strip_reference_sequences(self):
 
     id = os.path.basename(self.fn)
@@ -267,6 +270,29 @@ class TestHIVTrace(unittest.TestCase):
     [self.assertTrue(not any([k in node for k in known_contaminants])) for node in results["trace_results"]["Nodes"]]
 
     return
+
+  #
+  def test_strip_drams(self):
+
+    #run the whole thing and make sure it completed via the status file
+    results = strip_drams(self.fn, 'lewis')
+    self.assertTrue(results.__next__()[1][120:123] == '---')
+    self.assertTrue(results.__next__()[1][672:675] == '---')
+    self.assertFalse(results.__next__()[1][687:690] == '---')
+
+    results = strip_drams(self.fn, 'wheeler')
+    self.assertTrue(results.__next__()[1][129:132] == '---')
+    self.assertTrue(results.__next__()[1][687:690] == '---')
+
+    results = hivtrace.hivtrace(id, self.fn, self.reference, self.ambiguities,
+                      self.distance_threshold, self.min_overlap,
+                      False, '0.025', 'lewis')
+
+    self.assertTrue(results["trace_results"])
+
+
+    return
+
 
 
   # TODO: Expand test

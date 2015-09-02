@@ -179,36 +179,36 @@ def annotate_with_hxb2(hxb2_links_fn, hivcluster_json_fn):
     return
 
 
-def lanl_annotate_with_hxb2(lanl_hxb2_fn, lanl_hivcluster_json_fn, threshold):
+#def lanl_annotate_with_hxb2(lanl_hxb2_fn, lanl_hivcluster_json_fn, threshold):
 
-    """
-    Annotates the output of hivclustercsv with results from HXB2 tn93 analysis
-    """
+#    """
+#    Annotates the output of hivclustercsv with results from HXB2 tn93 analysis
+#    """
 
-    # Read hxb2 from generate lanl file
-    with open(lanl_hxb2_fn) as lanl_hxb2_fh:
-        lanl_hxb2_reader = csv.reader(lanl_hxb2_fh, delimiter=',')
-        lanl_hxb2_reader.__next__()
+#    # Read hxb2 from generate lanl file
+#    with open(lanl_hxb2_fn) as lanl_hxb2_fh:
+#        lanl_hxb2_reader = csv.reader(lanl_hxb2_fh, delimiter=',')
+#        lanl_hxb2_reader.__next__()
 
-        #filter hxb2 links based on threshold
-        lanl_hxb2_links = list(filter(lambda x: float(x[2]) < float(threshold), lanl_hxb2_reader))
-        lanl_hxb2_links = [l[1] for l in lanl_hxb2_links]
+#        #filter hxb2 links based on threshold
+#        lanl_hxb2_links = list(filter(lambda x: float(x[2]) < float(threshold), lanl_hxb2_reader))
+#        lanl_hxb2_links = [l[1] for l in lanl_hxb2_links]
 
-    # Load hivcluster json
-    with open(lanl_hivcluster_json_fn) as lanl_hivcluster_json_fh:
-        lanl_json = json.loads(lanl_hivcluster_json_fh.read())
+#    # Load hivcluster json
+#    with open(lanl_hivcluster_json_fn) as lanl_hivcluster_json_fh:
+#        lanl_json = json.loads(lanl_hivcluster_json_fh.read())
 
-    nodes = lanl_json.get('Nodes')
+#    nodes = lanl_json.get('Nodes')
 
-    #for each link in hxb2, get id in json object and add attribute
-    ids = list(filter(lambda x: x['id'] in lanl_hxb2_links, nodes))
-    [id.update({'hxb2_linked': 'true'}) for id in ids]
+#    #for each link in hxb2, get id in json object and add attribute
+#    ids = list(filter(lambda x: x['id'] in lanl_hxb2_links, nodes))
+#    [id.update({'hxb2_linked': 'true'}) for id in ids]
 
-    #Save nodes to file
-    with open(lanl_hivcluster_json_fn, 'w') as json_fh:
-        json.dump(lanl_json, json_fh)
+#    #Save nodes to file
+#    with open(lanl_hivcluster_json_fn, 'w') as json_fh:
+#        json.dump(lanl_json, json_fh)
 
-    return
+#    return
 
 def id_to_attributes(csv_fn, attribute_map, delimiter):
     '''
@@ -258,7 +258,7 @@ def annotate_attributes(trace_json_fn, attributes):
           #TODO Raise error if cannot annotate
           with open(trace_json_cp_fn, 'w') as copy_f:
               json.dump(trace_json, copy_f)
-        except:
+        except: # pragma: no cover
           return
 
     shutil.move(trace_json_cp_fn, trace_json_fn)
@@ -285,44 +285,43 @@ def annotate_lanl(trace_json_fn, lanl_file):
           [node.update({'is_lanl' : str(node["id"] in lanl_hits).lower() }) for node in nodes]
           with open(trace_json_cp_fn, 'w') as copy_f:
               json.dump(trace_json, copy_f)
-        except:
+        except: #pragma: no cover
           return
 
     shutil.move(trace_json_cp_fn, trace_json_fn)
     return
 
-def strip_reference_sequences(input, reference_fn, TN93DIST, threshold, ambiguities, min_overlap):
+# TODO : implement
+#def strip_reference_sequences(input, reference_fn, TN93DIST, threshold, ambiguities, min_overlap):
 
-    tn93_ref_fn = input+'_user.reference.json'
-    with open(tn93_ref_fn , 'w') as tn93_ref_fh:
-        output_fn=input+'_user.reference.csv'
-        OUTPUT_FORMAT='csv'
+#    tn93_ref_fn = input+'_user.reference.json'
+#    with open(tn93_ref_fn , 'w') as tn93_ref_fh:
+#        output_fn=input+'_user.reference.csv'
+#        OUTPUT_FORMAT='csv'
 
-        tn93_process =  [TN93DIST, '-q', '-o', output_fn, '-t',
-                                   threshold, '-a', ambiguities, '-g', '1', '-l',
-                                   min_overlap, '-f', OUTPUT_FORMAT, '-s', reference_fn,
-                                   input]
+#        tn93_process =  [TN93DIST, '-q', '-o', output_fn, '-t',
+#                                   threshold, '-a', ambiguities, '-g', '1', '-l',
+#                                   min_overlap, '-f', OUTPUT_FORMAT, '-s', reference_fn,
+#                                   input]
 
-        logging.debug(' '.join(tn93_process))
-        subprocess.check_call(tn93_process, stdout=tn93_ref_fh)
+#        logging.debug(' '.join(tn93_process))
+#        subprocess.check_call(tn93_process, stdout=tn93_ref_fh)
 
-    # Make new FASTA file without reference sequences
-    with open(output_fn) as output_fh:
-        to_strip = set([line.split(',')[0].strip() for line in output_fh.readlines()[1:]])
+#    # Make new FASTA file without reference sequences
+#    with open(output_fn) as output_fh:
+#        to_strip = set([line.split(',')[0].strip() for line in output_fh.readlines()[1:]])
 
-    logging.debug("Stripping " + to_strip)
-    input_file = list(SeqIO.parse(open(input, 'r'), 'fasta'))
+#    logging.debug("Stripping " + to_strip)
+#    input_file = list(SeqIO.parse(open(input, 'r'), 'fasta'))
 
-    #Filter sequences to strip
-    stripped = list(filter(lambda x: x.id not in to_strip, input_file))
+#    #Filter sequences to strip
+#    stripped = list(filter(lambda x: x.id not in to_strip, input_file))
 
-    output_handle = open(input, "w")
-    SeqIO.write(stripped, output_handle, "fasta")
-
-
+#    output_handle = open(input, "w")
+#    SeqIO.write(stripped, output_handle, "fasta")
 
 def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
-             compare_to_lanl, fraction, strip_drams_flag =False, filter_edges = "no", handle_contaminants = "remove"):
+             compare_to_lanl, fraction, strip_drams_flag = False, filter_edges = "no", handle_contaminants = "remove"):
 
     """
     PHASE 1)  Pad sequence alignment to HXB2 length with bealign
@@ -368,7 +367,7 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
         if not os.path.isfile(LANL_TN93OUTPUT_CSV):
             lanl_tn93output_zip = os.path.join(resource_dir, 'LANL.TN93OUTPUT.csv.gz')
             gunzip_file(lanl_tn93output_zip, LANL_TN93OUTPUT_CSV)
-    except e:
+    except e: # pragma: no cover
         print("Oops, missing a resource file")
         raise
 
