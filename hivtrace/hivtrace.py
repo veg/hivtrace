@@ -36,6 +36,7 @@ import sys
 from Bio import SeqIO
 import csv
 from itertools import chain
+from itertools import groupby
 import json
 import logging
 import tempfile
@@ -66,6 +67,17 @@ def update_status(id, phase, status, msg = ""):
     }
 
     logging.info(json.dumps(msg))
+
+def fasta_iter(fasta_name):
+    """
+    Iterate through fasta file
+    """
+    fh = open(fasta_name)
+    faiter = (x[1] for x in groupby(fh, lambda line: line[0] == ">"))
+    for header in faiter:
+        header = header.__next__()[1:].strip()
+        seq = "".join(s.strip() for s in faiter.__next__())
+        yield header, seq
 
 def gunzip_file(zip_file, out_file):
     with gzip.open(zip_file, 'rb') as f_in:
@@ -321,7 +333,8 @@ def annotate_lanl(trace_json_fn, lanl_file):
 #    SeqIO.write(stripped, output_handle, "fasta")
 
 def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
-             compare_to_lanl, fraction, strip_drams_flag = False, filter_edges = "no", handle_contaminants = "remove"):
+             compare_to_lanl, fraction, strip_drams_flag = False, filter_edges = "no",
+             handle_contaminants = "remove", skip_alignment = False):
 
     """
     PHASE 1)  Pad sequence alignment to HXB2 length with bealign
@@ -398,27 +411,44 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
 
     EXCLUSION_LIST = None
 
-    # PHASE 1
-    update_status(id, phases.ALIGNING, status.RUNNING)
+    # Check for incompatible statement
+    if skip_alignment and compare_to_lanl:
+        raise Exception("You have passed arguments that are incompatible! You cannot compare to the public database if you elect to submit a pre-made alignment! Please consider the issue before trying again.")
 
-    if handle_contaminants is None:
-        handle_contaminants  = 'no'
+    if skip_alignment:
 
-    bealign_process = [BEALIGN, '-q', '-r', reference , '-m', SCORE_MATRIX, '-R', input, BAM_FN]
+        # Check for equal length in all sequences
+        seqs = fasta_iter(input)
+        seq_length = len(seqs.__next__()[1])
 
-    if handle_contaminants != 'no':
-        bealign_process.insert (-3, '-K')
+        if(any(len(seq[1]) != seq_length for seq in seqs)):
+            raise Exception("Not all input sequences have the same length!")
 
-    logging.debug(' '.join(bealign_process))
-    subprocess.check_call(bealign_process, stdout=DEVNULL)
-    update_status(id, phases.ALIGNING, status.COMPLETED)
+        # copy input file to output fasta file
+        shutil.copyfile(input, OUTPUT_FASTA_FN)
 
-    # PHASE 2
-    update_status(id, phases.BAM_FASTA_CONVERSION, status.RUNNING)
-    bam_process = [BAM2MSA, BAM_FN, OUTPUT_FASTA_FN]
-    logging.debug(' '.join(bam_process))
-    subprocess.check_call(bam_process, stdout=DEVNULL)
-    update_status(id, phases.BAM_FASTA_CONVERSION, status.COMPLETED)
+    else:
+        # PHASE 1
+        update_status(id, phases.ALIGNING, status.RUNNING)
+
+        if handle_contaminants is None:
+            handle_contaminants  = 'no'
+
+        bealign_process = [BEALIGN, '-q', '-r', reference , '-m', SCORE_MATRIX, '-R', input, BAM_FN]
+
+        if handle_contaminants != 'no':
+            bealign_process.insert (-3, '-K')
+
+        logging.debug(' '.join(bealign_process))
+        subprocess.check_call(bealign_process, stdout=DEVNULL)
+        update_status(id, phases.ALIGNING, status.COMPLETED)
+
+        # PHASE 2
+        update_status(id, phases.BAM_FASTA_CONVERSION, status.RUNNING)
+        bam_process = [BAM2MSA, BAM_FN, OUTPUT_FASTA_FN]
+        logging.debug(' '.join(bam_process))
+        subprocess.check_call(bam_process, stdout=DEVNULL)
+        update_status(id, phases.BAM_FASTA_CONVERSION, status.COMPLETED)
 
     if handle_contaminants != 'no':
         with (open (OUTPUT_FASTA_FN, 'r')) as msa:
@@ -615,6 +645,7 @@ def main():
                                                      with these sites removed. It requires input/output file names along with the list of \
                                                      DRAM sites to remove: 'lewis' or 'wheeler'.")
     parser.add_argument('-c', '--compare', help='Compare to supplied FASTA file', action='store_true')
+    parser.add_argument('--skip-alignment', help='Skip alignment', action='store_true')
     parser.add_argument('--log', help='Write logs to specified directory')
 
 

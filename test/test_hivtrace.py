@@ -49,6 +49,7 @@ class TestHIVTrace(unittest.TestCase):
     this_dirname = os.path.join(os.path.dirname(os.path.realpath(__file__)))
 
     self.fn                        = path.join(this_dirname, 'rsrc/TEST.FASTA')
+    self.aligned_fn                = path.join(this_dirname, 'rsrc/TEST.ALIGNED.FASTA')
     self.custom_reference          = path.join(this_dirname, 'rsrc/TEST_REFERENCE.FASTA')
     self.malformed_ids_fn          = path.join(this_dirname, 'rsrc/TEST_WITH_REFERENCE_CONTAMINANTS.fa')
     self.env_fn                    = path.join(this_dirname, 'rsrc/HIV1_ALL_2013_env_DNA.fasta')
@@ -346,6 +347,33 @@ class TestHIVTrace(unittest.TestCase):
                       False, '0.015', handle_contaminants='remove', filter_edges='remove')
 
 
+
+  def test_premade_alignment(self):
+
+    compare_to_lanl = True
+    input_fn   = self.fn
+    reference  = self.reference
+    id = os.path.basename(input_fn)
+    status_file = input_fn+'_status'
+
+    #Ensure that you cannot compare to lanl if skipping alignment
+    with self.assertRaises(Exception):
+        results = hivtrace.hivtrace(id, input_fn, reference, self.ambiguities,
+                          self.distance_threshold, self.min_overlap,
+                          compare_to_lanl, '0.015', handle_contaminants='remove', filter_edges='remove', skip_alignment=True)
+
+    #Ensure that unequal sequence lengths fail
+    with self.assertRaises(Exception):
+        results = hivtrace.hivtrace(id, input_fn, reference, self.ambiguities,
+                          self.distance_threshold, self.min_overlap,
+                          False, '0.015', handle_contaminants='remove', filter_edges='remove', skip_alignment=True)
+
+    results = hivtrace.hivtrace(id, self.aligned_fn, reference, self.ambiguities,
+                      self.distance_threshold, self.min_overlap,
+                      False, '0.015', handle_contaminants='remove', filter_edges='remove', skip_alignment=True)
+
+
+    self.assertTrue('trace_results' in results.keys())
 
 
 if __name__ == '__main__':
