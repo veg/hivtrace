@@ -671,7 +671,7 @@ def main():
     if STRIP_DRAMS != 'wheeler' and STRIP_DRAMS != 'lewis':
         STRIP_DRAMS = False
 
-    results = hivtrace(ID, FN, REFERENCE, AMBIGUITY_HANDLING, DISTANCE_THRESHOLD, MIN_OVERLAP, COMPARE_TO_LANL, FRACTION, strip_drams_flag =STRIP_DRAMS, filter_edges = args.filter, handle_contaminants = args.curate)
+    results = hivtrace(ID, FN, REFERENCE, AMBIGUITY_HANDLING, DISTANCE_THRESHOLD, MIN_OVERLAP, COMPARE_TO_LANL, FRACTION, strip_drams_flag =STRIP_DRAMS, filter_edges = args.filter, handle_contaminants = args.curate, skip_alignment=args.skip_alignment)
     print(json.dumps(results))
 
 
