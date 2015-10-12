@@ -1,0 +1,87 @@
+circle.node, rect.node, path.node {
+  cursor: pointer;
+  stroke: #000;
+  stroke-width: .5px;
+}
+
+.hiv-trace-problematic {
+    stroke: #F00 !important;
+    stroke-width: 2px !important;
+}
+
+.hiv-trace-selected {
+    stroke-width: 0px !important;
+}
+
+.hiv-trace-muted {
+    opacity: 0.25;
+}
+
+g.node-group {
+  cursor: pointer;
+  stroke: #000;
+}
+
+
+path.cluster {
+    cursor: pointer;
+    stroke: #000;
+    stroke-width: 1px;
+}
+
+.histogram {
+  fill: #ccc;
+   stroke: #000;
+   stroke-width: 1px;
+}
+
+.bar text {
+  fill: #fff;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.link {
+  stroke: #AAAAAA;
+  stroke-width: 1.5px;
+}
+
+.unsupported, .line {
+  fill: none;
+  stroke: red;
+  stroke-width: 1.5px;
+  stroke-dasharray: 2,2;
+}
+
+.chord path {
+  fill-opacity: .67;
+  stroke: #000;
+  stroke-width: .5px;
+}
+
+#file-progress {
+  display: none;
+}
+
+.removed {
+  stroke: #CC3333;
+  stroke-opacity:0.3;
+}
+
+#network_tag {
+  margin-top: 15px;
+}
+
+.nav-trace {
+  margin-top: 5px;
+}
+
+.hivtrace-download-button {
+  margin-left: 5px;
+  margin-bottom : 5px;
+}
+
