@@ -1,4 +1,4 @@
-HIV-Trace
+HIV-TRACE
 ==========
 
 [![Build Status](https://travis-ci.org/veg/hivtrace.svg)](https://travis-ci.org/veg/hivtrace)
