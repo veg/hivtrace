@@ -27,10 +27,11 @@ before_install:
   - git clone https://github.com/veg/tn93.git
   - cd tn93/ && cmake ./ && make install && cd ../
   - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy
-  - pip install biopython
+
 
 install:
   - pip install --upgrade pip
+  - pip install biopython
   - pip install coveralls
 
 script: 
