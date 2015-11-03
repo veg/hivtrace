@@ -18,20 +18,15 @@ addons:
         - cmake
 
 before_install:
-  - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
-  - chmod a+x miniconda.sh
-  - ./miniconda.sh -b
-  - export PATH=/home/travis/miniconda/bin:$PATH
-  - conda update --yes conda
   - sudo chmod 777 /usr/local/bin
   - git clone https://github.com/veg/tn93.git
   - cd tn93/ && cmake ./ && make install && cd ../
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy
-
 
 install:
   - pip install --upgrade pip
   - pip install biopython
+  - pip install numpy
+  - pip install scipy
   - pip install coveralls
 
 script: 
@@ -42,8 +37,6 @@ notifications:
     email:
         recipients:
             - sweaver@ucsd.edu
-            - spond@ucsd.edu
-            - jwertheim@ucsd.edu
         on_success: always
         on_failure: always
 
