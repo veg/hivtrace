@@ -85,3 +85,7 @@ path.cluster {
   margin-bottom : 5px;
 }
 
+#network_ui_bar_filter {
+  z-index: 0;
+}
+

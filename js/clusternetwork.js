@@ -454,21 +454,21 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
          var cluster_ui_container = d3.select ("#" + button_bar_ui + "_cluster_operations_container");
          
          [
-            ["Expand All",          function () {return self.expand_some_clusters()},   true],
-            ["Collapse All",        function () {return self.collapse_some_clusters()}, true],
-            ["Expand Filtered",     function () {return self.expand_some_clusters(self.select_some_clusters (function (n) {return n.match_filter;}))},   true],
-            ["Collapse Filtered",   function () {return self.collapse_some_clusters(self.select_some_clusters (function (n) {return n.match_filter;}))}, true],
+            ["Expand All",          function () {return self.expand_some_clusters()},   true, 'hivtrace-expand-all'],
+            ["Collapse All",        function () {return self.collapse_some_clusters()}, true, 'hivtrace-collapse-all'],
+            ["Expand Filtered",     function () {return self.expand_some_clusters(self.select_some_clusters (function (n) {return n.match_filter;}))},   true, 'hivtrace-expand-filtered'],
+            ["Collapse Filtered",   function () {return self.collapse_some_clusters(self.select_some_clusters (function (n) {return n.match_filter;}))}, true, 'hivtrace-collapse-filtered'],
             ["Hide problematic clusters", function (item) {
                                             d3.select (item).text (self.hide_hxb2 ? "Hide problematic clusters" :  "Show problematic clusters");
                                             self.toggle_hxb2 ();
-                                          }, self.has_hxb2_links],
+                                          }, self.has_hxb2_links, 'hivtrace-hide-problematic-clusters'],
                                           
             ["Show removed edges",   function (item) {
                                         self.filter_edges = !self.filter_edges; 
                                         d3.select (item).text (self.filter_edges ? "Show removed edges" :  "Hide removed edges");
                                         self.update (false); 
                                      }
-                                    , function () {return _.some (self.edges, function (d) {return d.removed;});}]
+                                    , function () {return _.some (self.edges, function (d) {return d.removed;});}, 'hivtrace-show-removed-edges']
             
          ].forEach (function (item,index) {
             var handler_callback = item[1];
@@ -476,6 +476,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
                 this.append ("li").append ("a")
                                   .text (item[0])
                                   .attr ("href", "#")
+                                  .attr ("id", item[3])
                                   .on ("click", function(e) {
                                     handler_callback(this);
                                     d3.event.preventDefault();
@@ -491,7 +492,15 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
             button_group.append ("button").classed ("btn btn-default btn-sm", true).attr ("title", "Compress spacing").on ("click", function (d) {change_spacing (4/5);}).append ("i").classed ("fa fa-arrows-alt", true);
             button_group.append ("button").classed ("btn btn-default btn-sm", true).attr ("title", "Enlarge window").on ("click", function (d) {change_window_size (20, true);}).append ("i").classed ("fa fa-expand", true);
             button_group.append ("button").classed ("btn btn-default btn-sm", true).attr ("title", "Shrink window").on ("click", function (d) {change_window_size (-20, true);}).append ("i").classed ("fa fa-compress", true);
-            button_group.append ("button").classed ("btn btn-default btn-sm", true).attr ("title", "Compute graph statistics").on ("click", function (d) {_.bind(self.compute_graph_stats,this)();}).append ("i").classed ("fa fa-calculator", true);
+
+            button_group.append ("button")
+              .classed("btn btn-default btn-sm", true)
+              .attr("title", "Compute graph statistics")
+              .attr("id", "hivtrace-compute-graph-statistics")
+              .on("click", function (d) {_.bind(self.compute_graph_stats,this)();})
+              .append("i")
+              .classed("fa fa-calculator", true);
+
             button_group.append ("button")
               .classed("btn btn-default btn-sm", true)
               .attr("title", "Save Image")
@@ -506,8 +515,6 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
             }, 250));
         
     }
-          
-     
      
     
      if (attributes && "hivtrace" in attributes) {
@@ -717,7 +724,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
     var buttons = this_cell.selectAll ("button").data (labels);
     buttons.enter().append ("button");
     buttons.exit().remove();
-    buttons.classed ("btn btn-primary btn-xs", true).text (function (d) {return d[0];})
+    buttons.classed ("btn btn-primary btn-xs btn-node-property", true).text (function (d) {return d[0];})
                                                  .attr ("disabled", function (d) {return d[1] ? "disabled" : null})
                                                  .on ("click", function (d) {
                                                     if (d[1] == 0) {
@@ -1000,8 +1007,6 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
 
         link.exit().remove();
 
-
-    
         rendered_nodes  = network_svg.selectAll('.node')
             .data(draw_me.nodes, function (d) {return d.id;});
         rendered_nodes.exit().remove();
@@ -1018,8 +1023,8 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
               .on ("mouseout", cluster_pop_off)
               .call(network_layout.drag().on("dragstart", cluster_pop_off));
         
-        draw_cluster_table ();
-        draw_node_table ();
+        draw_cluster_table();
+        draw_node_table();
     
     } else {
         rendered_nodes = network_svg.selectAll('.node');
