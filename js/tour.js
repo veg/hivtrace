@@ -7,7 +7,7 @@ var tour = new Shepherd.Tour({
 // Introduction
 tour.addStep('intro', {
   title: 'Welcome to HIV-TRACE',
-  text: '<p>HIV TRACE is a tool that aids in understanding how HIV is spreading among different groups of people.</p>' +
+  text: '<p>HIV TRACE is a tool that aids in understanding how HIV is spreading among infected individuals.</p>' +
         '<p>Please take a moment to become acquainted by taking the tour.</p>',
   attachTo: '.nav-trace top',
   advanceOn: '.docs-link click'
@@ -23,13 +23,22 @@ tour.addStep('navbar', {
 });
 
 
-// calculator
+// Calculator
 tour.addStep('calculator', {
   title: 'Compute Graph Statistics',
   text: '<p>Some graph statistics can be computationally expensive, and will take more time as the number of nodes within a cluster increase.</p>' + 
         '<p>Clicking the calculator button will perform these computations, and place the results in tables we will discover later in the tour.</p>',
   attachTo: '#hivtrace-compute-graph-statistics right',
-  advanceOn: '.docs-link click'
+  advanceOn: '#hivtrace-compute-graph-statistics click',
+  buttons : [{
+        text: 'Compute and Continue',
+        action: tour.next
+      }],
+  when: {
+      hide: function() {
+        $("#hivtrace-compute-graph-statistics").click();
+      }
+    }
 });
 
 
@@ -38,8 +47,8 @@ tour.addStep('filter-nodes', {
   title: 'Node Search',
   text: '<p>Do you have a specific set of nodes (i.e. sequences) in mind?</p>'
         + '<p>Use the search method to search by ID or a specific attribute.</p>'
-        + '<p>Matching nodes will appear white.</p>'
-        + '<p>Clusters with matching nodes within will spawn a blue halo with an arc length in proportion to the number of nodes matched.</p>',
+        + '<p>Clusters with matching nodes within will spawn a blue halo with an arc length in proportion to the number of nodes matched.</p>'
+        + '<p>Matching nodes will appear white.</p>',
   attachTo: '#network_ui_bar_filter left',
   advanceOn: '.docs-link click',
   when: {
@@ -61,7 +70,7 @@ tour.addStep('cluster-hover', {
   title: 'Cluster Options',
   text: 'We seem to have found a match! Shall we expand the matched cluster by clicking the <code>Expand Filtered</code> option?',
   attachTo: '#network_ui_bar_cluster_operations_button top',
-  advanceOn: '.docs-link click',
+  advanceOn: '#hivtrace-expand-filtered click',
   when: {
       show: function() {
         _.delay(function() {$("#network_ui_bar_cluster_operations_button").click()}, 100);
@@ -76,7 +85,7 @@ tour.addStep('cluster-hover', {
 tour.addStep('expanded-clusters', {
   title: 'Expanded Cluster',
   text: '<p>Now that we have revealed the nodes within the cluster, please take a moment to mouse-over some of the nodes to discover their properties.</p>' 
-        + '<p>We will learn more about them later in the tour.</p>',
+        + '<p>We will learn more about these properties later in the tour.</p>',
   attachTo: '#network_tag bottom',
   advanceOn: '.docs-link click',
 
@@ -85,9 +94,9 @@ tour.addStep('expanded-clusters', {
 // Graph tab
 tour.addStep('graph-tab', {
   title: 'Graph Tab',
-  text: 'Now we shall select the graph tab to reveal statistics about our inferred network.',
+  text: 'Shall we select the graph tab to reveal statistics about our inferred network?',
   attachTo: '#graph-tab top',
-  advanceOn: '.docs-link click',
+  advanceOn: '#graph-tab > a click',
   when: {
       hide: function() {
         $("#graph-tab > a").click();
@@ -97,18 +106,19 @@ tour.addStep('graph-tab', {
 
 // Explain table
 tour.addStep('graph-statistics', {
-  title: 'Notice the Statistics',
-  text: 'Notice the statistics.',
+  title: 'Graph Statistics',
+  text: 'An overview of the entire graph can be found in this table.'
+        + '<br />Degrees refer to average degree of all nodes in the graph.'
+        + '<br />Cluster sizes refer to average number of nodes within each cluster in the graph.',
   attachTo: '#graph_summary_table right',
   advanceOn: '.docs-link click',
-
-
 });
 
 // Explain graph
 tour.addStep('degree-distribution', {
   title: 'Degree distribution',
-  text: 'A graph of the network degree count per cluster and its inferred probability distribution.',
+  text: '<p>A graph of the network degree count per cluster and its inferred probability distribution.</p>'
+      + '<p>Possible distributions are <code>Waring</code>, <code>Yule</code>, <code>Pareto</code>, and <code>Negative Binomial</code></p>',
   attachTo: '#histogram_tag left',
   advanceOn: '.docs-link click'
 });
@@ -116,9 +126,9 @@ tour.addStep('degree-distribution', {
 // Cluster tab
 tour.addStep('cluster-tab', {
   title: 'Cluster properties',
-  text: 'Notice the cluster tab',
+  text: 'Now please join me in viewing tabular cluster statistics.',
   attachTo: '#clusters-tab top',
-  advanceOn: '.docs-link click',
+  advanceOn: '#clusters-tab > a click',
   when: {
       hide: function() {
         $("#clusters-tab > a").click();
@@ -129,8 +139,42 @@ tour.addStep('cluster-tab', {
 // Column explanation
 tour.addStep('cluster-columns', {
   title: 'Cluster columns',
-  text: "Let's talk about columns",
-  attachTo: '#cluster_table top',
+  text: 'This view provides per cluster tabular insight. Below is a brief overview of the columns and their descriptions.'
++    '<table class="table hivtrace-tut-table">'
++      '<thead>'
++        '<tr>'
++          '<th>Column Name</th>'
++          '<th>Description</th>'
++        '</tr>'
++      '</thead>'
++      '<tbody>'
++        '<tr>'
++          '<td>ID</td>'
++          '<td>The cluster\'s identification number.</td>'
++        '</tr>'
++        '<tr>'
++          '<td>Properties</td>'
++          '<td>Whether the cluster is currently collapsed or expanded on the Network view.</td>'
++        '</tr>'
++        '<tr>'
++          '<td>Size</td>'
++          '<td>The number of nodes within the cluster</td>'
++        '</tr>'
++        '<tr>'
++          '<td>Degrees</td>'
++          '<td>The average of each node within the cluster\'s degree in mean, median, and interquartile range, respectively</td>'
++        '</tr>'
++        '<tr>'
++          '<td>CC</td>'
++          '<td>The <a target="_blank" href="//en.wikipedia.org/wiki/Clustering_coefficient#Global_clustering_coefficient">Global Clustering Coefficient</a></td>'
++        '</tr>'
++        '<tr>'
++          '<td>MPL</td>'
++          '<td>The <a target="_blank" href="//en.wikipedia.org/wiki/Average_path_length">Mean Path Length</a></td>'
++        '</tr>'
++      '</tbody>'
++    '</table>',
+  attachTo: '.page-header bottom',
   advanceOn: '.docs-link click'
 });
 
@@ -138,7 +182,7 @@ tour.addStep('cluster-columns', {
 // Properties
 tour.addStep('cluster-properties', {
   title: 'Cluster properties',
-  text: "Let's talk about properties",
+  text: "Click the buttons to expand or collapse the respective clusters on the Network view.",
   attachTo: '.btn-xs top',
   advanceOn: '.docs-link click'
 });
@@ -146,10 +190,10 @@ tour.addStep('cluster-properties', {
 
 // Node tab
 tour.addStep('node-tab', {
-  title: 'Node tab',
-  text: 'Node tab',
+  title: 'Nodes',
+  text: 'Shall we take a look at the node data?',
   attachTo: '#nodes-tab top',
-  advanceOn: '.docs-link click',
+  advanceOn: '#nodes-tab > a click',
   when: {
       hide: function() {
         $("#nodes-tab > a").click();
@@ -161,25 +205,63 @@ tour.addStep('node-tab', {
 // Column explanation
 tour.addStep('node-columns', {
   title: 'Node columns',
-  text: "Let's talk about nodes",
+  text: 'This view provides per node tabular insight. Below is a brief overview of the columns and their descriptions.'
++    '<table class="table hivtrace-tut-table">'
++      '<thead>'
++        '<tr>'
++          '<th>Column Name</th>'
++          '<th>Description</th>'
++        '</tr>'
++      '</thead>'
++      '<tbody>'
++        '<tr>'
++          '<td>ID</td>'
++          '<td>The cluster\'s identification number.</td>'
++        '</tr>'
++        '<tr>'
++          '<td>Properties</td>'
++          '<td>Whether the node is currently hidden (in a collapsed cluster) or visible on the Network view.</td>'
++        '</tr>'
++        '<tr>'
++          '<td>Degree</td>'
++          '<td>The <a target="_blank" href="//en.wikipedia.org/wiki/Degree_(graph_theory)">degree</a> of the node</td>'
++        '</tr>'
++        '<tr>'
++          '<td>Cluster</td>'
++          '<td>The ID of the cluster the node belongs to.</td>'
++        '</tr>'
++        '<tr>'
++          '<td>LCC</td>'
++          '<td>The <a target="_blank" href="//en.wikipedia.org/wiki/Clustering_coefficient#Local_clustering_coefficient">Local Clustering Coefficient</a></td>'
++        '</tr>'
++      '</tbody>'
++    '</table>',
   attachTo: '#node_table top',
   advanceOn: '.docs-link click'
 });
 
 
-
 // Properties
 tour.addStep('node-properties', {
-  title: 'node properties',
-  text: "Let's talk about node properties",
+  title: 'Node Properties',
+  text: "Click the buttons to show or hide the respective nodes on the Network view.",
   attachTo: '.btn-node-property top',
   advanceOn: '.docs-link click'
 });
 
+// Closing statements
+tour.addStep('closing-statements', {
+  title: 'Tour Completed',
+  text: "<p>This marks the end of our tour. Please visit <a href=//hivtrace.org>hivtrace.org</a> to try it yourself," 
+        + " or stay on the demo page to familiarize yourself with the application a bit more.</p>"
+        + "<p>We appreciate your time and effort today, and hope that HIV-TRACE will find utility in your endeavors.</p>",
+  attachTo: '.page-header bottom',
+  advanceOn: '.docs-link click',
+  buttons : [{
+        text: 'Done',
+        action: tour.cancel
+      }]
+});
+
 tour.start();
-
-//for (var i=0; i<= 9; i++) {
-//  _.delay(function() {tour.next();}, i*50);
-//}
-
 
