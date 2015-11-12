@@ -54,7 +54,7 @@ tour.addStep('filter-nodes', {
   when: {
       show: function() {
         $("#network_ui_bar_filter").focus();
-        var node_string = 'Node 65';
+        var node_string = 'CN';
         var delay_time = 500;
 
         for (var i=0; i<= node_string.length; i++) {
