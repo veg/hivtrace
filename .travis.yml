@@ -3,7 +3,7 @@ branches:
 only:
   - master
 python:
-  - "3.4"
+  - "3.5"
 
 cache:
   directories:
@@ -27,7 +27,7 @@ install:
   - pip install biopython
   - pip install numpy
   - travis_wait
-  - pip install scipy
+  - pip -v install scipy
   - pip install coveralls
 
 script: 
