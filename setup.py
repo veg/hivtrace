@@ -50,7 +50,7 @@ def setup_package():
 
     setup(
         name='hivtrace',
-        version='0.1.4',
+        version='0.1.5',
         description='HIV Trace',
         author='Steven Weaver',
         author_email='sweaver@ucsd.edu',
@@ -62,7 +62,7 @@ def setup_package():
                 'rsrc/LANL.TN93OUTPUT.csv.gz'
                 ]
             },
-        dependency_links = ['git+git://github.com/veg/hyphy-python.git@0.1.1#egg=HyPhy-0.1.1',
+        dependency_links = ['git+git://github.com/veg/hyphy-python.git@0.1.3#egg=HyPhy-0.1.3',
                             'git+git://github.com/veg/BioExt.git@0.17.2#egg=BioExt-0.17.2',
                             'git+git://github.com/veg/hppy.git@0.9.6#egg=hppy-0.9.6',
                             'git+git://github.com/veg/hivclustering.git@1.2.0#egg=hivclustering-1.2.0'
