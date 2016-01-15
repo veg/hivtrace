@@ -57,3 +57,5 @@ docs/_build/
 # PyBuilder
 target/
 
+hivtrace/rsrc/LANL.FASTA
+hivtrace/rsrc/LANL.TN93OUTPUT.csv
