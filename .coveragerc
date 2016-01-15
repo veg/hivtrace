@@ -1,3 +1,8 @@
+[run]
+include = 
+  hivtrace.py
+  hivtrace/*.py
+
 [report]
 exclude_lines =
     pragma: no cover
@@ -10,3 +15,4 @@ exclude_lines =
     raise NotImplementedError
     if __name__ == .__main__.:
     if rt_only:
+
