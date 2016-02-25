@@ -16,9 +16,9 @@ HIV Trace requires [tn93](https://github.com/veg/tn93) be installed and python 3
 
 ## Install using pip
 
-`pip install numpy`
+`pip3 install numpy`
 
-`pip install biopython`
+`pip3 install biopython`
 
 `pip3 install https://github.com/veg/hivtrace/archive/0.1.4.tar.gz --process-dependency-links`
 
