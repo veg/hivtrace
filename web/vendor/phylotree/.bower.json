@@ -1,0 +1,32 @@
+{
+  "name": "phylotree",
+  "version": "0.1.2",
+  "main": "phylotree.js",
+  "keywords": [
+    "phylogenetics",
+    "phylogeny",
+    "d3",
+    "branching",
+    "tree"
+  ],
+  "ignore": [
+    "index.html"
+  ],
+  "dependencies": {
+    "underscore": "1.x",
+    "font-awesome": "4.x",
+    "bootstrap": "3.x",
+    "d3": "3.x",
+    "jquery": "1.x"
+  },
+  "homepage": "https://github.com/veg/phylotree.js",
+  "_release": "0.1.2",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.1.2",
+    "commit": "74ad35aae3ce64e2b49c922e401c05addb7391ed"
+  },
+  "_source": "git@github.com:veg/phylotree.js.git",
+  "_target": "*",
+  "_originalSource": "git@github.com:veg/phylotree.js.git"
+}

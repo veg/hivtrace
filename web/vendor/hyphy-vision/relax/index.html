@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+
+    <meta charset="utf-8">
+
+    <link rel="stylesheet" href="../vendor/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../vendor/bootstrap/dist/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="../vendor/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" href="../vendor/phylotree/phylotree.css">
+    <link href="../hyphy-vision.css" rel="stylesheet">
+
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+    <script src="../vendor/jquery/dist/jquery.js"></script>
+    <script src="../vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="../vendor/underscore/underscore-min.js"></script>
+    <script src="../vendor/d3/d3.min.js"></script>
+    <script src="../vendor/phylotree/phylotree.js"></script>
+
+    <script src="../hyphy-vision.js"></script>
+    <title> RELAX analysis result</title>
+
+</head>
+
+<body style='padding-top: 70px;'>
+
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">RELAX results</a>
+            </div>
+
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="navbar-collapse-1">
+
+                <ul class="nav nav-pills navbar-right" role="tablist" id='navigation_buttons'>
+                    <li class="active"><a href="#datamonkey-relax-summary-tab" role="tab" data-toggle="tab"><i class="fa fa-list" style = 'margin-right: 5px'></i>Summary</a></li>
+                    <li><a href="#tree_tab" role="tab" data-toggle="tab"><i class="fa fa-tree" style = 'margin-right: 5px'></i> Tree</a></li>
+                </ul>
+
+                <ul class="nav navbar-nav">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Load file<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <input type="file" id="datamonkey-relax-load-json">
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+
+    <div class='container-fluid'>
+        <div id='datamonkey-relax-error' class="alert alert-danger alert-dismissible" role="alert" style="display:none;">
+            <button type="button" class="close" id='datamonkey-relax-error-hide'><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <strong>Error!</strong> <span id='datamonkey-relax-error-text'></span>
+        </div>
+
+        <div class="tab-content">
+            <div class="tab-pane active" id="datamonkey-relax-summary-tab">
+
+                <div class="row" style='margin-top: 5px'>
+                    <div class="col-md-12">
+                        <ul class="list-group">
+                            <li class="list-group-item list-group-item-info">
+                                <h3 class="list-group-item-heading"><i class="fa fa-list" style = 'margin-right: 10px'>
+                        </i><span id = 'summary-method-name'>RELAX(ed selection test)</span> summary</h3>
+                                <p class="list-group-item-text lead" style="margin-top:0.5em; ">
+                                    Test for selection <strong id='summary-direction'></strong> (<abbr title="Relaxation coefficient">K</abbr> = <strong id='summary-K'></strong>) was <strong id='summary-evidence'> </strong> (p = <strong id='summary-pvalue'></strong>, <abbr title="Likelihood ratio statistic">LR</abbr> = <strong id='summary-LRT'> </strong>)
+                                </p>
+                                <p><small>Please cite <a href = '#' id = 'summary-pmid'>PMID XXX</a> if you use this result in a publication, presentation, or other scientific work.</small>
+                                </p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <h4 class="list-group-item-heading"><i class="fa fa-cubes" style = 'margin-right: 10px'></i>Model fits</h4>
+                                <table class="table table-hover table-condensed list-group-item-text" style="margin-top:0.5em;">
+                                    <thead>
+                                        <tr id='summary-model-header1'>
+                                            <th>Model</th>
+                                            <th><em> log </em>L</th>
+                                            <th><abbr title="Number of estimated model parameters"># par.</abbr></th>
+                                            <th><abbr title="Small Sample AIC">AIC<sub>c</sub></abbr></th>
+                                            <th>Time to fit</th>
+                                            <th><abbr title="Total tree length, expected substitutions/site">L<sub>tree</sub></abbr></th>
+                                            <th>Branch set</th>
+                                            <th>&omega;<sub>1</sub></th>
+                                            <th>&omega;<sub>2</sub></th>
+                                            <th>&omega;<sub>3</sub></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id='summary-model-table'></tbody>
+                                </table>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+                <div id="hyphy-omega-plots" class="row">
+                    <script type="text/template" class="hyphy-omega-plots">
+                        {% _.each(rc, function(item, key) { %}
+                        <div class="col-lg-6">
+                            <div class="panel panel-default" id='{{ item.key }}'>
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">&omega; distributions under the <strong>{{ item.label }}</strong> model</h3>
+                                    <p>
+                                        <small>Test branches are shown in <span class="hyphy-blue">blue</span> and reference branches are shown in <span class="hyphy-red">red</span></small>
+                                    </p>
+                                    <div class="btn-group">
+                                        <button id="export-{{item.key}}-svg" type="button" class="btn btn-default btn-sm">
+                                            <span class="glyphicon glyphicon-floppy-save"></span> SVG
+                                        </button>
+                                        <button id="export-{{item.key}}-png" type="button" class="btn btn-default btn-sm">
+                                            <span class="glyphicon glyphicon-floppy-save"></span> PNG
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="panel-body">
+                                    <svg id={{item.key}}-svg />
+                                </div>
+                            </div>
+                        </div>
+                        {% }) %}
+                    </script>
+                </div>
+            </div>
+
+             <div class='tab-pane' id="tree_tab">
+                <div class='row'>
+                    <div class="cold-md-12">
+                        <div class="input-group input-group-sm">
+                            <div class="input-group-btn">
+                                <button type="button" class="btn btn-default btn-sm" data-direction="vertical" data-amount="1" title="Expand vertical spacing">
+                                    <i class="fa fa-arrows-v"></i>
+                                </button>
+                                <button type="button" class="btn btn-default btn-sm" data-direction="vertical" data-amount="-1" title="Compress vertical spacing">
+                                    <i class="fa  fa-compress fa-rotate-135"></i>
+                                </button>
+                                <button type="button" class="btn btn-default btn-sm" data-direction="horizontal" data-amount="1" title="Expand horizonal spacing">
+                                    <i class="fa fa-arrows-h"></i>
+                                </button>
+                                <button type="button" class="btn btn-default btn-sm" data-direction="horizontal" data-amount="-1" title="Compress horizonal spacing">
+                                    <i class="fa  fa-compress fa-rotate-45"></i>
+                                </button>
+                                <button type="button" class="btn btn-default btn-sm" id="sort_ascending" title="Sort deepest clades to the bototm">
+                                    <i class="fa fa-sort-amount-asc"></i>
+                                </button>
+                                <button type="button" class="btn btn-default btn-sm" id="sort_descending" title="Sort deepsest clades to the top">
+                                    <i class="fa fa-sort-amount-desc"></i>
+                                </button>
+                                <button type="button" class="btn btn-default btn-sm" id="sort_original" title="Restore original order">
+                                    <i class="fa fa-sort"></i>
+                                </button>
+                            </div>
+                            <div class="input-group-btn" data-toggle="buttons">
+                                <label class="btn btn-default active btn-sm">
+                                    <input type="radio" name="options" class="phylotree-layout-mode" data-mode="linear" autocomplete="off" checked="" title="Layout left-to-right"> Linear
+                                </label>
+                                <label class="btn btn-default  btn-sm">
+                                    <input type="radio" name="options" class="phylotree-layout-mode" data-mode="radial" autocomplete="off" title="Layout radially"> Radial
+                                </label>
+                            </div>
+                            <div class="input-group-btn" data-toggle="buttons">
+                              <label class="btn btn-default active btn-sm">
+                                <input type="radio" class="phylotree-align-toggler" data-align="left" name="options-align" autocomplete="off" checked="" title="Align tips labels to branches"> 
+                                    <i class="fa fa-align-left"></i>
+                              </label>
+                              <label class="btn btn-default btn-sm">
+                               <input type="radio" class="phylotree-align-toggler" data-align="right" name="options-align" autocomplete="off" title="Align tips labels to the edge of the plot"> 
+                                    <i class="fa fa-align-right"></i>
+                              </label>
+                            </div>
+            
+                            <div class="input-group-btn">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Model
+                                    <span class="caret"></span></button>
+                                <ul class="dropdown-menu" id="datamonkey-relax-tree-model-list">
+                                    <!-- <li><a href="#" class="_seq_predef" data-range="131,156">V1</a></li> -->
+
+                                </ul>
+                            </div>
+
+                            <input type="text" class="form-control disabled" id="datamonkey-relax-tree-model" disabled>
+
+                            <div class="input-group-btn">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Highlight branch set
+                                    <span class="caret"></span></button>
+                                <ul class="dropdown-menu" id="datamonkey-relax-tree-highlight-branches">
+                                    <!-- <li><a href="#" class="_seq_predef" data-range="131,156">V1</a></li> -->
+
+                                </ul>
+                            </div>
+
+                            <input type="text" class="form-control disabled" id="datamonkey-relax-tree-highlight" disabled>
+
+                            <span class="input-group-addon">
+                                        Use model branch lengths
+                                        <input type="checkbox" id="datamonkey-relax-tree-branch-lengths" checked class = "datamonkey-relax-tree-trigger">
+                                      </span>
+                            <span class="input-group-addon">
+                                        Show fill legend
+                                        <input type="checkbox" id="datamonkey-relax-tree-fill-legend" checked class = "datamonkey-relax-tree-trigger">
+                                      </span>
+                            <span class="input-group-addon">
+                                        Use color
+                                        <input type="checkbox" id="datamonkey-relax-tree-fill-color" checked class = "datamonkey-relax-tree-trigger">
+                                      </span>
+
+                        </div>
+                    </div>
+                </div>
+                <div class='row'>
+                    <div class='col-md-1'>
+                        <div class='row'>
+                            <div id='color_legend'>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='col-md-11'>
+                        <div class='row'>
+                            <div id='tree_container' class='tree-widget'>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <img id="hyphy-chart-image" />
+    <canvas id="hyphy-chart-canvas"></canvas>
+
+    <!--
+###############################################################################################################################
+-->
+
+
+    <script>
+        $(document).ready(function() {
+                   
+            datamonkey.relax();
+            
+            d3.json("test-data/test.json", function(json) {
+                analysis_data = json;
+                render(json);
+           });
+
+            $("#export-phylo-svg").on('click', function(e) {
+                datamonkey.save_image("svg", "#tree_container");
+            });
+
+            $("#export-phylo-png").on('click', function(e) {
+                datamonkey.save_image("png", "#tree_container");
+            });
+
+        });
+
+    </script>
+
+</body>
+
+</html>

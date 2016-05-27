@@ -1,0 +1,34 @@
+{
+  "name": "dcjs",
+  "version": "1.7.4",
+  "main": [
+    "dc.js",
+    "dc.css"
+  ],
+  "ignore": [
+    ".gitignore",
+    ".travis.yml",
+    "build.xml",
+    "globals.js",
+    "index.js",
+    "make",
+    "package.json",
+    "test",
+    "src",
+    "wiki"
+  ],
+  "dependencies": {
+    "d3": "3.x",
+    "crossfilter": "1.x"
+  },
+  "homepage": "https://github.com/NickQiZhu/dc.js",
+  "_release": "1.7.4",
+  "_resolution": {
+    "type": "version",
+    "tag": "1.7.4",
+    "commit": "8540e4d19553bd23c3cb2847098ea5bf0624bd06"
+  },
+  "_source": "git://github.com/NickQiZhu/dc.js.git",
+  "_target": "1.x",
+  "_originalSource": "dcjs"
+}

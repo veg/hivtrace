@@ -1,0 +1,352 @@
+<html lang='en'>
+
+<head>
+  <meta charset="utf-8">
+  <title> HIV-Trace analysis result</title>
+
+  <!-- Latest compiled and minified CSS -->
+  <link href="vendor/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+  <link href="css/vendor.css" rel="stylesheet">
+  <link href="./css/hivtrace.css" rel="stylesheet">
+
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="vendor.js"></script>
+
+  <style>
+    .navbar {
+      position : relative;
+    }
+  </style>
+
+
+</head>
+
+
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+  <div class="container">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">HIV-Trace Results</a>
+    </div>
+
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id = "navbar-collapse-1">
+      <ul class="nav nav-pills navbar-right" role="tablist" id = 'navigation_buttons'>
+        <li class="active"><a href="#summary_tab" role="tab" data-toggle="tab"><i class="fa fa-list" style = 'margin-right: 5px'></i>Summary</a></li>
+      </ul>
+      <ul class="nav navbar-nav">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Load file<b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li><input type="file" id="json_file"></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+
+<div class="container">
+  <div class="tabbable">
+    <ul class="nav nav-tabs" id="top_level_tab_container">
+      <li class="active" id="main-tab"><a href="#trace-results" data-toggle="tab">Network</a></li>
+      <li class='disabled' id='lanl-result-tab'><a href="#lanl-trace-results" data-toggle="tab">Network + DB</a></li>
+      <li class='disabled' id="graph-tab"><a href="#trace-graph" data-toggle="tab">Graph</a></li>
+      <li class='disabled' id="clusters-tab"><a href="#trace-clusters" data-toggle="tab">Clusters</a></li>
+      <li class='disabled' id="nodes-tab"><a href="#trace-nodes" data-toggle="tab">Nodes</a></li>
+      <li class='disabled' id="attributes-tab"><a href="#trace-attributes" data-toggle="tab">Attributes</a></li>
+      <li class='disabled'><a href="#trace-settings" data-toggle="tab">Settings</a></li>
+    </ul>
+
+    <div class="tab-content">
+      <div id="trace-results" class="tab-pane active">
+        <!-- Warning bar -->
+        <div class="row" style="margin-top: 10px; margin-bottom: 10 px;">
+          <div class="col-lg-12">
+            <div class="alert alert-info" id='main-warning' style='display:none;'></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class='col-lg-9'>
+            <div class="nav-trace">
+              <div class="input-group input-group-sm" id='network_ui_bar'>
+
+                <!-- UI Bar -->
+                <div class="nav-trace">
+                  <div class="input-group input-group-sm" id='network_ui_bar'>
+                    <div class="input-group-btn" id='network_ui_bar_button_group'></div>
+                    <span class="input-group-btn">
+                      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" id = "network_ui_bar_cluster_operations_button">Clusters <span class="caret"></span></button>
+                      <ul class="dropdown-menu" role="menu" id='network_ui_bar_cluster_operations_container'></ul>
+                    </span>
+                    <div class="input-group-btn">
+                      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                      id="network_ui_bar_attributes_label">Attribute <span class="caret"></span></button>
+                      <ul class="dropdown-menu" role="menu" id='network_ui_bar_attributes'></ul>
+                    </div>
+                    <input type="text" class="form-control" placeholder="Search for nodes" id='network_ui_bar_filter' />
+                  </div>
+                </div>
+
+                <!-- Main SVG -->
+                <div id='network_tag'>
+                  <div class="my_progress">
+                    <div class="progress-bar progress-bar-striped disabled" role="progressbar" aria-valuenow="100"
+                    aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                      Please load a network
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="row">
+          <div class='col-lg-9'>
+            <p id='network_status_string' class='text-info'></p>
+          </div>
+          <div id='network_ui_bar_aux_svg_holder' class='row style = ' margin-left: 5px ''></div>
+        </div>
+
+      </div>
+
+
+    <div id="trace-graph" class="tab-pane">
+      <div class='row'>
+        <div class='col-lg-6'>
+          <p class="lead"> Graph Statistics </p>
+          <table class="table table-striped table-condensed" id="graph_summary_table">
+          </table>
+        </div>
+        <div class='col-lg-6'>
+          <p id='histogram_label' class="lead"></p>
+          <div class='row' id='histogram_tag' style='margin-left: 5px'>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="lanl-trace-results" class="tab-pane">
+      <div class="row" style="margin-top: 10px; margin-bottom: 10 px;">
+        <div class="col-lg-12">
+          <div class="alert alert-info" id='lanl-main-warning' style='display:none;'>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class='col-lg-12'>
+          <div class="row">
+            <div class="input-group input-group-sm" id='lanl_network_ui_bar'>
+              <span class="input-group-btn">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" id = "lanl_network_ui_bar_cluster_operations_button">Clusters <span class="caret"></span></button>
+              <ul class="dropdown-menu" role="menu" id='lanl_network_ui_bar_cluster_operations_container'></ul>
+              </span>
+              <div class="input-group-btn">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                id="lanl_network_ui_bar_attribute_label">Attribute <span class="caret"></span></button>
+                <ul class="dropdown-menu" role="menu" id='lanl_network_ui_bar_attributes'></ul>
+              </div>
+              <input type="text" class="form-control" placeholder="search" id='lanl_network_ui_bar_search'>
+            </div>
+          </div>
+          <div class='row' id='lanl-network_tag'>
+            <div class="my_progress">
+              <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100"
+              aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                Loading the network...
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class='col-lg-9'>
+          <p id='lanl-network_status_string' class='text-info'></p>
+        </div>
+      </div>
+    </div>
+
+    <div id="trace-clusters" class="tab-pane">
+      <div class='row'>
+        <div class='col-lg-12'>
+          <span class="pull-right" id="cluster-table-export"> </span>
+          <p class="lead"> Clusters (connected components) </p>
+          <table class="table table-striped table-condensed table-hover" id="cluster_table">
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="trace-nodes" class="tab-pane">
+      <div class='row'>
+        <div class='col-lg-12'>
+          <span class="pull-right" id="node-table-export"> </span>
+          <p class="lead"> Nodes </p>
+          <table class="table table-striped table-condensed table-hover" id="node_table">
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="trace-attributes" class="tab-pane">
+      <div class='row'>
+        <div class="nav-trace">
+          <div class="input-group input-group-sm" id='network_ui_bar_attributes_container'>
+            <span class="input-group-btn">
+                          Categorical
+                          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" id = "network_ui_bar_attributes_cat_label">Attributes <span class="caret"></span></button>
+            <ul class="dropdown-menu" role="menu" id='network_ui_bar_attributes_cat'></ul>
+            </span>
+          </div>
+        </div>
+        <div class='col-lg-6'>
+          <div id='network_ui_bar_aux_svg_holder' class='row style = margin-left: 5px'>
+                  </div>
+              </div>
+               <div class='col-lg-6 '>
+                   <span class = "pull-right" id = "network_ui_bar_attribute_table_export"> </span>
+                   <table class = "table table-striped table-condensed table-hover" id = "network_ui_bar_attribute_table">
+                   </table>
+              </div>
+          </div>
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+<img class="hidden" id="hyphy-chart-image" />
+<canvas class="hidden" id="hyphy-chart-canvas"></canvas>
+
+<script src="js/hivtrace.js"></script>
+<script src="js/misc.js"></script>
+<script src="js/histogram.js"></script>
+<script src="js/clusternetwork.js"></script>
+
+
+<script>
+
+var network_container     = '#network_tag',
+    network_status_string = '#network_status_string',
+    network_warning       = '#main-warning',
+    histogram_tag         = '#histogram_tag',
+    histogram_label       = '#histogram_label',
+    button_bar_prefix     = 'network_ui_bar',
+    csvexport_label       = '#csvexport',
+    fasta_export_label    = '#fasta-export',
+    filter_edges_toggle   = '#network_ui_bar_toggle_filter_edges',
+    graph_summary_tag     = '#graph_summary_table',
+    cluster_table         = '#cluster_table',
+    parent_container      = '#trace-results',
+    node_table            = '#node_table';
+
+
+var init = function(data) {
+
+  var graph = data.trace_results;
+  var attributes = null;
+
+  var user_graph = new datamonkey.hivtrace.cluster_network_graph(graph, network_container, network_status_string, network_warning, button_bar_prefix, attributes, filter_edges_toggle, cluster_table, node_table, parent_container);
+  datamonkey.hivtrace.histogram(graph, histogram_tag, histogram_label);
+  datamonkey.hivtrace.graph_summary (graph, graph_summary_tag);
+  d3.select ("#graph-tab").classed ("disabled", false);
+  d3.select ("#clusters-tab").classed ("disabled", false);
+  d3.select ("#nodes-tab").classed ("disabled", false);
+  d3.select ("#attributes-tab").classed ("disabled", false);
+  datamonkey.hivtrace.export_table_to_text ("#cluster-table-export", cluster_table);
+  datamonkey.hivtrace.export_table_to_text ("#node-table-export", node_table);
+
+  $("#main-tab a[data-toggle='tab']").on ("shown.bs.tab", function (e) {
+        if (user_graph.needs_an_update) {
+            user_graph.update(false, 0.5);
+        }
+  });
+
+  $("#clusters-tab a[data-toggle='tab']").on ("shown.bs.tab", function (e) {
+        user_graph.update_volatile_elements (d3.select (cluster_table));
+  });
+
+  $("#nodes-tab a[data-toggle='tab']").on ("shown.bs.tab", function (e) {
+        user_graph.update_volatile_elements (d3.select (node_table));
+  });
+
+  if(data.lanl_trace_results > 0) {
+    // Only if the comparison was done
+    var lanl_network_container     = '#lanl-network_tag',
+        lanl_network_status_string = '#lanl-network_status_string',
+        lanl_network_warning       = '#lanl-main-warning',
+        lanl_histogram_tag         = '#lanl-histogram_tag',
+        lanl_histogram_label       = '#lanl-histogram_label',
+        lanl_csvexport_label       = '#lanl-csvexport',
+        lanl_button_bar_prefix     = 'lanl_network_ui_bar';
+
+    d3.select ("#lanl-trace-results").classed ("disabled", false);
+
+    var lanl_graph = data.lanl_trace_results;
+    var lanl_graph_rendered = new datamonkey.hivtrace.cluster_network_graph(lanl_graph, lanl_network_container, lanl_network_status_string, lanl_network_warning, lanl_button_bar_prefix, attributes, filter_edges_toggle, null, null, parent_container);
+  }
+
+}
+
+var initialize_cluster_network_graphs = function () {
+
+
+  //Initialize clusternetworkgraph with json url
+  var json_url = 'test-data/full_network.json';
+
+  d3.json(json_url, function(data) {
+    init(data)
+  });
+
+}
+
+function in_progress() {
+  return $('.progress').length > 0;
+}
+
+$(document).ready(function(){
+  if(!in_progress()) {
+    //initialize_cluster_network_graphs();
+  }
+
+  // *** HANDLERS ***
+  $("#json_file").on ("change", function (e) {
+    var files = e.target.files; // FileList object
+
+    if (files.length == 1) {
+      var f = files[0];
+      var reader = new FileReader();
+
+      reader.onload = (function(theFile) {
+        return function(e) {
+            var container_id = '#tree_container';
+            analysis_data = JSON.parse (e.target.result);
+            init(analysis_data);
+        };
+      })(f);
+      reader.readAsText(f);
+    }
+  });
+});
+
+</script>
+
+</body>
+</html>
