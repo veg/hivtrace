@@ -10,18 +10,19 @@ var gulp = require('gulp'),
     debug = require('gulp-debug'),
     rename = require('gulp-rename'),
     sourcemaps = require('gulp-sourcemaps'),
+    order = require('gulp-order'),
     uglify = require('gulp-uglify');
 
 var config = {
-     bowerDir: './vendor/'
+     bowerDir: './static/vendor/'
 }
 
 gulp.task("scripts", function() {
     var filterJS = gulpFilter('**/*.js');
     gulp.src(bower_files( { paths: {
         bowerDirectory: config.bowerDir,
-        bowerrc: './.bowerrc',
-        bowerJson: './bower.json'
+        bowerrc: './../../.bowerrc',
+        bowerJson: './../../bower.json'
      }, 
     "overrides": {
         "crossfilter": {
@@ -32,26 +33,35 @@ gulp.task("scripts", function() {
     }}), { base: config.bowerDir })
     .pipe(filterJS)
     .pipe(sourcemaps.init())
-      .pipe(concat('./vendor.js'))
+      .pipe(concat('./static/vendor.js'))
       .pipe(gulp.dest('./'))
       .pipe(rename('vendor.min.js'))
       .pipe(uglify())
     .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest('./'));
+    .pipe(gulp.dest('./static/'));
 });
 
-gulp.task("worker-scripts", function() {
-  gulp.src([ './src/bower-components/underscore/underscore.js', './src/bower-components/d3/d3.js'])
-    .pipe(concat('./worker-vendor.js'))
-    .pipe(gulp.dest('./public/assets/js/'));
+gulp.task("hivtrace-scripts", function() {
+
+  return gulp.src(['./static/src/*.js'])
+    .pipe(order([
+      "main.js",
+      "misc.js",
+      "histogram.js",
+      "clusternetwork.js",
+    ])).pipe(sourcemaps.init())
+          .pipe(concat('hivtrace.js'))
+          .pipe(sourcemaps.write('./'))
+        .pipe(gulp.dest('./static/'));
+
 });
 
 gulp.task("css", function() {
     var filterJS = gulpFilter('**/*.css');
     gulp.src(bower_files( { paths: {
         bowerDirectory: config.bowerDir,
-        bowerrc: './.bowerrc',
-        bowerJson: './bower.json'
+        bowerrc: './../../.bowerrc',
+        bowerJson: './../../bower.json'
      },
     "overrides": {
       "font-awesome": {
@@ -72,25 +82,25 @@ gulp.task("css", function() {
     }}), { base: config.bowerDir })
     .pipe(filterJS)
     .pipe(sourcemaps.init())
-      .pipe(concat('./vendor.css'))
-    .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest('./'));
+      .pipe(concat('./static/css/vendor.css'))
+    .pipe(sourcemaps.write('./static/css/'))
+    .pipe(gulp.dest('./static/css/'));
 });
 
 gulp.task('fonts', function() {
     return gulp.src([path.join(config.bowerDir, '/font-awesome/fonts/fontawesome-webfont.*')])
-            .pipe(gulp.dest('./fonts/'));
+            .pipe(gulp.dest('./static/fonts/'));
 });
 
 gulp.task('bs-fonts', function() {
     return gulp.src([path.join(config.bowerDir, '/bootstrap/fonts/*')])
-            .pipe(gulp.dest('./fonts/'));
+            .pipe(gulp.dest('./static/fonts/'));
 });
 
-gulp.task('build', ['scripts', 'worker-scripts', 'css', 'fonts', 'bs-fonts']);
+gulp.task('build', ['scripts', 'hivtrace-scripts', 'css', 'fonts', 'bs-fonts']);
 
 gulp.task('watch', function () {
-    watch('src/**/*', function () {
+    watch('static/**/*', function () {
         gulp.start('build');
     });
 });
