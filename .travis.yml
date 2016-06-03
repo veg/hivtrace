@@ -37,7 +37,9 @@ script:
 notifications:
     email:
         recipients:
-            - sweaver@ucsd.edu
+            - steven@stevenweaver.org
+            - jwertheim@ucsd.edu
+            - spond@temple.edu
         on_success: always
         on_failure: always
 
