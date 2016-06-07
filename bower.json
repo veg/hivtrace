@@ -16,6 +16,8 @@
              "!hivtrace/web/static/fonts",
              "!hivtrace/web/static/hivtrace.js",
              "!hivtrace/web/static/hivtrace.css",
+             "!hivtrace/web/static/vendor.js",
+             "!hivtrace/web/static/vendor.css",
              "!hivtrace/web/static/workers/*",
              "!hivtrace/web/static/fonts/*"
             ],
