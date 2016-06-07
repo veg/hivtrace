@@ -18,7 +18,7 @@
   ],
   "dependencies": {
     "hyphy-vision": "git@github.com:veg/hyphy-vision.git#0.1.3-alpha.2",
-    "hivtrace": "git@github.com:stevenweaver/hivtrace.git#f177f824705c275dad31f2f507781d3cdf95ed59",
+    "hivtrace": "git@github.com:veg/hivtrace.git#f177f824705c275dad31f2f507781d3cdf95ed59",
     "underscore": "1.x",
     "font-awesome": "4.x",
     "dcjs": "1.x",
