@@ -40,8 +40,13 @@ gulp.task("scripts", function() {
     .pipe(gulp.dest('./'));
 });
 
+gulp.task("hivtrace-scripts", function() {
+  gulp.src(['./vendor/hivtrace/hivtrace/web/static/**/*']).pipe(gulp.dest('./hivtrace/'));
+  gulp.src(['./vendor/hivtrace/hivtrace/web/static/workers/*']).pipe(gulp.dest('./workers/'));
+});
+
 gulp.task("worker-scripts", function() {
-  gulp.src([ './src/bower-components/underscore/underscore.js', './src/bower-components/d3/d3.js'])
+  gulp.src([ './vendor/underscore/underscore.js', './vendor/d3/d3.js'])
     .pipe(concat('./worker-vendor.js'))
     .pipe(gulp.dest('./public/assets/js/'));
 });
@@ -87,7 +92,7 @@ gulp.task('bs-fonts', function() {
             .pipe(gulp.dest('./fonts/'));
 });
 
-gulp.task('build', ['scripts', 'worker-scripts', 'css', 'fonts', 'bs-fonts']);
+gulp.task('build', ['scripts', 'hivtrace-scripts', 'worker-scripts', 'css', 'fonts', 'bs-fonts']);
 
 gulp.task('watch', function () {
     watch('src/**/*', function () {

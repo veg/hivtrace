@@ -3,33 +3,41 @@ if (typeof TetherBase === 'undefined') {
   TetherBase = {modules: []};
 }
 
-function getScrollParent(el) {
-  const {position} = getComputedStyle(el);
+let zeroElement = null;
+
+function getScrollParents(el) {
+  // In firefox if the el is inside an iframe with display: none; window.getComputedStyle() will return null;
+  // https://bugzilla.mozilla.org/show_bug.cgi?id=548397
+  const computedStyle = getComputedStyle(el) || {};
+  const position = computedStyle.position;
+  let parents = [];
 
   if (position === 'fixed') {
-    return el;
+    return [el];
   }
 
   let parent = el;
-  while (parent = parent.parentNode) {
+  while ((parent = parent.parentNode) && parent && parent.nodeType === 1) {
     let style;
     try {
       style = getComputedStyle(parent);
     } catch (err) {}
 
     if (typeof style === 'undefined' || style === null) {
-      return parent;
+      parents.push(parent);
+      return parents;
     }
 
     const {overflow, overflowX, overflowY} = style;
     if (/(auto|scroll)/.test(overflow + overflowY + overflowX)) {
       if (position !== 'absolute' || ['relative', 'absolute', 'fixed'].indexOf(style.position) >= 0) {
-        return parent;
+        parents.push(parent)
       }
     }
   }
 
-  return document.body;
+  parents.push(document.body);
+  return parents;
 }
 
 const uniqueId = (() => {
@@ -38,14 +46,14 @@ const uniqueId = (() => {
 })();
 
 const zeroPosCache = {};
-const getOrigin = (doc) => {
+const getOrigin = () => {
   // getBoundingClientRect is unfortunately too accurate.  It introduces a pixel or two of
   // jitter as the user scrolls that messes with our ability to detect if two positions
   // are equivilant or not.  We place an element at the top left of the page that will
   // get the same jitter, so we can cancel the two out.
-  let node = doc._tetherZeroElement;
-  if (typeof node === 'undefined') {
-    node = doc.createElement('div');
+  let node = zeroElement;
+  if (!node) {
+    node = document.createElement('div');
     node.setAttribute('data-tether-id', uniqueId());
     extend(node.style, {
       top: 0,
@@ -53,9 +61,9 @@ const getOrigin = (doc) => {
       position: 'absolute'
     });
 
-    doc.body.appendChild(node);
+    document.body.appendChild(node);
 
-    doc._tetherZeroElement = node;
+    zeroElement = node;
   }
 
   const id = node.getAttribute('data-tether-id');
@@ -77,6 +85,13 @@ const getOrigin = (doc) => {
   return zeroPosCache[id];
 };
 
+function removeUtilElements() {
+  if (zeroElement) {
+    document.body.removeChild(zeroElement);
+  }
+  zeroElement = null;
+};
+
 function getBounds(el) {
   let doc;
   if (el === document) {
@@ -96,7 +111,7 @@ function getBounds(el) {
     box[k] = rect[k];
   }
 
-  const origin = getOrigin(doc);
+  const origin = getOrigin();
 
   box.top -= origin.top;
   box.left -= origin.left;
@@ -310,7 +325,7 @@ class Evented {
 }
 
 TetherBase.Utils = {
-  getScrollParent,
+  getScrollParents,
   getBounds,
   getOffsetParent,
   extend,
@@ -322,5 +337,6 @@ TetherBase.Utils = {
   flush,
   uniqueId,
   Evented,
-  getScrollBarSize
+  getScrollBarSize,
+  removeUtilElements
 };
