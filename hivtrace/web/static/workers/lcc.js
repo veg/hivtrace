@@ -1,4 +1,4 @@
-importScripts('../vendor/d3/d3.min.js', '../vendor/underscore/underscore.js', '../js/misc.js');
+importScripts('./worker-vendor.js');
 
 onmessage = function(event) {
     try {

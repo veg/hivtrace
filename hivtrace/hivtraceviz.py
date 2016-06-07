@@ -40,7 +40,7 @@ def visualize(results):
 
 
 
-    handlers = [(r'/hivtrace/(.*)', VizHandler)]
+    handlers = [(r'/hivtrace/workers/(.*)', tornado.web.StaticFileHandler, {'path': 'web/static/workers/'}), (r'/hivtrace/(.*)', VizHandler)]
     app = tornado.web.Application(handlers, **settings)
     return app
 

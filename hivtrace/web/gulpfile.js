@@ -41,6 +41,12 @@ gulp.task("scripts", function() {
     .pipe(gulp.dest('./static/'));
 });
 
+gulp.task("worker-scripts", function() {
+    gulp.src([ './static/vendor/underscore/underscore.js', './static/vendor/d3/d3.js', './src/misc.js'])
+        .pipe(concat('./worker-vendor.js'))
+            .pipe(gulp.dest('./static/workers/'));
+});
+
 gulp.task("hivtrace-scripts", function() {
 
   return gulp.src(['./static/src/*.js'])
@@ -97,7 +103,7 @@ gulp.task('bs-fonts', function() {
             .pipe(gulp.dest('./static/fonts/'));
 });
 
-gulp.task('build', ['scripts', 'hivtrace-scripts', 'css', 'fonts', 'bs-fonts']);
+gulp.task('build', ['scripts', 'worker-scripts', 'hivtrace-scripts', 'css', 'fonts', 'bs-fonts']);
 
 gulp.task('watch', function () {
     watch('static/**/*', function () {
