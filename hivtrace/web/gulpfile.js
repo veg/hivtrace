@@ -82,9 +82,9 @@ gulp.task("css", function() {
     }}), { base: config.bowerDir })
     .pipe(filterJS)
     .pipe(sourcemaps.init())
-      .pipe(concat('./static/css/vendor.css'))
-    .pipe(sourcemaps.write('./static/css/'))
-    .pipe(gulp.dest('./static/css/'));
+      .pipe(concat('./static/vendor.css'))
+    .pipe(sourcemaps.write('./static/'))
+    .pipe(gulp.dest('./static/'));
 });
 
 gulp.task('fonts', function() {

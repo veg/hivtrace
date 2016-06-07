@@ -11,7 +11,14 @@
     "hiv",
     "epidemiology"
   ],
-  "ignore": ["*", "!hivtrace/web/static/*"],
+  "ignore": [
+             "*",
+             "!hivtrace/web/static/fonts",
+             "!hivtrace/web/static/hivtrace.js",
+             "!hivtrace/web/static/hivtrace.css",
+             "!hivtrace/web/static/workers/*",
+             "!hivtrace/web/static/fonts/*"
+            ],
   "dependencies": {
     "hyphy-vision": "git@github.com:veg/hyphy-vision.git#0.1.3-alpha.2",
     "underscore": "1.x",
