@@ -1,0 +1,110 @@
+/* HYPHY VISITON */
+
+/* font-awesome rotation fix */
+.fa-rotate-45 {
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.fa-rotate-135 {
+  -webkit-transform: rotate(135deg);
+  -moz-transform: rotate(135deg);
+  -ms-transform: rotate(135deg);
+  -o-transform: rotate(135deg);
+  transform: rotate(135deg);
+}
+
+.hyphy-omega-line-reference {
+    stroke: #000;
+    stroke-width: 6px;
+    opacity: 1;
+}
+
+/* aBSRESL */
+.hyphy-omega-bar line, .hyphy-omega-bar path {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.hyphy-omega-line {
+    stroke: #000;
+    stroke-width: 6px;
+}
+
+.hyphy-axis path, .hyphy-axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.hyphy-axis-label {
+    font: 18px sans-serif;
+}
+
+.hyphy-axis text {
+    font: 12px sans-serif;
+}
+
+.hyphy-weight-label {
+    font: 14px sans-serif;
+    text-anchor: middle;
+}
+
+.hyphy-neutral-line {
+    stroke-dasharray: 2,10;
+    stroke: #000;
+    stroke-width: 1px;
+}
+
+.hyphy-displacement-line {
+    fill: none;
+    stroke: #000;
+    opacity: 0.7;
+    stroke-width: 1.5px;
+}
+
+#hyphy-chart-image {
+  display : none;
+}
+
+#hyphy-chart-canvas {
+  display : none;
+}
+
+/* BUSTED */
+.hyphy-busted-axis path,
+.hyphy-busted-axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.hyphy-busted-area {
+  fill: steelblue;
+}
+
+.hyphy-busted-site-table {
+ margin-top: 20px;
+}
+
+.hyphy-busted-btn-export {
+  margin: 5px;
+}
+
+.hyphy-busted-dist-export {
+  margin-left: 5px;
+}
+
+.hyphy-blue {
+ color: #1f77b4
+}
+
+.hyphy-red {
+  color: #d62728;
+}
+
+
