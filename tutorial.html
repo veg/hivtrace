@@ -8,10 +8,12 @@
     <meta name="author" content="">
 
     <link href="vendor/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
-    <link href="./hivtrace/vendor.css" rel="stylesheet">
-    <link href="./hivtrace/hivtrace.css" rel="stylesheet">
-    <script src="./hivtrace/vendor.js"></script>
-
+    <link href="./static/vendor.css" rel="stylesheet">
+    <link href="./static/hivtrace.css" rel="stylesheet">
+    <script src="./static/vendor.js"></script>
+    <link rel="stylesheet" href="./static/vendor/shepherd-dist/css/shepherd-theme-arrows.css" />
+    <script src="./static/vendor/tether-dist/js/tether.min.js"></script>
+    <script src="./static/vendor/shepherd-dist/js/shepherd.min.js"></script></script></script>
   </head>
 
   <body>
@@ -213,7 +215,7 @@
 <img id="hyphy-chart-image" />
 <canvas id="hyphy-chart-canvas"></canvas>
 
-<script src="./hivtrace/hivtrace.js"></script>
+<script src="./static/hivtrace.js"></script>
 <script src="tour.js"></script>
 
 <script>
@@ -250,7 +252,7 @@ var initialize_cluster_network_graphs = function () {
 
     var graph = data.trace_results;
 
-    d3.json (window.location.href + "/attributes", function (error, attributes) {
+    attributes = null;
           user_graph = new datamonkey.hivtrace.cluster_network_graph(graph, network_container, network_status_string, network_warning, button_bar_prefix, attributes, filter_edges_toggle, cluster_table, node_table, parent_container);
           datamonkey.hivtrace.histogram(graph, histogram_tag, histogram_label);
           datamonkey.hivtrace.graph_summary (graph, graph_summary_tag);
@@ -288,7 +290,6 @@ var initialize_cluster_network_graphs = function () {
             //datamonkey.hivtrace.histogram(lanl_graph, lanl_histogram_tag, lanl_histogram_label);
           }
 
-      });
 
 
       

@@ -28,7 +28,7 @@ const transformKey = (() => {
   }
   const el = document.createElement('div');
 
-  const transforms = ['transform', 'webkitTransform', 'OTransform', 'MozTransform', 'msTransform'];
+  const transforms = ['transform', 'WebkitTransform', 'OTransform', 'MozTransform', 'msTransform'];
   for (let i = 0; i < transforms.length; ++i) {
     const key = transforms[i];
     if (el.style[key] !== undefined) {
@@ -391,7 +391,7 @@ class TetherClass extends Evented {
     this.enabled = true;
 
     this.scrollParents.forEach((parent) => {
-      if (parent !== document) {
+      if (parent !== this.target.ownerDocument) {
         parent.addEventListener('scroll', this.position);
       }
     })
@@ -572,22 +572,25 @@ class TetherClass extends Evented {
       }
     };
 
+    var doc = this.target.ownerDocument;
+    var win = doc.defaultView;
+
     let scrollbarSize;
-    if (document.body.scrollWidth > window.innerWidth) {
+    if (win.innerHeight > doc.documentElement.clientHeight) {
       scrollbarSize = this.cache('scrollbar-size', getScrollBarSize);
       next.viewport.bottom -= scrollbarSize.height;
     }
 
-    if (document.body.scrollHeight > window.innerHeight) {
+    if (win.innerWidth > doc.documentElement.clientWidth) {
       scrollbarSize = this.cache('scrollbar-size', getScrollBarSize);
       next.viewport.right -= scrollbarSize.width;
     }
 
-    if (['', 'static'].indexOf(document.body.style.position) === -1 ||
-        ['', 'static'].indexOf(document.body.parentElement.style.position) === -1) {
+    if (['', 'static'].indexOf(doc.body.style.position) === -1 ||
+        ['', 'static'].indexOf(doc.body.parentElement.style.position) === -1) {
       // Absolute positioning in the body will be relative to the page, not the 'initial containing block'
-      next.page.bottom = document.body.scrollHeight - top - height;
-      next.page.right = document.body.scrollWidth - left - width;
+      next.page.bottom = doc.body.scrollHeight - top - height;
+      next.page.right = doc.body.scrollWidth - left - width;
     }
 
     if (typeof this.options.optimizations !== 'undefined' &&
@@ -603,8 +606,8 @@ class TetherClass extends Evented {
         offsetBorder[side.toLowerCase()] = parseFloat(offsetParentStyle[`border${ side }Width`]);
       });
 
-      offsetPosition.right = document.body.scrollWidth - offsetPosition.left - offsetParentSize.width + offsetBorder.right;
-      offsetPosition.bottom = document.body.scrollHeight - offsetPosition.top - offsetParentSize.height + offsetBorder.bottom;
+      offsetPosition.right = doc.body.scrollWidth - offsetPosition.left - offsetParentSize.width + offsetBorder.right;
+      offsetPosition.bottom = doc.body.scrollHeight - offsetPosition.top - offsetParentSize.height + offsetBorder.bottom;
 
       if (next.page.top >= (offsetPosition.top + offsetBorder.top) && next.page.bottom >= offsetPosition.bottom) {
         if (next.page.left >= (offsetPosition.left + offsetBorder.left) && next.page.right >= offsetPosition.right) {
@@ -694,7 +697,17 @@ class TetherClass extends Evented {
           xPos = -_pos.right;
         }
 
-        css[transformKey] = `translateX(${ Math.round(xPos) }px) translateY(${ Math.round(yPos) }px)`;
+        if (window.matchMedia) {
+          // HubSpot/tether#207
+          const retina = window.matchMedia('only screen and (min-resolution: 1.3dppx)').matches ||
+                         window.matchMedia('only screen and (-webkit-min-device-pixel-ratio: 1.3)').matches;
+          if (!retina) {
+            xPos = Math.round(xPos);
+            yPos = Math.round(yPos);
+          }
+        }
+
+        css[transformKey] = `translateX(${ xPos }px) translateY(${ yPos }px)`;
 
         if (transformKey !== 'msTransform') {
           // The Z transform will keep this in the GPU (faster, and prevents artifacts),
@@ -759,7 +772,7 @@ class TetherClass extends Evented {
 
       if (!offsetParentIsBody) {
         this.element.parentNode.removeChild(this.element);
-        document.body.appendChild(this.element);
+        this.element.ownerDocument.body.appendChild(this.element);
       }
     }
 
@@ -779,6 +792,7 @@ class TetherClass extends Evented {
     if (write) {
       defer(() => {
         extend(this.element.style, writeCSS);
+        this.trigger('repositioned');
       });
     }
   }
