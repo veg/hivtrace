@@ -4,6 +4,17 @@ circle.node, rect.node, path.node {
   stroke-width: .5px;
 }
 
+circle.scatter {
+  fill: gray;
+}
+
+
+circle.legend, path.legend {
+  cursor: pointer;
+  stroke: #000;
+  stroke-width: .5px;
+}
+
 .hiv-trace-problematic {
     stroke: #F00 !important;
     stroke-width: 2px !important;
@@ -20,6 +31,12 @@ circle.node, rect.node, path.node {
 g.node-group {
   cursor: pointer;
   stroke: #000;
+}
+
+
+.hiv-trace-legend {
+    font-family: sans-serif;
+    font-size: 14 pt;
 }
 
 
