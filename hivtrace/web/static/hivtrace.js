@@ -673,6 +673,19 @@ var _networkMissing         = 'missing';
 var _networkMissingColor    = 'grey';
 var _networkShapeOrdering   = ['circle','square','triangle-up','triangle-down','diamond','cross'];
 var _defaultFloatFormat = d3.format(",.2r");
+var _networkPresetColorSchemes = {'trans_categ' : {
+                                    'Other-Male': '#999999',
+                                    'Heterosexual Contact-Male': '#e31a1c',
+                                    'Other-Child': '#ff7f00',
+                                    'Perinatal': '#ff7f00',
+                                    'MSM': '#1f78b4',
+                                    'IDU-Male': '#33a02c',
+                                    'Other-Female': '#999999',
+                                    'IDU-Female': '#33a02c',
+                                    'MSM & IDU': '#33a02c',
+                                    'Missing': '#999999',
+                                    'Heterosexual Contact-Female': '#e31a1c'
+                                 }};
 
 
 
@@ -952,11 +965,6 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
 
         var sizes = network_layout.size();
 
-        _.each (clusters, function (c) {
-            console.log (c.x, c.y);
-            //c.x = sizes[0] / 2;
-            //c.y = sizes[1] / 2;
-        });
         _.each (nodes,  function (n) {n.x += n.dx/2; n.y += n.dy/2});
         clusters.forEach (collapse_cluster);
         return [clusters, nodes];
@@ -1167,6 +1175,10 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
             var cluster_id = link_clicked.data ("cluster");
             var modal = d3.select ('#' + button_bar_ui + '_cluster_zoom');
             modal.selectAll (".modal-title").text ("Cluster " + cluster_id);
+
+            $("#" + button_bar_ui + "_cluster_zoom_svg_export").on ("click", function (e) {
+                datamonkey.save_image("png", "#" + button_bar_ui + "_cluster_zoom_svg");
+            });
 
             var node_indices = {};
             var used_index   = 0;
@@ -1907,7 +1919,17 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
      self.colorizer['continuous']        = false;
 
      if (cat_id) {
-        self.colorizer['category']    = graph_data [_networkGraphAttrbuteID][cat_id].dimension <= 10 ? d3.scale.category10() : d3.scale.category20c();
+        if (cat_id in _networkPresetColorSchemes) {
+            var domain = [], range = [];
+            _.each (_networkPresetColorSchemes[cat_id], function (value, key) {
+                domain.push (key);
+                range.push (value);
+            });
+            self.colorizer['category'] = d3.scale.ordinal ().domain (domain).range (range);
+
+        } else {
+            self.colorizer['category']    = graph_data [_networkGraphAttrbuteID][cat_id].dimension <= 10 ? d3.scale.category10() : d3.scale.category20c();
+        }
         self.colorizer['category_id'] = cat_id;
         self.colorizer['category_map'] = graph_data [_networkGraphAttrbuteID][cat_id]['value_map'];
         //self.colorizer['category_map'][null] =  graph_data [_networkGraphAttrbuteID][cat_id]['range'];

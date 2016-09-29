@@ -1,7 +1,10 @@
 {
   "name": "phylotree",
-  "version": "0.1.2",
-  "main": "phylotree.js",
+  "version": "0.1.4",
+  "main": [
+    "phylotree.js",
+    "phylotree.css"
+  ],
   "keywords": [
     "phylogenetics",
     "phylogeny",
@@ -20,11 +23,11 @@
     "jquery": "1.x"
   },
   "homepage": "https://github.com/veg/phylotree.js",
-  "_release": "0.1.2",
+  "_release": "0.1.4",
   "_resolution": {
     "type": "version",
-    "tag": "v0.1.2",
-    "commit": "74ad35aae3ce64e2b49c922e401c05addb7391ed"
+    "tag": "v0.1.4",
+    "commit": "76a306056cfce887ac749a19e251597d2d212bce"
   },
   "_source": "git@github.com:veg/phylotree.js.git",
   "_target": "*",
