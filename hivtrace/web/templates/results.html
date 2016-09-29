@@ -102,8 +102,21 @@
                       id="network_ui_bar_shapes_label">Shape <span class="caret"></span></button>
                       <ul class="dropdown-menu" role="menu" id='network_ui_bar_shapes'></ul>
                     </div>
+                    <div class="input-group-btn">
+                      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                      id="network_ui_bar_times_label">Time <span class="caret"></span></button>
+                      <ul class="dropdown-menu" role="menu" id='network_ui_bar_times'></ul>
+                    </div>
                     <input type="text" class="form-control" placeholder="Search for nodes" id='network_ui_bar_filter' />
                   </div>
+                </div>
+                <div class="nav-trace" id = "network_ui_bar_sliders" style = "display: none">
+                    <div class="input-group">
+                        <label  id = "network_ui_bar_sliders_label_from">2001/01/01</label>
+                            <input id = "network_ui_bar_sliders_from" class = "col-lg-3" type = "range" min = "0" max = "100" step = "0.1" value = "1"></input>
+                            <input id = "network_ui_bar_sliders_to" class = "col-lg-3" type = "range" min = "0" max = "100" step = "0.1" value = "1"/>
+                        <label class = "pull-right" id = "network_ui_bar_sliders_label_to">2012/01/01</label>
+                    </div>
                 </div>
 
                 <!-- Main SVG -->
@@ -199,7 +212,8 @@
                   <div class="modal-body" id = "network_ui_bar_cluster_zoom_svg">
                   </div>
                   <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id = "network_ui_bar_cluster_zoom_svg_export">Export <i class = "fa fa-image"></i></button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Dismiss</button>
                   </div>
                 </div>
               </div>
