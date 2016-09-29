@@ -1,8 +1,8 @@
 var _networkGraphAttrbuteID = "patient_attribute_schema";
 var _networkNodeAttributeID = "patient_attributes";
 var _networkMissing         = 'missing';
-var _networkMissingColor    = 'grey';
-var _networkShapeOrdering   = ['circle','square','triangle-up','triangle-down','diamond','cross'];
+var _networkMissingColor    = '#999';
+var _networkShapeOrdering   = ['circle','square','hexagon','diamond','cross','octagon'];
 var _defaultFloatFormat = d3.format(",.2r");
 var _networkPresetColorSchemes = {'trans_categ' : {
                                     'Other-Male': '#999999',
@@ -18,7 +18,25 @@ var _networkPresetColorSchemes = {'trans_categ' : {
                                     'Heterosexual Contact-Female': '#e31a1c'
                                  }};
 
+var _networkPresetAttributeSchemes = {'Risk+ VL (suppressed or not) / Gender' :
+    function (node) {
 
+        var color = _networkMissing,
+            shape = _networkMissing,
+            color_label = "missing/missing",
+            shape = "missing";
+        // vl_recent_value
+        // birth sex
+
+        if (_networkNodeAttributeID in node) {
+            if ('birth_sex' in node[_networkNodeAttributeID]) {
+                //switch (node[_networkNodeAttributeID]
+
+
+            }
+        }
+    }
+};
 
 var hivtrace_cluster_network_graph = function (json, network_container, network_status_string, network_warning_tag, button_bar_ui, attributes, filter_edges_toggle, clusters_table, nodes_table, parent_container, options) {
 
@@ -1009,8 +1027,10 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
 
   function draw_a_node (container, node) {
     container = d3.select(container);
-    container.attr("d", d3.svg.symbol().size( node_size )
-        .type( function(d) { return (d.hxb2_linked && !d.is_lanl) ? "cross" : (d.is_lanl ? "triangle-down" : self.node_shaper['shaper'] (d)) }))
+
+    var symbol_type =  (node.hxb2_linked && !node.is_lanl) ? "cross" : (node.is_lanl ? "triangle-down" : self.node_shaper['shaper'] (node));
+
+    container.attr("d", datamonkey.hivtrace.symbol (symbol_type).size( node_size (node) ))
         .attr('class', 'node')
         .attr("transform", function(d) { return "translate(" + d.x + "," + d.y+ ")"; })
         .style('fill', function(d) { return node_color(d); })
@@ -1018,7 +1038,8 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
         .on ('mouseover', node_pop_on)
         .on ('mouseout', node_pop_off)
         .call(network_layout.drag().on('dragstart', node_pop_off));
-  }
+
+   }
 
 
   function draw_a_cluster (container, the_cluster) {
@@ -1138,7 +1159,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
 
                  legend_svg.append ("g").classed ('hiv-trace-legend',true).attr ("transform", "translate(0," + offset + ")").append ("path")
                                                                           .attr ("transform", "translate(5,-5)")
-                                                                          .attr("d", d3.svg.symbol().size( 128 ).type( shape_mapper (value)))
+                                                                          .attr("d",  datamonkey.hivtrace.symbol(shape_mapper (value)).size( 128 ))
                                                                           .classed('legend', true)
                                                                           .style ('fill', 'none');
 
