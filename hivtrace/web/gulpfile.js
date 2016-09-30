@@ -31,9 +31,6 @@ gulp.task("scripts", function() {
           ]
         },
     }}), { base: config.bowerDir })
-    .pipe(order([
-      "jquery.js",
-    ]))
     .pipe(filterJS)
     .pipe(sourcemaps.init())
       .pipe(concat('./static/vendor.js'))
