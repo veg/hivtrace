@@ -51,6 +51,88 @@ function hivtrace_cluster_adjacency_list(obj) {
 
 }
 
+hivtrace_generate_svg_polygon_lookup = {
+};
+
+_.each (_.range (3,20), function (d) {
+    var angle_step    = Math.PI*2/d;
+    hivtrace_generate_svg_polygon_lookup [d] = _.map (_.range (1,d), function (i) {
+        return [Math.cos (angle_step * i), Math.sin (angle_step * i)];
+    });
+});
+
+function hivtrace_generate_svg_symbol (type) {
+    switch (type) {
+        case 'circle':
+        case 'cross':
+        case 'diamond':
+        case 'square':
+        case 'triangle-down':
+        case 'triangle-up':
+            return  d3.svg.symbol().type (type);
+
+        case 'pentagon':
+            return hivtrace_generate_svg_polygon().sides (5);
+        case 'hexagon':
+            return hivtrace_generate_svg_polygon().sides (6);
+        case 'septagon':
+            return hivtrace_generate_svg_polygon().sides (7);
+        case 'octagon':
+            return hivtrace_generate_svg_polygon().sides (8);
+    }
+    return node;
+}
+
+function hivtrace_generate_svg_polygon () {
+    var self = this;
+
+
+    function polygon () {
+        var path  = " M" + self.radius + " 0";
+
+        if (self.sides in hivtrace_generate_svg_polygon_lookup) {
+             path += hivtrace_generate_svg_polygon_lookup[self.sides].map (function (value) {
+                return " L" + self.radius * value[0] + " " + self.radius * value[1];
+             }).join (" ");
+        } else {
+            var angle_step    = Math.PI*2/self.sides,
+                current_angle = 0;
+            for (i = 0; i < self.sides - 1; i++) {
+                current_angle += angle_step;
+                path += " L" + self.radius * Math.cos (current_angle) + " " + self.radius * Math.sin (current_angle);
+            }
+        }
+
+        path += " Z";
+        return path;
+    }
+
+    polygon.sides = function (attr) {
+        if (_.isNumber (attr) && attr > 2) {
+            self.sides = attr;
+            return polygon;
+        }
+        return self.sides;
+    }
+
+    polygon.type = function () {
+       return polygon;
+    }
+
+    polygon.size = function(attr) {
+        if (_.isNumber (attr)) {
+            self.size = attr;
+            self.radius = Math.sqrt (attr/Math.PI);
+            return polygon;
+        }
+        return self.size;
+    }
+
+    polygon.size (64);
+    self.sides  = 6;
+
+    return polygon;
+}
 
 function hivtrace_new_cluster_adjacency_list(obj) {
 
@@ -61,7 +143,7 @@ function hivtrace_new_cluster_adjacency_list(obj) {
     nodes.forEach (function (n) {
         n.neighbors = d3.set();
     });
-    
+
     edges.forEach (function (e) {
         nodes[e.source].neighbors.add(e.target);
         nodes[e.target].neighbors.add(e.source);
@@ -484,7 +566,7 @@ hivtrace_compute_local_clustering_coefficients = _.once (function (obj) {
   var nodes = obj.Nodes;
 
   nodes.forEach (function (n) {
-  
+
     var a_node = n;
     var neighborhood_size = a_node.neighbors.size();
 
@@ -493,7 +575,7 @@ hivtrace_compute_local_clustering_coefficients = _.once (function (obj) {
     } else {
 
         if (neighborhood_size > 500) {
-            a_node.lcc = datamonkey.hivtrace.too_large;     
+            a_node.lcc = datamonkey.hivtrace.too_large;
         } else {
             // count triangles
             neighborhood = a_node.neighbors.values();
@@ -563,6 +645,8 @@ datamonkey.hivtrace.undefined = new Object();
 datamonkey.hivtrace.too_large = new Object();
 datamonkey.hivtrace.processing = new Object();
 datamonkey.hivtrace.format_value = hivtrace_format_value;
+datamonkey.hivtrace.polygon    = hivtrace_generate_svg_polygon;
+datamonkey.hivtrace.symbol    = hivtrace_generate_svg_symbol;
 
 function hivtrace_histogram(graph, histogram_tag, histogram_label) {  
 
@@ -670,8 +754,8 @@ datamonkey.hivtrace.histogram = hivtrace_histogram;
 var _networkGraphAttrbuteID = "patient_attribute_schema";
 var _networkNodeAttributeID = "patient_attributes";
 var _networkMissing         = 'missing';
-var _networkMissingColor    = 'grey';
-var _networkShapeOrdering   = ['circle','square','triangle-up','triangle-down','diamond','cross'];
+var _networkMissingColor    = '#999';
+var _networkShapeOrdering   = ['circle','square','hexagon','diamond','cross','octagon'];
 var _defaultFloatFormat = d3.format(",.2r");
 var _networkPresetColorSchemes = {'trans_categ' : {
                                     'Other-Male': '#999999',
@@ -687,7 +771,25 @@ var _networkPresetColorSchemes = {'trans_categ' : {
                                     'Heterosexual Contact-Female': '#e31a1c'
                                  }};
 
+var _networkPresetAttributeSchemes = {'Risk+ VL (suppressed or not) / Gender' :
+    function (node) {
 
+        var color = _networkMissing,
+            shape = _networkMissing,
+            color_label = "missing/missing",
+            shape = "missing";
+        // vl_recent_value
+        // birth sex
+
+        if (_networkNodeAttributeID in node) {
+            if ('birth_sex' in node[_networkNodeAttributeID]) {
+                //switch (node[_networkNodeAttributeID]
+
+
+            }
+        }
+    }
+};
 
 var hivtrace_cluster_network_graph = function (json, network_container, network_status_string, network_warning_tag, button_bar_ui, attributes, filter_edges_toggle, clusters_table, nodes_table, parent_container, options) {
 
@@ -1541,7 +1643,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
 
   function _cluster_table_draw_buttons (element, payload) {
     var this_cell = d3.select (element);
-    var labels = [[payload[0] ? "collapsed" : "expanded",0]];
+    var labels = [[payload[0] ? "expand" : "collapse",0]];
     if (payload[1]) {
         labels.push (["problematic",1]);
     }
@@ -1565,7 +1667,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
 
  function _node_table_draw_buttons (element, payload) {
     var this_cell = d3.select (element);
-    var labels = [[payload[0] ? "shown" : "hidden",0]];
+    var labels = [[payload[0] ? "hide" : "show",0]];
 
     var buttons = this_cell.selectAll ("button").data (labels);
     buttons.enter().append ("button");
@@ -1599,7 +1701,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
         add_a_sortable_table (self.node_table,
                                 // headers
                               [[{value:"ID", sort : "value", help: "Node ID"},
-                                 {value: "Properties", sort: "value"},
+                                 {value: "Visibility", sort: "value"},
                                  {value: "Degree", sort: "value", help: "Node degree"},
                                  {value: "Cluster", sort: "value", help: "Which cluster does the node belong to"},
                                  {value: "LCC", sort: "value", help: "Local clustering coefficient"}
@@ -1625,7 +1727,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
         add_a_sortable_table (self.cluster_table,
                                 // headers
                               [[{value:"ID (click to zoom)", sort : "value", help: "Unique cluster ID"},
-                                 {value: "Properties", sort: "value"},
+                                 {value: "Visibility", sort: "value"},
                                  {value: "Size", sort: "value", help: "Number of nodes in the cluster"},
                                  {value: "Degrees<br>Mean [Median, IQR]", html : true},
                                  {value: "CC", sort: "value", help: "Global clustering coefficient"},
@@ -1678,8 +1780,10 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
 
   function draw_a_node (container, node) {
     container = d3.select(container);
-    container.attr("d", d3.svg.symbol().size( node_size )
-        .type( function(d) { return (d.hxb2_linked && !d.is_lanl) ? "cross" : (d.is_lanl ? "triangle-down" : self.node_shaper['shaper'] (d)) }))
+
+    var symbol_type =  (node.hxb2_linked && !node.is_lanl) ? "cross" : (node.is_lanl ? "triangle-down" : self.node_shaper['shaper'] (node));
+
+    container.attr("d", datamonkey.hivtrace.symbol (symbol_type).size( node_size (node) ))
         .attr('class', 'node')
         .attr("transform", function(d) { return "translate(" + d.x + "," + d.y+ ")"; })
         .style('fill', function(d) { return node_color(d); })
@@ -1687,7 +1791,8 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
         .on ('mouseover', node_pop_on)
         .on ('mouseout', node_pop_off)
         .call(network_layout.drag().on('dragstart', node_pop_off));
-  }
+
+   }
 
 
   function draw_a_cluster (container, the_cluster) {
@@ -1807,7 +1912,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
 
                  legend_svg.append ("g").classed ('hiv-trace-legend',true).attr ("transform", "translate(0," + offset + ")").append ("path")
                                                                           .attr ("transform", "translate(5,-5)")
-                                                                          .attr("d", d3.svg.symbol().size( 128 ).type( shape_mapper (value)))
+                                                                          .attr("d",  datamonkey.hivtrace.symbol(shape_mapper (value)).size( 128 ))
                                                                           .classed('legend', true)
                                                                           .style ('fill', 'none');
 

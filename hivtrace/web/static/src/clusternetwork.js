@@ -939,7 +939,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
 
   function _cluster_table_draw_buttons (element, payload) {
     var this_cell = d3.select (element);
-    var labels = [[payload[0] ? "collapsed" : "expanded",0]];
+    var labels = [[payload[0] ? "expand" : "collapse",0]];
     if (payload[1]) {
         labels.push (["problematic",1]);
     }
@@ -963,7 +963,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
 
  function _node_table_draw_buttons (element, payload) {
     var this_cell = d3.select (element);
-    var labels = [[payload[0] ? "shown" : "hidden",0]];
+    var labels = [[payload[0] ? "hide" : "show",0]];
 
     var buttons = this_cell.selectAll ("button").data (labels);
     buttons.enter().append ("button");
@@ -997,7 +997,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
         add_a_sortable_table (self.node_table,
                                 // headers
                               [[{value:"ID", sort : "value", help: "Node ID"},
-                                 {value: "Properties", sort: "value"},
+                                 {value: "Visibility", sort: "value"},
                                  {value: "Degree", sort: "value", help: "Node degree"},
                                  {value: "Cluster", sort: "value", help: "Which cluster does the node belong to"},
                                  {value: "LCC", sort: "value", help: "Local clustering coefficient"}
@@ -1023,7 +1023,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
         add_a_sortable_table (self.cluster_table,
                                 // headers
                               [[{value:"ID (click to zoom)", sort : "value", help: "Unique cluster ID"},
-                                 {value: "Properties", sort: "value"},
+                                 {value: "Visibility", sort: "value"},
                                  {value: "Size", sort: "value", help: "Number of nodes in the cluster"},
                                  {value: "Degrees<br>Mean [Median, IQR]", html : true},
                                  {value: "CC", sort: "value", help: "Global clustering coefficient"},

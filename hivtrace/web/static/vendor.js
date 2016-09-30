@@ -32573,6 +32573,7 @@ jQuery.each( [
 	};
 } );
 
+    var dimension = this.dimension()
 
 
 
@@ -33285,6 +33286,8 @@ d3.layout.phylotree = function(container) {
                 
             }
         }
+      }, this))
+  }
 
         if (phylotree.radial()) { // map the nodes to polar coordinates
 
@@ -33593,7 +33596,13 @@ d3.layout.phylotree = function(container) {
                 .attr("role", "menu");
         }
 
+  Tooltip.prototype.isInStateTrue = function () {
+    for (var key in this.inState) {
+      if (this.inState[key]) return true
+    }
 
+    return false
+  }
 
         menu_object.selectAll("li").remove();
         if (node) {
@@ -33679,7 +33688,9 @@ d3.layout.phylotree = function(container) {
 
 
 
-            }
+      var placement = typeof this.options.placement == 'function' ?
+        this.options.placement.call(this, $tip[0], this.$element[0]) :
+        this.options.placement
 
             if (d3_phylotree_has_hidden_nodes(node)) {
                 menu_object.append("li").append("a")
@@ -34080,6 +34091,10 @@ d3.layout.phylotree = function(container) {
             }
         }
 
+    // IE8 doesn't accept hiding via the `:empty` pseudo selector, we have to do
+    // this manually by checking the contents.
+    if (!$tip.find('.popover-title').html()) $tip.find('.popover-title').hide()
+  }
 
         populate_mp_matrix(nodes[0]);
         nodes.forEach(function(d) {
@@ -34156,6 +34171,8 @@ d3.layout.phylotree = function(container) {
                 graft_at["attribute"] = lengths ? lengths[0] : null;
                 graft_at["original_child_order"] = 1;
 
++function ($) {
+  'use strict';
 
                 phylotree.update_layout(nodes[0], true);
             }
