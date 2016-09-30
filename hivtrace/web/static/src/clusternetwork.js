@@ -948,7 +948,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
         add_a_sortable_table (self.node_table,
                                 // headers
                               [[{value:"ID", sort : "value", help: "Node ID"},
-                                 {value: "Properties", sort: "value"},
+                                 {value: "Visibility", sort: "value"},
                                  {value: "Degree", sort: "value", help: "Node degree"},
                                  {value: "Cluster", sort: "value", help: "Which cluster does the node belong to"},
                                  {value: "LCC", sort: "value", help: "Local clustering coefficient"}
@@ -974,7 +974,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
         add_a_sortable_table (self.cluster_table,
                                 // headers
                               [[{value:"ID (click to zoom)", sort : "value", help: "Unique cluster ID"},
-                                 {value: "Properties", sort: "value"},
+                                 {value: "Visibility", sort: "value"},
                                  {value: "Size", sort: "value", help: "Number of nodes in the cluster"},
                                  {value: "Degrees<br>Mean [Median, IQR]", html : true},
                                  {value: "CC", sort: "value", help: "Global clustering coefficient"},
