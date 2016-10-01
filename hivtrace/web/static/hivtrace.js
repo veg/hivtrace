@@ -1752,8 +1752,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
                               [[{value:"ID", sort : "value", help: "Node ID"},
                                  {value: "Visibility", sort: "value"},
                                  {value: "Degree", sort: "value", help: "Node degree"},
-                                 {value: "Cluster", sort: "value", help: "Which cluster does the node belong to"},
-                                 {value: "LCC", sort: "value", help: "Local clustering coefficient"}
+                                 {value: "Cluster", sort: "value", help: "Which cluster does the node belong to"}
                                ]],
                                  // rows
                                self.nodes.map (function (n, i) {
@@ -1763,9 +1762,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
                                                 "volatile" : true
                                         },
                                         {"value" : n.degree, help: "Node degree"},
-                                        {"value" : n.cluster, help: "Which cluster does the node belong to"},
-                                        {"value": function () {return datamonkey.hivtrace.format_value(n.lcc,_defaultFloatFormat);},
-                                         "volatile" : true, "html": true, help: "Local clustering coefficient"}];
+                                        {"value" : n.cluster, help: "Which cluster does the node belong to"}];
 
                                 }));
     }
@@ -1778,9 +1775,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
                               [[{value:"ID (click to zoom)", sort : "value", help: "Unique cluster ID"},
                                  {value: "Visibility", sort: "value"},
                                  {value: "Size", sort: "value", help: "Number of nodes in the cluster"},
-                                 {value: "Degrees<br>Mean [Median, IQR]", html : true},
-                                 {value: "CC", sort: "value", help: "Global clustering coefficient"},
-                                 {value: "MPL", sort: "value", help: "Mean Path Length"}
+                                 {value: "Degrees<br>Mean [Median, IQR]", html : true}
                                ]],
                                 self.clusters.map (function (d, i) {
                                  // rows
@@ -1791,17 +1786,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
                                                 volatile : true
                                         },
                                         {value :d.children.length},
-                                        {value : d.degrees, format: function (d) {return _defaultFloatFormat(d['mean']) + " [" + _defaultFloatFormat(d['median']) + ", " + _defaultFloatFormat(d['Q1']) + " - " + _defaultFloatFormat(d['Q3']) +"]"}},
-                                        {
-                                            value: function () {return hivtrace_format_value(d.cc,_defaultFloatFormat);},
-                                            volatile : true,
-                                            help: "Global clustering coefficient"
-                                        },
-                                        {
-                                            value: function () {return hivtrace_format_value(d.mpl,_defaultFloatFormat);},
-                                            volatile : true,
-                                            help: "Mean path length"
-                                        }
+                                        {value : d.degrees, format: function (d) {return _defaultFloatFormat(d['mean']) + " [" + _defaultFloatFormat(d['median']) + ", " + _defaultFloatFormat(d['Q1']) + " - " + _defaultFloatFormat(d['Q3']) +"]"}}
                                         ];
 
                                 })
