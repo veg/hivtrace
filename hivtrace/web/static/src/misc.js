@@ -33,6 +33,88 @@ function hivtrace_cluster_adjacency_list(obj) {
 
 }
 
+hivtrace_generate_svg_polygon_lookup = {
+};
+
+_.each (_.range (3,20), function (d) {
+    var angle_step    = Math.PI*2/d;
+    hivtrace_generate_svg_polygon_lookup [d] = _.map (_.range (1,d), function (i) {
+        return [Math.cos (angle_step * i), Math.sin (angle_step * i)];
+    });
+});
+
+function hivtrace_generate_svg_symbol (type) {
+    switch (type) {
+        case 'circle':
+        case 'cross':
+        case 'diamond':
+        case 'square':
+        case 'triangle-down':
+        case 'triangle-up':
+            return  d3.svg.symbol().type (type);
+
+        case 'pentagon':
+            return hivtrace_generate_svg_polygon().sides (5);
+        case 'hexagon':
+            return hivtrace_generate_svg_polygon().sides (6);
+        case 'septagon':
+            return hivtrace_generate_svg_polygon().sides (7);
+        case 'octagon':
+            return hivtrace_generate_svg_polygon().sides (8);
+    }
+    return node;
+}
+
+function hivtrace_generate_svg_polygon () {
+    var self = this;
+
+
+    function polygon () {
+        var path  = " M" + self.radius + " 0";
+
+        if (self.sides in hivtrace_generate_svg_polygon_lookup) {
+             path += hivtrace_generate_svg_polygon_lookup[self.sides].map (function (value) {
+                return " L" + self.radius * value[0] + " " + self.radius * value[1];
+             }).join (" ");
+        } else {
+            var angle_step    = Math.PI*2/self.sides,
+                current_angle = 0;
+            for (i = 0; i < self.sides - 1; i++) {
+                current_angle += angle_step;
+                path += " L" + self.radius * Math.cos (current_angle) + " " + self.radius * Math.sin (current_angle);
+            }
+        }
+
+        path += " Z";
+        return path;
+    }
+
+    polygon.sides = function (attr) {
+        if (_.isNumber (attr) && attr > 2) {
+            self.sides = attr;
+            return polygon;
+        }
+        return self.sides;
+    }
+
+    polygon.type = function () {
+       return polygon;
+    }
+
+    polygon.size = function(attr) {
+        if (_.isNumber (attr)) {
+            self.size = attr;
+            self.radius = Math.sqrt (attr/Math.PI);
+            return polygon;
+        }
+        return self.size;
+    }
+
+    polygon.size (64);
+    self.sides  = 6;
+
+    return polygon;
+}
 
 function hivtrace_new_cluster_adjacency_list(obj) {
 
@@ -43,7 +125,7 @@ function hivtrace_new_cluster_adjacency_list(obj) {
     nodes.forEach (function (n) {
         n.neighbors = d3.set();
     });
-    
+
     edges.forEach (function (e) {
         nodes[e.source].neighbors.add(e.target);
         nodes[e.target].neighbors.add(e.source);
@@ -466,7 +548,7 @@ hivtrace_compute_local_clustering_coefficients = _.once (function (obj) {
   var nodes = obj.Nodes;
 
   nodes.forEach (function (n) {
-  
+
     var a_node = n;
     var neighborhood_size = a_node.neighbors.size();
 
@@ -475,7 +557,7 @@ hivtrace_compute_local_clustering_coefficients = _.once (function (obj) {
     } else {
 
         if (neighborhood_size > 500) {
-            a_node.lcc = datamonkey.hivtrace.too_large;     
+            a_node.lcc = datamonkey.hivtrace.too_large;
         } else {
             // count triangles
             neighborhood = a_node.neighbors.values();
@@ -545,3 +627,5 @@ datamonkey.hivtrace.undefined = new Object();
 datamonkey.hivtrace.too_large = new Object();
 datamonkey.hivtrace.processing = new Object();
 datamonkey.hivtrace.format_value = hivtrace_format_value;
+datamonkey.hivtrace.polygon    = hivtrace_generate_svg_polygon;
+datamonkey.hivtrace.symbol    = hivtrace_generate_svg_symbol;

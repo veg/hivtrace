@@ -635,11 +635,13 @@ function datamonkey_describe_vector (vector, as_list) {
 }
 
 function datamonkey_export_handler (data, filename, mimeType) {
-    var link = $('body').add('a');
-    link.attr('download', filename || "download.tsv")
-        .attr('href', 'data:' + (mimeType || 'text/plain')  +  ';charset=utf-8,' + encodeURIComponent(data))
-        .click()
-        .detach(); 
+
+    var pom = document.createElement('a');
+    pom.setAttribute('href', 'data:' + (mimeType || 'text/plain')  +  ';charset=utf-8,' + encodeURIComponent(data));
+    pom.setAttribute('download', filename || "download.tsv");
+    pom.click();
+    pom.remove();
+
 }
     
 

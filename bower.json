@@ -1,6 +1,6 @@
 {
   "name": "hivtrace",
-  "version": "0.1.6",
+  "version": "0.2.1",
   "main": [
     "hivtrace/web/hivtrace.js",
     "hivtrace/web/css/hivtrace.css"
@@ -22,7 +22,7 @@
              "!hivtrace/web/static/fonts/*"
             ],
   "dependencies": {
-    "hyphy-vision": "git@github.com:veg/hyphy-vision.git#0.1.3-alpha.2",
+    "hyphy-vision": "git@github.com:veg/hyphy-vision.git#0.2.3",
     "underscore": "1.x",
     "font-awesome": "4.x",
     "dcjs": "1.x",
