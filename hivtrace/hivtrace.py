@@ -280,9 +280,9 @@ def annotate_lanl(trace_json_fn, lanl_file):
 
 def get_singleton_nodes(nodes_in_results, original_fn):
 
-    seqs = map(lambda x: x[0], fasta_iter(original_fn))
-    node_names = map(lambda x: x['id'], nodes_in_results)
-    singletons = filter(lambda x: x not in node_names, seqs)
+    seqs = list(map(lambda x: x[0], fasta_iter(original_fn)))
+    node_names = list(map(lambda x: x['id'], nodes_in_results))
+    singletons = list(filter(lambda x: x not in node_names, seqs))
     node_objects = [{'edi': None, 'attributes': [], 'cluster': None, 'id': node_name, 'baseline': None} for node_name in singletons]
 
     return node_objects

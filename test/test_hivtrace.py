@@ -354,13 +354,16 @@ class TestHIVTrace(unittest.TestCase):
 
   def test_keep_singletons(self):
 
+    this_dirname = os.path.join(os.path.dirname(os.path.realpath(__file__)))
+
     compare_to_lanl = False
-    input_fn   = self.fn
+    #input_fn   = self.fn
+    input_fn = path.join(this_dirname, 'rsrc/TEST2.FASTA')
     reference  = self.reference
     id = os.path.basename(input_fn)
     status_file = input_fn+'_status'
 
-    results = hivtrace.hivtrace(id, self.aligned_fn, reference, self.ambiguities,
+    results = hivtrace.hivtrace(id, input_fn, reference, self.ambiguities,
                       self.distance_threshold, self.min_overlap,
                       False, '0.015', handle_contaminants='remove', filter_edges='remove', skip_alignment=True)
 
