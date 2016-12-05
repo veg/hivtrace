@@ -278,6 +278,15 @@ def annotate_lanl(trace_json_fn, lanl_file):
     shutil.move(trace_json_cp_fn, trace_json_fn)
     return
 
+def get_singleton_nodes(nodes_in_results, original_fn):
+
+    seqs = map(lambda x: x[0], fasta_iter(original_fn))
+    node_names = map(lambda x: x['id'], nodes_in_results)
+    singletons = filter(lambda x: x not in node_names, seqs)
+    node_objects = [{'edi': None, 'attributes': [], 'cluster': None, 'id': node_name, 'baseline': None} for node_name in singletons]
+
+    return node_objects
+
 # TODO : implement
 #def strip_reference_sequences(input, reference_fn, TN93DIST, threshold, ambiguities, min_overlap):
 
@@ -508,6 +517,10 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     # Read and print output_cluster_json
     results_json["trace_results"] = json.loads(open(OUTPUT_CLUSTER_JSON, 'r').read())
 
+    # Get singletons
+    singletons = get_singleton_nodes(results_json['trace_results']['Nodes'], input)
+    results_json['trace_results']['Singletons'] = singletons
+
     if not compare_to_lanl:
         return results_json
 
@@ -601,6 +614,7 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
         results_json['lanl_trace_results'] = lanl_trace_results
       else:
         logging.debug('no lanl results!')
+
 
     DEVNULL.close()
     return results_json

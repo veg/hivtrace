@@ -352,6 +352,19 @@ class TestHIVTrace(unittest.TestCase):
 
     self.assertTrue('trace_results' in results.keys())
 
+  def test_keep_singletons(self):
+
+    compare_to_lanl = False
+    input_fn   = self.fn
+    reference  = self.reference
+    id = os.path.basename(input_fn)
+    status_file = input_fn+'_status'
+
+    results = hivtrace.hivtrace(id, self.aligned_fn, reference, self.ambiguities,
+                      self.distance_threshold, self.min_overlap,
+                      False, '0.015', handle_contaminants='remove', filter_edges='remove', skip_alignment=True)
+
+    self.assertTrue('Singletons' in results['trace_results'].keys())
 
 if __name__ == '__main__':
   unittest.main()
