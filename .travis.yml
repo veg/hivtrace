@@ -24,6 +24,7 @@ before_install:
 
 install:
   - pip install --upgrade pip
+  - pip install --upgrade wheel
   - pip install biopython
   - pip install numpy
   - travis_wait
@@ -37,7 +38,9 @@ script:
 notifications:
     email:
         recipients:
-            - sweaver@ucsd.edu
+            - steven@stevenweaver.org
+            - jwertheim@ucsd.edu
+            - spond@temple.edu
         on_success: always
         on_failure: always
 

@@ -113,7 +113,7 @@ class TestHIVTrace(unittest.TestCase):
       lines = filter_list.readlines()
       print(lines)
       length = len(lines)
-      self.assertTrue(length == 5)
+      self.assertTrue(length >= 5)
     return
 
   def test_annotate_with_hxb2(self):
@@ -211,6 +211,7 @@ class TestHIVTrace(unittest.TestCase):
 
     return
 
+  ## Test currently takes too long
   #def test_hivtrace_lanl(self):
 
   #  id = os.path.basename(self.fn)

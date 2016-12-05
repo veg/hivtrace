@@ -1,0 +1,45 @@
+{
+  "name": "hyphy-vision",
+  "version": "0.1.3-alpha.2",
+  "main": [
+    "hyphy-vision.js",
+    "hyphy-vision.css"
+  ],
+  "keywords": [
+    "phylogenetics",
+    "phylogeny",
+    "hyphy",
+    "datamonkey",
+    "relaxed selection",
+    "relax",
+    "absrel",
+    "bsrel",
+    "busted",
+    "random effects branch-site modeling"
+  ],
+  "ignore": [
+    "test-data",
+    "README.md",
+    "RELAX.html"
+  ],
+  "dependencies": {
+    "underscore": "1.x",
+    "font-awesome": "4.x",
+    "bootstrap": "3.x",
+    "d3": "3.x",
+    "crossfilter": "1.x",
+    "dcjs": "1.x",
+    "jquery": "1.x",
+    "phylotree": "git@github.com:veg/phylotree.js.git"
+  },
+  "homepage": "https://github.com/veg/hyphy-vision",
+  "_release": "0.1.3-alpha.2",
+  "_resolution": {
+    "type": "version",
+    "tag": "0.1.3-alpha.2",
+    "commit": "dae699a150550769efb069206e72c8b0454facd1"
+  },
+  "_source": "git@github.com:veg/hyphy-vision.git",
+  "_target": "0.1.3-alpha.2",
+  "_originalSource": "git@github.com:veg/hyphy-vision.git"
+}

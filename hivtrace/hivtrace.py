@@ -381,6 +381,7 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     BAM_FN                        = os.path.join(tmp_path, basename+'_output.bam')
     OUTPUT_FASTA_FN               = input+'_output.fasta'
     OUTPUT_TN93_FN                = os.path.join(tmp_path, basename+'_user.tn93output.csv')
+    DEST_TN93_FN                  = input+'_user.tn93output.csv'
     JSON_TN93_FN                  = os.path.join(tmp_path, basename+'_user.tn93output.json')
     OUTPUT_COMBINED_SEQUENCE_FILE = os.path.join(tmp_path, basename+"_combined_user_lanl.fasta")
     OUTPUT_CLUSTER_JSON           = os.path.join(tmp_path, basename+'_user.trace.json')
@@ -471,6 +472,7 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
 
         logging.debug(' '.join(tn93_process))
         subprocess.check_call(tn93_process,stdout=tn93_fh,stderr=tn93_fh)
+        shutil.copyfile(OUTPUT_TN93_FN, DEST_TN93_FN)
         update_status(id, phases.COMPUTE_TN93_DISTANCE, status.COMPLETED)
 
     # send contents of tn93 to status page
@@ -486,7 +488,7 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     output_cluster_json_fh = open(OUTPUT_CLUSTER_JSON, 'w')
 
     hivnetworkcsv_process = [HIVNETWORKCSV, '-i', OUTPUT_TN93_FN, '-t',
-                                   threshold, '-f', SEQUENCE_ID_FORMAT, '-j']
+                                   threshold, '-f', SEQUENCE_ID_FORMAT, '-j', '-o']
 
     if filter_edges and filter_edges != 'no':
         hivnetworkcsv_process.extend (['-n',filter_edges, '-s', OUTPUT_FASTA_FN])
@@ -549,8 +551,8 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
       # send contents of tn93 to status page
 
       # PHASE 6b
-      #Perform concatenation
-      #This is where reference annotation becomes an issue
+      # Perform concatenation
+      # This is where reference annotation becomes an issue
       concatenate_data(USER_LANL_TN93OUTPUT, LANL_TN93OUTPUT_CSV,
                        OUTPUT_USERTOLANL_TN93_FN, OUTPUT_TN93_FN)
 
@@ -616,7 +618,6 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
 
     DEVNULL.close()
     return results_json
-
 
 def main():
 
