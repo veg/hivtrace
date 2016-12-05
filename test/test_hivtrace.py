@@ -1,28 +1,4 @@
 #!/usr/bin/env python
-#  Datamonkey - An API for comparative analysis of sequence alignments using state-of-the-art statistical models.
-#
-#  Copyright (C) 2015
-#  Sergei L Kosakovsky Pond (spond@ucsd.edu)
-#  Steven Weaver (sweaver@ucsd.edu)
-#
-#  Permission is hereby granted, free of charge, to any person obtaining a
-#  copy of this software and associated documentation files (the
-#  "Software"), to deal in the Software without restriction, including
-#  without limitation the rights to use, copy, modify, merge, publish,
-#  distribute, sublicense, and/or sell copies of the Software, and to
-#  permit persons to whom the Software is furnished to do so, subject to
-#  the following conditions:
-#
-#  The above copyright notice and this permission notice shall be included
-#  in all copies or substantial portions of the Software.
-#
-#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-#  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-#  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-#  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-#  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-#  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-#  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import sys
 import os
@@ -235,23 +211,23 @@ class TestHIVTrace(unittest.TestCase):
 
     return
 
-  def test_hivtrace_lanl(self):
+  #def test_hivtrace_lanl(self):
 
-    id = os.path.basename(self.fn)
-    compare_to_lanl = True
+  #  id = os.path.basename(self.fn)
+  #  compare_to_lanl = True
 
-    #run the whole thing and make sure it completed via the status file
-    results = hivtrace.hivtrace(id, self.fn, self.reference, self.ambiguities,
-                      self.distance_threshold, self.min_overlap,
-                      compare_to_lanl, '0.025', False, "report")
+  #  #run the whole thing and make sure it completed via the status file
+  #  results = hivtrace.hivtrace(id, self.fn, self.reference, self.ambiguities,
+  #                    self.distance_threshold, self.min_overlap,
+  #                    compare_to_lanl, '0.025', False, "report")
 
-    # Read output json
-    self.assertTrue(results["lanl_trace_results"]["Network Summary"]["Clusters"] == 2)
-    self.assertTrue(results["lanl_trace_results"]["Network Summary"]["Edges"] == 31)
-    self.assertTrue(results["lanl_trace_results"]["Network Summary"]["Nodes"] == 13)
-    self.assertTrue(set(results["lanl_trace_results"].keys()) == set(['Cluster sizes', 'Edge Stages', 'Edges', 'HIV Stages', 'Network Summary', 'Settings', 'Degrees', 'Directed Edges', 'Multiple sequences', 'Nodes']))
+  #  # Read output json
+  #  self.assertTrue(results["lanl_trace_results"]["Network Summary"]["Clusters"] == 2)
+  #  self.assertTrue(results["lanl_trace_results"]["Network Summary"]["Edges"] == 31)
+  #  self.assertTrue(results["lanl_trace_results"]["Network Summary"]["Nodes"] == 13)
+  #  self.assertTrue(set(results["lanl_trace_results"].keys()) == set(['Cluster sizes', 'Edge Stages', 'Edges', 'HIV Stages', 'Network Summary', 'Settings', 'Degrees', 'Directed Edges', 'Multiple sequences', 'Nodes']))
 
-    return
+  #  return
 
   def test_strip_reference_sequences(self):
 
@@ -375,6 +351,19 @@ class TestHIVTrace(unittest.TestCase):
 
     self.assertTrue('trace_results' in results.keys())
 
+  def test_keep_singletons(self):
+
+    compare_to_lanl = False
+    input_fn   = self.fn
+    reference  = self.reference
+    id = os.path.basename(input_fn)
+    status_file = input_fn+'_status'
+
+    results = hivtrace.hivtrace(id, self.aligned_fn, reference, self.ambiguities,
+                      self.distance_threshold, self.min_overlap,
+                      False, '0.015', handle_contaminants='remove', filter_edges='remove', skip_alignment=True)
+
+    self.assertTrue('Singletons' in results['trace_results'].keys())
 
 if __name__ == '__main__':
   unittest.main()

@@ -1,30 +1,5 @@
 #!/usr/bin/env python3
 
-#  Datamonkey - An API for comparative analysis of sequence alignments using state-of-the-art statistical models.
-#
-#  Copyright (C) 2015
-#  Sergei L Kosakovsky Pond (spond@ucsd.edu)
-#  Steven Weaver (sweaver@ucsd.edu)
-#
-#  Permission is hereby granted, free of charge, to any person obtaining a
-#  copy of this software and associated documentation files (the
-#  "Software"), to deal in the Software without restriction, including
-#  without limitation the rights to use, copy, modify, merge, publish,
-#  distribute, sublicense, and/or sell copies of the Software, and to
-#  permit persons to whom the Software is furnished to do so, subject to
-#  the following conditions:
-#
-#  The above copyright notice and this permission notice shall be included
-#  in all copies or substantial portions of the Software.
-#
-#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-#  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-#  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-#  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-#  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-#  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-#  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
 import argparse
 import subprocess
 from subprocess import PIPE
@@ -303,6 +278,15 @@ def annotate_lanl(trace_json_fn, lanl_file):
     shutil.move(trace_json_cp_fn, trace_json_fn)
     return
 
+def get_singleton_nodes(nodes_in_results, original_fn):
+
+    seqs = map(lambda x: x[0], fasta_iter(original_fn))
+    node_names = map(lambda x: x['id'], nodes_in_results)
+    singletons = filter(lambda x: x not in node_names, seqs)
+    node_objects = [{'edi': None, 'attributes': [], 'cluster': None, 'id': node_name, 'baseline': None} for node_name in singletons]
+
+    return node_objects
+
 # TODO : implement
 #def strip_reference_sequences(input, reference_fn, TN93DIST, threshold, ambiguities, min_overlap):
 
@@ -531,6 +515,10 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     # Read and print output_cluster_json
     results_json["trace_results"] = json.loads(open(OUTPUT_CLUSTER_JSON, 'r').read())
 
+    # Get singletons
+    singletons = get_singleton_nodes(results_json['trace_results']['Nodes'], input)
+    results_json['trace_results']['Singletons'] = singletons
+
     if not compare_to_lanl:
         return results_json
 
@@ -624,6 +612,7 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
         results_json['lanl_trace_results'] = lanl_trace_results
       else:
         logging.debug('no lanl results!')
+
 
     DEVNULL.close()
     return results_json
