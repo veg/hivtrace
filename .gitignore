@@ -59,3 +59,10 @@ target/
 
 hivtrace/rsrc/LANL.FASTA
 hivtrace/rsrc/LANL.TN93OUTPUT.csv
+test/rsrc/HIV1_ALL_2013_env_DNA.fasta_output.fasta
+test/rsrc/TEST.ALIGNED.FASTA_output.fasta
+test/rsrc/TEST.ALIGNED.FASTA_user.tn93output.csv
+test/rsrc/TEST.FASTA_output.fasta
+test/rsrc/TEST2.FASTA_output.fasta
+test/rsrc/TEST2.FASTA_user.tn93output.csv
+
