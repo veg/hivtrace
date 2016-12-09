@@ -116,55 +116,6 @@ class TestHIVTrace(unittest.TestCase):
       self.assertTrue(length >= 5)
     return
 
-  def test_annotate_with_hxb2(self):
-
-    hxb2_links_fn=self.fn+'_USER.HXB2LINKED.CSV'
-    hivcluster_json_fn=self.fn+'_USER.TRACE.JSON'
-    hivtrace.annotate_with_hxb2(hxb2_links_fn, hivcluster_json_fn)
-
-    with open(hivcluster_json_fn) as json_fh:
-      hivcluster_json = json.loads(json_fh.read())
-    nodes = hivcluster_json.get('Nodes')
-    test_subjects = ['testid_3', 'testid_5']
-
-    # Ensure test subjects have hxb2 attribute
-    test_subject_nodes = filter(lambda x: x['id'] in test_subjects, nodes)
-    [self.assertEqual(node.get('hxb2_linked'), 'true') for node in test_subject_nodes]
-
-    # Ensure the others have not been discriminated
-    non_test_subject_nodes = filter(lambda x: x['id'] not in test_subjects, nodes)
-    [self.assertEqual(node.get('hxb2_linked'), 'false') for node in non_test_subject_nodes]
-
-    return
-
-  #def test_lanl_annotate_with_hxb2(self):
-
-  #  self.fn = './res/INPUT.FASTA'
-  #  HXB2_LINKED_LANL='../../app/hivtrace/res/LANL.HXB2.csv'
-  #  LANL_OUTPUT_CLUSTER_JSON=self.fn+'_LANL_USER.TRACE.JSON'
-  #  DISTANCE_THRESHOLD = '.025'
-
-  #  hivtrace.lanl_annotate_with_hxb2(HXB2_LINKED_LANL,
-  #                                   LANL_OUTPUT_CLUSTER_JSON,
-  #                                   DISTANCE_THRESHOLD)
-
-  #  with open(LANL_OUTPUT_CLUSTER_JSON) as json_fh:
-  #    lanl_hivcluster_json = json.loads(json_fh.read())
-
-  #  nodes = lanl_hivcluster_json.get('Nodes')
-
-  #  test_subjects = ['B|JP|D21166|-', 'B_CH_AF077691_9999' ]
-
-  #  # Ensure test subjects have hxb2 attribute
-  #  test_subject_nodes = filter(lambda x: x['id'] in test_subjects, nodes)
-  #  [self.assertEqual(node.get('hxb2_linked'), 'true') for node in test_subject_nodes]
-
-  #  # Ensure the others have not been discriminated
-  #  non_test_subject_nodes = filter(lambda x: x['id'] not in test_subjects, nodes)
-  #  [self.assertEqual(node.get('hxb2_linked'), 'false') for node in non_test_subject_nodes]
-
-  #  return
-
   def test_attribute_parse(self):
 
     output_tn93_fn=self.fn+'_USER.TN93OUTPUT.CSV'
@@ -365,9 +316,28 @@ class TestHIVTrace(unittest.TestCase):
 
     results = hivtrace.hivtrace(id, input_fn, reference, self.ambiguities,
                       self.distance_threshold, self.min_overlap,
-                      False, '0.015', handle_contaminants='remove', filter_edges='remove', skip_alignment=True)
+                      False, '0.015', handle_contaminants='report', filter_edges='remove', skip_alignment=True)
 
     self.assertTrue('Singletons' in results['trace_results'].keys())
+
+  def test_contaminant_annotations(self):
+
+    this_dirname = os.path.join(os.path.dirname(os.path.realpath(__file__)))
+
+    compare_to_lanl = False
+    #input_fn   = self.fn
+    input_fn = path.join(this_dirname, 'rsrc/CONTAM.fasta')
+    reference  = self.reference
+    id = os.path.basename(input_fn)
+    status_file = input_fn+'_status'
+
+    results = hivtrace.hivtrace(id, input_fn, reference, self.ambiguities,
+                      self.distance_threshold, self.min_overlap,
+                      False, '0.015', handle_contaminants='report', filter_edges='remove', skip_alignment=True)
+
+    nodes = list(filter(lambda x: "HXB2" in x["id"], results["trace_results"]["Nodes"]))
+    self.assertTrue(all('problematic' in n["attributes"] for n in nodes))
+
 
 if __name__ == '__main__':
   unittest.main()
