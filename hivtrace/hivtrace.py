@@ -134,69 +134,6 @@ def create_filter_list(tn93_fn, filter_list_fn):
             [f.write(row + '\n') for row in rows]
 
 
-def annotate_with_hxb2(hxb2_links_fn, hivcluster_json_fn):
-
-    """
-    Annotates the output of hivclustercsv with results from HXB2 tn93 analysis
-    """
-
-    # Read hxb2 links
-    with open(hxb2_links_fn) as hxb2_fh:
-        hxb2_reader = csv.reader(hxb2_fh, delimiter=',')
-        hxb2_reader.__next__()
-        hxb2_links  = [row[0].strip() for row in hxb2_reader]
-
-    # Load hivcluster json
-    with open(hivcluster_json_fn) as hivcluster_fh:
-        hivcluster_json = json.loads(hivcluster_fh.read())
-
-    nodes = hivcluster_json.get('Nodes')
-
-    #for each link in hxb2, get id in json object and add attribute
-    ids = filter(lambda x: x['id'] in hxb2_links, nodes)
-    not_linked_ids = filter(lambda x: x['id'] not in hxb2_links, nodes)
-
-    [id.update({'hxb2_linked': 'true'}) for id in ids]
-    [id.update({'hxb2_linked': 'false'}) for id in not_linked_ids]
-
-    #Save nodes to file
-    with open(hivcluster_json_fn, 'w') as json_fh:
-        json.dump(hivcluster_json, json_fh)
-
-    return
-
-
-#def lanl_annotate_with_hxb2(lanl_hxb2_fn, lanl_hivcluster_json_fn, threshold):
-
-#    """
-#    Annotates the output of hivclustercsv with results from HXB2 tn93 analysis
-#    """
-
-#    # Read hxb2 from generate lanl file
-#    with open(lanl_hxb2_fn) as lanl_hxb2_fh:
-#        lanl_hxb2_reader = csv.reader(lanl_hxb2_fh, delimiter=',')
-#        lanl_hxb2_reader.__next__()
-
-#        #filter hxb2 links based on threshold
-#        lanl_hxb2_links = list(filter(lambda x: float(x[2]) < float(threshold), lanl_hxb2_reader))
-#        lanl_hxb2_links = [l[1] for l in lanl_hxb2_links]
-
-#    # Load hivcluster json
-#    with open(lanl_hivcluster_json_fn) as lanl_hivcluster_json_fh:
-#        lanl_json = json.loads(lanl_hivcluster_json_fh.read())
-
-#    nodes = lanl_json.get('Nodes')
-
-#    #for each link in hxb2, get id in json object and add attribute
-#    ids = list(filter(lambda x: x['id'] in lanl_hxb2_links, nodes))
-#    [id.update({'hxb2_linked': 'true'}) for id in ids]
-
-#    #Save nodes to file
-#    with open(lanl_hivcluster_json_fn, 'w') as json_fh:
-#        json.dump(lanl_json, json_fh)
-
-#    return
-
 def id_to_attributes(csv_fn, attribute_map, delimiter):
     '''
     Parse attributes from id and return them in a dictionary format
@@ -287,35 +224,6 @@ def get_singleton_nodes(nodes_in_results, original_fn):
 
     return node_objects
 
-# TODO : implement
-#def strip_reference_sequences(input, reference_fn, TN93DIST, threshold, ambiguities, min_overlap):
-
-#    tn93_ref_fn = input+'_user.reference.json'
-#    with open(tn93_ref_fn , 'w') as tn93_ref_fh:
-#        output_fn=input+'_user.reference.csv'
-#        OUTPUT_FORMAT='csv'
-
-#        tn93_process =  [TN93DIST, '-q', '-o', output_fn, '-t',
-#                                   threshold, '-a', ambiguities, '-g', '1', '-l',
-#                                   min_overlap, '-f', OUTPUT_FORMAT, '-s', reference_fn,
-#                                   input]
-
-#        logging.debug(' '.join(tn93_process))
-#        subprocess.check_call(tn93_process, stdout=tn93_ref_fh)
-
-#    # Make new FASTA file without reference sequences
-#    with open(output_fn) as output_fh:
-#        to_strip = set([line.split(',')[0].strip() for line in output_fh.readlines()[1:]])
-
-#    logging.debug("Stripping " + to_strip)
-#    input_file = list(SeqIO.parse(open(input, 'r'), 'fasta'))
-
-#    #Filter sequences to strip
-#    stripped = list(filter(lambda x: x.id not in to_strip, input_file))
-
-#    output_handle = open(input, "w")
-#    SeqIO.write(stripped, output_handle, "fasta")
-
 def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
              compare_to_lanl, fraction, strip_drams_flag = False, filter_edges = "no",
              handle_contaminants = "remove", skip_alignment = False):
@@ -324,8 +232,7 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     PHASE 1)  Pad sequence alignment to HXB2 length with bealign
     PHASE 2)  Convert resulting bam file back to FASTA format
     PHASE 2b) Rename any duplicates in FASTA file
-    PHASE 3)  Remove HXB2 and NL43 sequences
-    PHASE 3b) Strip Drams if requested
+    PHASE 3)  Strip DRAMs if requested
     PHASE 4)  TN93 analysis on the supplied FASTA file alone
     PHASE 5)  Run hivclustercsv to return clustering information in JSON format
     PHASE 5b) Attribute annotations to results from (4)
@@ -449,10 +356,7 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     attribute_map = ('SOURCE', 'SUBTYPE', 'COUNTRY', 'ACCESSION_NUMBER', 'YEAR_OF_SAMPLING')
 
     # PHASE 3
-    # Strip HXB2 and NL43 linked sequences
-    #if REFERENCE_FASTA:
-    #    strip_reference_sequences(OUTPUT_FASTA_FN, REFERENCE_FASTA, TN93DIST, threshold, ambiguities, min_overlap)
-
+    # Strip DRAMS
     if strip_drams_flag:
         #update_status(id, "Masking DRAM sites")
         OUTPUT_FASTA_FN_TMP = OUTPUT_FASTA_FN + ".spool"
@@ -527,7 +431,6 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     if compare_to_lanl:
 
       # PHASE 6
-
       update_status(id, phases.PUBLIC_COMPUTE_TN93_DISTANCE, status.RUNNING)
       lanl_tn93_process = ''
 
@@ -561,6 +464,7 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
 
       # Create a list from TN93 csv for hivnetworkcsv filter
       create_filter_list(OUTPUT_TN93_FN, USER_FILTER_LIST)
+
 
       # PHASE 7
       update_status(id,phases.PUBLIC_INFERRING_CONNECTIONS, status.RUNNING)
