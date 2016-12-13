@@ -34,6 +34,7 @@ def setup_package():
             'hivtrace': [
                 'rsrc/LANL.FASTA.gz',
                 'rsrc/LANL.TN93OUTPUT.csv.gz'
+                'web'
                 ]
             },
         dependency_links = [
