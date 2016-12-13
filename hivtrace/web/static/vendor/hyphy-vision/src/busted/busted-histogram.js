@@ -6,14 +6,14 @@ function busted_render_histogram(c, json) {
   if (d3.keys (json ["evidence ratios"]).length == 0) { // no evidence ratios computed
     d3.selectAll (c).style ("display", "none");
     d3.selectAll (".dc-data-table").style ("display", "none");
-    d3.selectAll ('[id^="export"]').style ("display", "none");
+    //d3.selectAll ('[id^="export"]').style ("display", "none");
     d3.selectAll ("#er-thresholds").style ("display", "none");
     d3.selectAll ("#apply-thresholds").style ("display", "none");
     return;
   } else {
     d3.selectAll (c).style ("display", "block");
     d3.selectAll (".dc-data-table").style ("display", "table");
-    d3.selectAll ('[id^="export"]').style ("display", "block");
+    //d3.selectAll ('[id^="export"]').style ("display", "block");
     d3.selectAll ("#er-thresholds").style ("display", "block");
     d3.selectAll ("#apply-thresholds").style ("display", "block");
   }
@@ -79,13 +79,13 @@ function busted_render_histogram(c, json) {
   var composite = dc.compositeChart(c);
 
   composite
-      .width(1170)
+      .width($(window).width())
       .height(300)
       .dimension(site_index)
       .x(d3.scale.linear().domain([1, erc.length]))
       .yAxisLabel("2 * Ln Evidence Ratio")
       .xAxisLabel("Site Location")
-      .legend(dc.legend().x(1020).y(20).itemHeight(13).gap(5))
+      .legend(dc.legend().x($(window).width() - 150).y(20).itemHeight(13).gap(5))
       .renderHorizontalGridLines(true)
       .compose([
         dc.lineChart(composite)

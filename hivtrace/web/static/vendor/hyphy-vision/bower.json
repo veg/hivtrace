@@ -1,6 +1,6 @@
 {
   "name": "hyphy-vision",
-  "version": "0.1.3-alpha.2",
+  "version": "0.2.3",
   "main": ["hyphy-vision.js", "hyphy-vision.css"],
   "keywords": ["phylogenetics", "phylogeny", "hyphy", "datamonkey", "relaxed selection", "relax", "absrel", "bsrel", "busted", "random effects branch-site modeling"],
   "ignore" : ["test-data", "README.md", "RELAX.html"],
@@ -12,6 +12,9 @@
      "crossfilter"   : "1.x",
      "dcjs"          : "1.x",
      "jquery"        : "1.x",
-     "phylotree"     : "git@github.com:veg/phylotree.js.git"
+     "react"         : "0.14.x",
+     "phylotree"     : "git@github.com:veg/phylotree.js.git#v0.1.4",
+     "redux"         : "https://unpkg.com/redux/dist/redux.js",
+     "immutable"     : "3.8.1"
   }
 }

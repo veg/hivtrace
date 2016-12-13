@@ -1,0 +1,7 @@
+include hivtrace/rsrc/LANL.FASTA.gz
+include hivtrace/rsrc/LANL.TN93OUTPUT.csv.gz
+include hivtrace/web/templates/results.html
+recursive-include hivtrace/web/static *.js *.css
+recursive-include hivtrace/web/static/workers *.js
+recursive-include hivtrace/web/static/css *.css
+recursive-include hivtrace/web/static/fonts *.eot *.svg *.ttf *.woff *.woff2

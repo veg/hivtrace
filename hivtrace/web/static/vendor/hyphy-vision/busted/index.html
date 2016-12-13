@@ -16,9 +16,11 @@
   <script src="../vendor/jquery/dist/jquery.js"></script>
   <script src="../vendor/bootstrap/dist/js/bootstrap.min.js"></script>
   <script src="../vendor/d3/d3.min.js"></script>
+  <script src="../vendor/underscore/underscore.js"></script>
   <script src="../vendor/phylotree/phylotree.js"></script>
   <script src="../vendor/crossfilter/crossfilter.min.js"></script>
   <script src="../vendor/dcjs/dc.min.js"></script>
+  <script src="../vendor/react/react-with-addons.js"></script>
   <script src="../hyphy-vision.js"></script>
 
   <title> BUSTED analysis result</title>
@@ -32,7 +34,8 @@
 -->
 
 <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
-  <div class="container">
+
+  <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
@@ -49,7 +52,7 @@
     <div class="collapse navbar-collapse" id = "navbar-collapse-1">
       <ul class="nav nav-pills navbar-right" role="tablist" id = 'navigation_buttons'>
         <li class="active"><a href="#summary_tab" role="tab" data-toggle="tab"><i class="fa fa-list" style = 'margin-right: 5px'></i>Summary</a></li>
-        <li><a href="#tree_tab" role="tab" data-toggle="tab"><i class="fa fa-tree" style = 'margin-right: 5px'></i> Tree</a></li>
+        <li><a href="#tree_tab" role="tab" data-toggle="tab"><i class="fa fa-tree" style='margin-right: 5px'></i> Tree</a></li>
       </ul>
       <ul class="nav navbar-nav">
         <li class="dropdown">
@@ -63,154 +66,7 @@
   </div><!-- /.container-fluid -->
 </nav>
 
-<div class = 'container'>
-    <div class="tab-content">
-        <div class="tab-pane active" id="summary_tab">
-          <div class = "row" style = 'margin-top: 5px'>
-            <div class = "col-md-12">
-              <ul class="list-group">
-              <li class="list-group-item list-group-item-info">
-                <h3 class="list-group-item-heading"><i class="fa fa-list" style = 'margin-right: 10px'>
-                </i><span id = 'summary-method-name'>BUSTED</span> summary</h3>
-                  There is <strong><span id='summary-test-result' ></span></strong> of episodic diversifying selection, with LRT p-value of <span id='summary-test-pvalue'>.
-                  <p>
-                    <small>Please cite <a href = '#' id = 'summary-pmid'>PMID XXX</a> if you use this result in a publication, presentation, or other scientific work.</small>
-                  </p>
-               </li>
-              </ul>
-            </div>
-          </div>
-
-           <div class = "row">
-              <div class = "col-lg-12">
-                <ul class="list-group">
-                  <li class="list-group-item">
-                    <h4 class="list-group-item-heading"><i class="fa fa-cubes" style = 'margin-right: 10px'></i>Model fits</h4>
-                    <table class = "table table-hover table-condensed list-group-item-text" style = "margin-top:0.5em;">
-                      <thead>
-                          <tr>
-                            <th>Model</th>
-                            <th><em> log </em>L</th>
-                            <th><abbr title = "Number of estimated model parameters"># par.</abbr></th>
-                            <th><abbr title = "Small Sample AIC">AIC<sub>c</sub></abbr></th>
-                            <th>Time to fit</th>
-                            <th>Total tree length</th>
-                            <th>&omega;<sub>1</sub></th>
-                            <th>&omega;<sub>2</sub></th>
-                            <th>&omega;<sub>3</sub></th>
-                         </tr>
-                      </thead>
-                      <tbody id = 'summary-model-table'></tbody>
-                     </table>                            
-                   </li>
-                 </ul>
-              </div>
-
-          </div>
-
-          <button id="export-chart-svg" type="button" class="btn btn-default btn-sm pull-right btn-export">
-            <span class="glyphicon glyphicon-floppy-save"></span> Export Chart to SVG
-          </button>
-
-          <button id="export-chart-png" type="button" class="btn btn-default btn-sm pull-right btn-export">
-            <span class="glyphicon glyphicon-floppy-save"></span> Export Chart to PNG
-          </button>
-
-          <div class='row hyphy-busted-site-table'>
-            <div id="chart-id" class="col-lg-12">
-              <strong>Model Evidence Ratios Per Site</strong>
-              <div class="clearfix"></div>
-            </div>
-          </div>
-
-
-          <div class='row site-table'>
-
-            <div class="col-lg-12">
-
-              <form id="er-thresholds">
-                <div class="form-group">
-                  <label for="er-constrained-threshold">Constrained Evidence Ratio Threshold:</label>
-                  <input type="text" class="form-control" id="er-constrained-threshold" value="-Infinity">
-                </div>
-                <div class="form-group">
-                  <label for="er-optimized-null-threshold">Optimized Null Evidence Ratio Threshold:</label>
-                  <input type="text" class="form-control" id="er-optimized-null-threshold" value="-Infinity">
-                </div>
-              </form>
-              <button id="export-csv" type="button" class="btn btn-default btn-sm pull-right hyphy-busted-btn-export">
-                <span class="glyphicon glyphicon-floppy-save"></span> Export Table to CSV
-              </button>
-              <button id="apply-thresholds" type="button" class="btn btn-default btn-sm pull-right hyphy-busted-btn-export">
-                Apply Thresholds
-              </button>
-
-
-              <table id="sites" class="table sites dc-data-table">
-                <thead>
-                  <tr class="header">
-                    <th>Site Index</th>
-                    <th>Unconstrained Likelihood</th>
-                    <th>Constrained Likelihood</th>
-                    <th>Optimized Null Likelihood</th>
-                    <th>Constrained Evidence Ratio</th>
-                    <th>Optimized Null Evidence Ratio</th>
-                  </tr>
-                </thead>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <div class="tab-pane" id="tree_tab">
-
-
-            <div class="row">
-              <div class = "col-lg-8">
-                 <div class="btn-group">
-                  <button type="button" class="btn btn-default btn-sm" id = "expand_spacing">
-                    <i class="fa fa-expand" ></i>
-                  </button>
-                   <button type="button" class="btn btn-default btn-sm" id = "compress_spacing">
-                    <i class="fa fa-compress"></i>
-                  </button>
-                  <button id="export-phylo-svg" type="button" class="btn btn-default btn-sm">
-                    <span class="glyphicon glyphicon-floppy-save"></span> SVG
-                  </button>
-                  <button id="export-phylo-png" type="button" class="btn btn-default btn-sm">
-                    <span class="glyphicon glyphicon-floppy-save"></span> PNG
-                  </button>
-                </div>
-              </div>
-            </div>        
-
-            <div class="row">
-
-              <div class="col-lg-8">
-                <div id="tree_container" class="tree-widget"></div>
-              </div>
-
-              <div class="col-lg-4">
-                <div class="panel panel-default">
-                  <div id="primary_omega_tag" class="panel-heading">
-                    Foreground
-                    <div class="dist-export btn-group">
-                      <button id="export-dist-svg" type="button" class="btn btn-default btn-sm">
-                        <span class="glyphicon glyphicon-floppy-save"></span> SVG
-                      </button>
-                      <button id="export-dist-png" type="button" class="btn btn-default btn-sm">
-                        <span class="glyphicon glyphicon-floppy-save"></span> PNG
-                      </button>
-                    </div>
-                  </div>
-                  <div id="primary-omega-dist" class="panel-body">
-                    <svg id="primary-omega-plot"></svg>
-                  </div>
-                </div>
-              </div>
-          </div>
-        </div>
-    </div>
+<div id='busted-content' class='container-fluid'>
 </div>
 
 <img id="hyphy-chart-image" />
@@ -222,111 +78,40 @@
 
 
 <script>
-function add_dc_legend(svg) {
-
-  var dc_legend = svg.append("g")
-      .attr("class", "dc-legend")
-      .attr("transform", "translate(15,40)")
-
-      var fg_item = dc_legend.append("g")
-        .attr("class","dc-legend-item")
-        .attr("transform", "translate(0,0)")
-
-        fg_item.append("rect")
-          .attr("width", "13")
-          .attr("height", "13")
-          .attr("fill", "red")
-
-        fg_item.append("text")
-          .attr("x", "15")
-          .attr("y", "11")
-          .text("Foreground")
-
-      var bg_item = dc_legend.append("g")
-        .attr("class","dc-legend-item")
-        .attr("transform", "translate(0,18)")
-
-        bg_item.append("rect")
-          .attr("width", "13")
-          .attr("height", "13")
-          .attr("fill", "gray")
-
-        bg_item.append("text")
-          .attr("x", "15")
-          .attr("y", "11")
-          .text("Background")
-
-}
-
-
-function init(json) {
-
-  global_test_set = json["test set"].split(',');
-
-  datamonkey.busted.render_summary(json);
-  datamonkey.busted.render_histogram("#chart-id", json);
-  // delete existing tree
-  d3.select('#tree_container').select("svg").remove();
-  datamonkey.busted.render_tree('#tree_container', "body", json);
-  var svg = d3.select('#tree_container').select("svg");
-  add_dc_legend(svg);
-
-  var fg_rate = json["fits"]["Unconstrained model"]["rate distributions"]["FG"]
-  var omegas  = fg_rate.map(function (r) {return r[0];})
-  var weights = fg_rate.map(function (r) {return r[1];})
-
-  var dsettings = { 
-    'log'       : true,
-    'legend'    : false,
-    'domain'    : [0.00001, 20],
-    'dimensions': {'width' : 325, 'height' : 300}
-  }
-
-  datamonkey.busted.draw_distribution("FG", omegas, weights, dsettings);
-
-
-  $("#export-dist-svg").on('click', function(e) { 
-    datamonkey.save_image("svg", "#primary-omega-dist"); 
-  }); 
-
-  $("#export-dist-png").on('click', function(e) { 
-    datamonkey.save_image("png", "#primary-omega-dist"); 
-  }); 
-
-}
-
 
 $( document ).ready( function () {
 
   // *** HANDLERS ***
-  $("#json_file").on ("change", function (e) {
-    var files = e.target.files; // FileList object
-
-    if (files.length == 1) {
-      var f = files[0];
-      var reader = new FileReader();
-
-      reader.onload = (function(theFile) {
-        return function(e) {
-            var container_id = '#tree_container';
-            analysis_data = JSON.parse (e.target.result);
-            init(analysis_data);
-        };
-      })(f);
-      reader.readAsText(f);
-    }
-  });
+//  $("#json_file").on ("change", function (e) {
+//    var files = e.target.files; // FileList object
+//
+//    if (files.length == 1) {
+//      var f = files[0];
+//      var reader = new FileReader();
+//
+//      reader.onload = (function(theFile) {
+//        return function(e) {
+//            var container_id = '#tree_container';
+//            analysis_data = JSON.parse (e.target.result);
+//            init(analysis_data);
+//        };
+//      })(f);
+//      reader.readAsText(f);
+//    }
+//  });
 
 
   $(".content").addClass('hidden');
-  d3.json ("test-data/lysin.nex.BUSTED.json", function (json) {
+  render_busted("test-data/lysin.nex.BUSTED.json", "busted-content")
 
-    init(json);
-
-    $(".loader").addClass('hidden');
-    $(".content").removeClass('hidden');
-
-  }); 
+//  d3.json ("test-data/lysin.nex.BUSTED.json", function (json) {
+//
+//    init(json);
+//
+//    $(".loader").addClass('hidden');
+//    $(".content").removeClass('hidden');
+//
+//  }); 
 
 });
 

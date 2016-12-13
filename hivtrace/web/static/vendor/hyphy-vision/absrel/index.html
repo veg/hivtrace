@@ -5,18 +5,18 @@
     <meta charset="utf-8">
 
     <link rel="stylesheet" href="../vendor/bootstrap/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../vendor/font-awesome/css/font-awesome.css">
     <link rel="stylesheet" href="../vendor/bootstrap/dist/css/bootstrap-theme.min.css">
-
-    <title>aBS-REL analysis result</title>
+    <link rel="stylesheet" href="../vendor/font-awesome/css/font-awesome.css">
     <link rel="stylesheet" href="../vendor/phylotree/phylotree.css">
-    <link rel="stylesheet" href="../hyphy-vision.css">
+    <link href="../hyphy-vision.css" rel="stylesheet">
 
-    <!-- Latest compiled and minified JavaScript -->
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
     <script src="../vendor/jquery/dist/jquery.js"></script>
     <script src="../vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="../vendor/underscore/underscore-min.js"></script>
     <script src="../vendor/d3/d3.min.js"></script>
     <script src="../vendor/phylotree/phylotree.js"></script>
+    <script src="../vendor/react/react-with-addons.js"></script>
     <script src="../hyphy-vision.js"></script>
 
 </head>
@@ -24,6 +24,7 @@
 <body style='padding-top: 70px;'>
 
     <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+
         <div class="container-fluid">
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
@@ -41,8 +42,8 @@
             <div class="collapse navbar-collapse" id="navbar-collapse-1">
 
                 <ul class="nav nav-pills navbar-right" role="tablist" id='navigation_buttons'>
-                    <li class="active"><a href="#summary_tab" role="tab" data-toggle="tab"><i class="fa fa-list" style = 'margin-right: 5px'></i>Summary</a></li>
-                    <li><a href="#tree_tab" role="tab" data-toggle="tab"><i class="fa fa-tree" style = 'margin-right: 5px'></i> Tree</a></li>
+                    <li class="active"><a href="#summary-tab" role="tab" data-toggle="tab"><i class="fa fa-list" style = 'margin-right: 5px'></i>Summary</a></li>
+                    <li><a class="tree-tab-btn" href="#tree-tab" role="tab" data-toggle="tab"><i class="fa fa-tree" style = 'margin-right: 5px'></i> Tree</a></li>
                     <li><a href="#table_tab" role="tab" data-toggle="tab"><i class="fa fa-table" style = 'margin-right: 5px'></i> Table</a></li>
                 </ul>
 
@@ -71,248 +72,20 @@
             <strong>Error!</strong> <span id='datamonkey-absrel-error-text'></span>
         </div>
 
-        <div class="tab-content">
-            <div class="tab-pane active" id="summary_tab">
+        <div id="absrel-content" class="tab-content"></div>
 
-                <div class="row" style='margin-top: 5px'>
-                    <div class="col-md-12">
-                        <ul class="list-group">
-                            <li class="list-group-item list-group-item-info">
-                                <h3 class="list-group-item-heading"><i class="fa fa-list" style = 'margin-right: 10px'>
-                        </i><span id = 'summary-method-name'>Adaptive branch site REL</span> summary</h3>
-                                <p class="list-group-item-text lead" style="margin-top:0.5em; ">
-                                    Evidence<sup>&dagger;</sup> of episodic diversifying selection was found on <strong id='summary-selected-branches'></strong> out of <span id='summary-tested-branches'></span> tested branches (<span id='summary-total-branches'></span> total branches).
-                                </p>
-                                <p><small><sup>&dagger;</sup><abbr title = 'Likelihood Ratio Test'>LRT</abbr> p &le; 0.05, corrected for multiple testing.</small>
-                                    <br><small>Please cite <a href = '#' id = 'summary-pmid'>PMID XXX</a> if you use this result in a publication, presentation, or other scientific work.</small>
-                                </p>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <ul class="list-group">
-                            <li class="list-group-item">
-                                <h4 class="list-group-item-heading"><i class="fa fa-tree" style = 'margin-right: 10px'>
-                            </i>Tree</h4>
-                                <table class="table table-hover table-condensed list-group-item-text" style="margin-top:0.5em;">
-                                    <thead>
-                                        <tr>
-                                            <th>&omega; rate
-                                                <br>classes</th>
-                                            <th># of
-                                                <br>branches</th>
-                                            <th>% of
-                                                <br>branches</th>
-                                            <th>% of tree
-                                                <br>length</th>
-                                            <th># under
-                                                <br>selection</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id='summary-tree-table'>
-
-                                    </tbody>
-                                    <caption style='caption-side: bottom; text-align: left; margin-top:1em;'>
-                                        <p class="list-group-item-text text-muted">
-                                            Total tree length under the branch-site model is <strong id='summary-tree-length'></strong> expected substitutions per nucleotide site, and <strong id='summary-tree-length-mg94'></strong> under the MG94 model.
-                                        </p>
-                                    </caption>
-                                </table>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="col-md-6">
-                        <ul class="list-group">
-                            <li class="list-group-item">
-                                <h4 class="list-group-item-heading"><i class="fa fa-cubes" style = 'margin-right: 10px'>
-                        </i>Model fits</h4>
-                                <table class="table table-hover table-condensed list-group-item-text" style="margin-top:0.5em;">
-                                    <thead>
-                                        <tr>
-                                            <th>Model</th>
-                                            <th><em> log </em>L</th>
-                                            <th><abbr title="Number of estimated model parameters"># par.</abbr></th>
-                                            <th><abbr title="Small Sample AIC">AIC<sub>c</sub></abbr></th>
-                                            <th>Time to fit</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id='summary-model-table'>
-
-                                    </tbody>
-
-                                    <caption style='caption-side: bottom; text-align: left; margin-top:1em;'>
-                                        <p class="list-group-item-text text-muted">
-                                            The complete analysis took <strong id='summary-total-runtime'></strong> to finish, of which <strong id='summary-complexity-runtime'></strong> was taken by the complexity analysis, and <strong id='summary-testing-runtime'></strong> by selection testing.
-                                        </p>
-                                    </caption>
-                                </table>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class='tab-pane' id="tree_tab">
-                <div class='row'>
-                    <div class="col-md-4">
-                        <div class="input-group input-group-sm">
-
-                            <div class="input-group-btn">
-                                <button type="button" class="btn btn-default btn-sm" data-direction="vertical" data-amount="1" title="Expand vertical spacing">
-                                    <i class="fa fa-arrows-v"></i>
-                                </button>
-                                <button type="button" class="btn btn-default btn-sm" data-direction="vertical" data-amount="-1" title="Compress vertical spacing">
-                                    <i class="fa  fa-compress fa-rotate-135"></i>
-                                </button>
-                                <button type="button" class="btn btn-default btn-sm" data-direction="horizontal" data-amount="1" title="Expand horizonal spacing">
-                                    <i class="fa fa-arrows-h"></i>
-                                </button>
-                                <button type="button" class="btn btn-default btn-sm" data-direction="horizontal" data-amount="-1" title="Compress horizonal spacing">
-                                    <i class="fa  fa-compress fa-rotate-45"></i>
-                                </button>
-                                <button type="button" class="btn btn-default btn-sm" id="sort_ascending" title="Sort deepest clades to the bototm">
-                                    <i class="fa fa-sort-amount-asc"></i>
-                                </button>
-                                <button type="button" class="btn btn-default btn-sm" id="sort_descending" title="Sort deepsest clades to the top">
-                                    <i class="fa fa-sort-amount-desc"></i>
-                                </button>
-                                <button type="button" class="btn btn-default btn-sm" id="sort_original" title="Restore original order">
-                                    <i class="fa fa-sort"></i>
-                                </button>
-                            </div>
-
-                            <div class="input-group-btn" data-toggle="buttons">
-                                <label class="btn btn-default active btn-sm">
-                                    <input type="radio" name="options" class="phylotree-layout-mode" data-mode="linear" autocomplete="off" checked="" title="Layout left-to-right"> Linear
-                                </label>
-                                <label class="btn btn-default  btn-sm">
-                                    <input type="radio" name="options" class="phylotree-layout-mode" data-mode="radial" autocomplete="off" title="Layout radially"> Radial
-                                </label>
-                            </div>
-
-                            <div class="input-group-btn" data-toggle="buttons">
-                                <label class="btn btn-default active btn-sm">
-                                    <input type="radio" class="phylotree-align-toggler" data-align="left" name="options-align" autocomplete="off" checked="" title="Align tips labels to branches">
-                                    <i class="fa fa-align-left"></i>
-
-
-                                </label>
-                                <label class="btn btn-default btn-sm">
-                                    <input type="radio" class="phylotree-align-toggler" data-align="right" name="options-align" autocomplete="off" title="Align tips labels to the edge of the plot">
-                                    <i class="fa fa-align-right"></i>
-
-                                </label>
-                            </div>
-
-
-                            <span class="input-group-addon">
-                                        Use colors
-                                        <input type="checkbox" id="datamonkey-absrel-color-or-grey" data-color-mode = 'color' checked/>
-                                      </span>
-                            <span class="input-group-addon">
-                                        Show fill legend
-                                        <input type="checkbox" id="datamonkey-absrel-show-color-bar" checked data-show-color-bar = 'on'/>
-                                      </span>
-                            <span class="input-group-addon">
-                                        Show MG94 tree
-                                        <input type="checkbox" id="datamonkey-absrel-show-model" data-model = 'Full model'/>
-                                      </span>
-
-                        </div>
-                    </div>
-                </div>
-
-                <div class='row'>
-                    <div class='col-md-1'>
-                        <div class='row'>
-                            <div id='color_legend'>
-                            </div>
-                        </div>
-                    </div>
-                    <div class='col-md-11'>
-                        <div class='row'>
-                            <div id='tree_container' class='tree-widget'>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            <div class='tab-pane' id="table_tab">
-                <div class="row">
-                    <div class="col-md-7">
-                        <table class="table table-hover table-condensed" style="margin-top:0.5em;">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th><abbr title="Branch Length">B</abbr></th>
-                                    <th><abbr title="Likelihood ratio test statistic">LRT</abbr></th>
-                                    <th>Test p-value</th>
-                                    <th>Uncorrected p-value</th>
-                                    <th>&omega; distribution over sites</th>
-                                </tr>
-                            </thead>
-                            <tbody id='table-branch-table'></tbody>
-                        </table>
-                    </div>
-                    <div class="col-md-5">
-                        <div class="panel panel-default">
-                            <div class="panel-heading" id='primary_omega_tag'></div>
-                            <div class="panel-body">
-                                <svg id="primary_omega_plot" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
+
+    <img id="hyphy-chart-image" />
+    <canvas id="hyphy-chart-canvas"></canvas>
 
 
     <script>
-        
-
-        $(document).ready(function() {
-
-           var bsrel_app = datamonkey.absrel();
-
-           $("#datamonkey-absrel-json-file").on("change", function(e) {
-               var files = e.target.files; // FileList object
-
-               if (files.length == 1) {
-                   var f = files[0];
-                   var reader = new FileReader();
-
-                   reader.onload = (function(theFile) {
-                       return function(e) {
-                           bsrel_app(JSON.parse(e.target.result));
-                       };
-                   })(f);
-                   reader.readAsText(f);
-               }
-
-               $("#datamonkey-absrel-toggle-here").dropdown("toggle");
-               e.preventDefault();
-           });
-
-           $("#export-phylo-svg").on('click', function(e) {
-               datamonkey.save_image("svg", "#tree_container");
-           });
-
-           $("#export-phylo-png").on('click', function(e) {
-               datamonkey.save_image("png", "#tree_container");
-           });
-
-           d3.json("test-data/test.json", function(json) {
-               bsrel_app(json);
-           });
-       });
-               
+      $(document).ready(function() {
+        render_absrel("test-data/test.json", "absrel-content");
+      });
     </script>
+
 </body>
 
 </html>
