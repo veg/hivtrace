@@ -1,6 +1,7 @@
 circle.node, rect.node, path.node {
   cursor: pointer;
   stroke: #000;
+  fill: #CCC;
   stroke-width: .5px;
 }
 
@@ -39,15 +40,41 @@ g.node-group {
     font-size: 14 pt;
 }
 
+@keyframes selected_object_animation {
+    from {
+        stroke-width: 1px;
+        stroke: #CCC;
+    }
 
-path.cluster {
+    50% {
+        stroke-width: 3px;
+        stroke: #000;
+    }
+
+    to {
+        stroke-width: 1px;
+        stroke: #CCC;
+    }
+}
+
+path.selected_object, circle.selected_object {
+
+    animation-duration: 2s;
+    animation-name : selected_object_animation;
+    animation-iteration-count: infinite;
+
+
+}
+
+path.cluster, circle.cluster {
     cursor: pointer;
+    fill: #CCC;
     stroke: #000;
-    stroke-width: 1px;
+    stroke-width: 2.5px;
 }
 
 .histogram {
-  fill: #ccc;
+   fill: #ccc;
    stroke: #000;
    stroke-width: 1px;
 }
