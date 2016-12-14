@@ -57,7 +57,7 @@ function datamonkey_convert_svg_to_png(image_string) {
 
     var pom = document.createElement('a');
     pom.setAttribute('download', 'phylotree.png');
-    pom.href = canvas.toDataURL("image/png");     
+    pom.href = canvas.toDataURL("image/png");
     $("body").append(pom);
     pom.click();
     pom.remove();
@@ -79,7 +79,7 @@ function datamonkey_save_newick_tree(type) {
   svg.setAttribute("version", "1.1");
 
   var defsEl = document.createElement("defs");
-  svg.insertBefore(defsEl, svg.firstChild); 
+  svg.insertBefore(defsEl, svg.firstChild);
 
   var styleEl = document.createElement("style")
   defsEl.appendChild(styleEl);
@@ -154,35 +154,35 @@ function datamonkey_describe_vector (vector, as_list) {
              'Q1' : d3.quantile (vector, 0.25),
              'Q3' : d3.quantile (vector, 0.75),
              'mean': d3.mean (vector)};
-             
+
     if (as_list) {
-        
+
         d = "<pre>Range  :" + d['min'] + "-" + d['max'] + "\n"
             +    "IQR    :" + d['Q1'] + "-" + d['Q3'] + "\n"
             +    "Mean   :" + d['mean'] + "\n"
             +    "Median :" + d['median'] + "\n"
             + "</pre>";
-        
-        /*d =   
-        "<dl class = 'dl-horizontal'>" + 
-        "<dt>Range</dt><dd>" + d['min'] + "-" + d['max'] + "</dd>" + 
+
+        /*d =
+        "<dl class = 'dl-horizontal'>" +
+        "<dt>Range</dt><dd>" + d['min'] + "-" + d['max'] + "</dd>" +
         "<dt>IQR</dt><dd>" + d['Q1'] + "-" + d['Q3'] +  "</dd>" +
         "<dt>Mean</dt><dd>" + d['mean'] +  "</dd>" +
         "<dt>Median</dt><dd>" + d['median'] + "</dd></dl>";*/
     }
-    
+
     return d;
-    
+
 }
 
 function datamonkey_export_handler (data, filename, mimeType) {
-    var link = $('body').add('a');
-    link.attr('download', filename || "download.tsv")
-        .attr('href', 'data:' + (mimeType || 'text/plain')  +  ';charset=utf-8,' + encodeURIComponent(data))
-        .click()
-        .detach(); 
+    var pom = document.createElement('a');
+    pom.setAttribute('href', 'data:' + (mimeType || 'text/plain')  +  ';charset=utf-8,' + encodeURIComponent(data));
+    pom.setAttribute('download', filename || "download.tsv");
+    pom.click();
+    pom.remove();
 }
-    
+
 
 function datamonkey_table_to_text (table_id, sep) {
     sep = sep || "\t";
@@ -190,7 +190,7 @@ function datamonkey_table_to_text (table_id, sep) {
     d3.select (table_id + " thead").selectAll ("th").each (function () {header_row.push (d3.select(this).text())});
     var data_rows = [];
     d3.select (table_id + " tbody").selectAll ("tr").each (function (d,i) {data_rows.push ([]); d3.select (this).selectAll ("td").each (function () {data_rows[i].push (d3.select(this).text())})});
-    
+
     return header_row.join (sep) + "\n" +
            data_rows.map (function (d) {return d.join (sep);}).join ("\n");
 }
@@ -203,6 +203,51 @@ function datamonkey_capitalize(s) {
   }
 }
 
+function datamonkey_count_partitions (json) {
+    try {
+      return _.keys (json).length;
+    } catch (e) {
+        // ignore errors
+    }
+    return 0;
+}
+
+function datamonkey_sum (object, accessor) {
+    accessor = accessor || function (value) {return value;};
+    return _.reduce (object, function (sum, value, index) {return sum + accessor (value, index);},0);
+}
+
+function datamonkey_count_sites_from_partitions (json) {
+    try {
+        return datamonkey_sum (json ["partitions"], function (value) {return value["coverage"][0].length;});
+    } catch (e) {
+        // ignore errors
+    }
+    return 0;
+}
+
+function datamonkey_filter_list (list, predicate, context) {
+    var result = {};
+    predicate = _.bind (predicate, context);
+    _.each (list, _.bind(function (value, key) {
+        if (predicate (value, key)) {
+            result[key] = value;
+        }
+      }, context)
+    );
+    return result;
+}
+
+function datamonkey_map_list (list, transform, context) {
+    var result = {};
+    transform = _.bind (transform, context);
+   _.each (list, _.bind(function (value, key) {
+        result[key] = transform(value,key);
+      }, context)
+    );
+    return result;
+}
+
 datamonkey.helpers = new Object;
 datamonkey.helpers.save_newick_to_file = datamonkey_save_newick_to_file;
 datamonkey.helpers.convert_svg_to_png = datamonkey_convert_svg_to_png;
@@ -212,3 +257,8 @@ datamonkey.helpers.describe_vector = datamonkey_describe_vector;
 datamonkey.helpers.table_to_text = datamonkey_table_to_text;
 datamonkey.helpers.export_handler = datamonkey_export_handler;
 datamonkey.helpers.capitalize = datamonkey_capitalize;
+datamonkey.helpers.countPartitionsJSON = datamonkey_count_partitions;
+datamonkey.helpers.countSitesFromPartitionsJSON = datamonkey_count_sites_from_partitions;
+datamonkey.helpers.sum = datamonkey_sum;
+datamonkey.helpers.filter=datamonkey_filter_list;
+datamonkey.helpers.map=datamonkey_map_list;

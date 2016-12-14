@@ -1,4 +1,4 @@
-/* HYPHY VISITON */
+/* HYPHY VISION */
 
 /* font-awesome rotation fix */
 .fa-rotate-45 {
@@ -107,4 +107,10 @@
   color: #d62728;
 }
 
+.hyphy-navy {
+  color: #001f3f;
+}
 
+#table-branch-table tr{
+  cursor : pointer;
+}

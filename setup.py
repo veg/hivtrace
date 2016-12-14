@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 
-from setuptools import setup
 import os
 import gzip
+from setuptools import setup
 
 def gunzip_file(zip_file, out_file):
+    ''' unzips files'''
     with gzip.open(zip_file, 'rb') as f_in:
         with open(out_file, 'wb') as f_out:
             f_out.writelines(f_in)
 
-
 def setup_package():
+    ''' setup declaration '''
 
     # Unzip LANL files
-    resource_dir =  os.path.join(os.path.dirname(os.path.realpath(__file__)), 'hivtrace/rsrc')
+    resource_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'hivtrace/rsrc')
     lanl_zip = os.path.join(resource_dir, 'LANL.FASTA.gz')
     lanl_tn93output_zip = os.path.join(resource_dir, 'LANL.TN93OUTPUT.csv.gz')
     lanl_outfile = os.path.join(resource_dir, 'LANL.FASTA')
@@ -25,7 +26,7 @@ def setup_package():
     setup(
         name='hivtrace',
         version='0.2.2',
-        description='HIV TRACE',
+        description='HIV-TRACE',
         author='Steven Weaver',
         author_email='steven@stevenweaver.org',
         url='http://www.hivtrace.org',
@@ -33,12 +34,15 @@ def setup_package():
         package_data={
             'hivtrace': [
                 'rsrc/LANL.FASTA.gz',
-                'rsrc/LANL.TN93OUTPUT.csv.gz'
+                'rsrc/LANL.TN93OUTPUT.csv.gz',
+                'web/templates/results.html',
+                'web/static/*.js',
+                'web/static/*.css',
+                'web/static/workers/*.js',
+                'web/static/css/*.css',
+                'web/static/fonts/*'
                 ]
             },
-        dependency_links = [
-                            'git+git://github.com/veg/hppy.git@0.9.6#egg=hppy-0.9.6'
-                            ],
         install_requires=[
             'biopython >= 1.58',
             'biopython-extensions >= 0.18.3',
@@ -46,7 +50,7 @@ def setup_package():
             'tornado >= 4.3',
             'hivclustering >= 1.2.0',
             ],
-        entry_points= {
+        entry_points={
             'console_scripts': [
                 'hivtrace = hivtrace.hivtrace:main',
                 'hivtrace_strip_drams = hivtrace.strip_drams:main',
