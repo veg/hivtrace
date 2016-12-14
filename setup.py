@@ -2,7 +2,6 @@
 
 import os
 import gzip
-import glob
 from setuptools import setup
 
 def gunzip_file(zip_file, out_file):
@@ -12,9 +11,10 @@ def gunzip_file(zip_file, out_file):
             f_out.writelines(f_in)
 
 def setup_package():
+    ''' setup declaration '''
 
     # Unzip LANL files
-    resource_dir =  os.path.join(os.path.dirname(os.path.realpath(__file__)), 'hivtrace/rsrc')
+    resource_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'hivtrace/rsrc')
     lanl_zip = os.path.join(resource_dir, 'LANL.FASTA.gz')
     lanl_tn93output_zip = os.path.join(resource_dir, 'LANL.TN93OUTPUT.csv.gz')
     lanl_outfile = os.path.join(resource_dir, 'LANL.FASTA')
@@ -50,7 +50,7 @@ def setup_package():
             'tornado >= 4.3',
             'hivclustering >= 1.2.0',
             ],
-        entry_points= {
+        entry_points={
             'console_scripts': [
                 'hivtrace = hivtrace.hivtrace:main',
                 'hivtrace_strip_drams = hivtrace.strip_drams:main',
