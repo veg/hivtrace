@@ -65,4 +65,5 @@ test/rsrc/TEST.ALIGNED.FASTA_user.tn93output.csv
 test/rsrc/TEST.FASTA_output.fasta
 test/rsrc/TEST2.FASTA_output.fasta
 test/rsrc/TEST2.FASTA_user.tn93output.csv
-
+node_modules
+hivtrace/web/static/vendor/
