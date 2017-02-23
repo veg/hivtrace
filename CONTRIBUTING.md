@@ -13,7 +13,7 @@ pip install numpy
 pip install biopython
 pip install -e hivtrace
 bower install
-cd hivtrace/hivtrace/web
+cd hivtrace/web
 npm install
 gulp
 ```
