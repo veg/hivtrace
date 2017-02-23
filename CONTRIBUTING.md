@@ -19,5 +19,6 @@ gulp
 ```
 
 You should then be able to try the following command:
+```
 hivtrace_viz example.json
-
+```
