@@ -43,11 +43,12 @@ g.node-group {
 @keyframes selected_object_animation {
     from {
         stroke-width: 1px;
+        stroke-dasharray: 10 2 1;
         stroke: #CCC;
     }
 
     50% {
-        stroke-width: 3px;
+        stroke-width: 5px;
         stroke: #000;
     }
 
