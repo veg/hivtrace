@@ -1,5 +1,9 @@
 var root = this;
 
+if (typeof datamonkey === 'undefined') {
+	datamonkey = new Object;
+}
+
 datamonkey.hivtrace = function () {};
 
 if (typeof exports !== 'undefined') {
