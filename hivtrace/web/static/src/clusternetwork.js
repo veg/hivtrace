@@ -5,9 +5,19 @@ var _networkMissingOpacity  = '0.1';
 var _networkMissingColor    = '#999';
 var _networkContinuousColorStops = 9;
 var _networkShapeOrdering   = ['circle','square','hexagon','diamond','cross','octagon'];
-var _defaultFloatFormat = d3.format(",.2r");
-var _defaultPercentFormat = d3.format(",.3p");
-var _defaultDateFormat  = d3.time.format("%Y-%m-%dT%H:%M:%S.%LZ");
+var _defaultFloatFormat     = d3.format(",.2r");
+var _defaultPercentFormat   = d3.format(",.3p");
+var _defaultDateFormat      = d3.time.format("%Y-%m-%dT%H:%M:%S.%LZ");
+var _networkSequentialColor = {
+								3: ["#ffeda0","#feb24c","#f03b20"],
+								4: ["#ffffb2","#fecc5c","#fd8d3c","#e31a1c"],
+								5: ["#ffffb2","#fecc5c","#fd8d3c","#f03b20","#bd0026"],
+								6: ["#ffffb2","#fed976","#feb24c","#fd8d3c","#f03b20","#bd0026"],
+								7: ["#ffffb2","#fed976","#feb24c","#fd8d3c","#fc4e2a","#e31a1c","#b10026"],
+								8: ["#ffffcc","#ffeda0","#fed976","#feb24c","#fd8d3c","#fc4e2a","#e31a1c","#b10026"],
+								9: ["#ffffcc","#ffeda0","#fed976","#feb24c","#fd8d3c","#fc4e2a","#e31a1c","#bd0026","#800026"]
+							  };
+
 
 var _is_CDC_ = true;
 
@@ -46,6 +56,11 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
 			'depends': 'vl_recent_value',
 			'label' : 'binned_vl_recent_value',
 			'enum' : ["≤200", "200-10000", ">10000"],
+			'color_scale' : function () {
+							 return d3.scale.ordinal()
+							.domain(["≤200", "200-10000", ">10000",_networkMissing])
+							.range(_.union(_networkSequentialColor[3],[_networkMissingColor]))},
+							
 			'map' : function (node) {
 				var vl_value = attribute_node_value_by_id (node, 'vl_recent_value');
 				if (vl_value != _networkMissing) {
@@ -72,6 +87,16 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
 					value = _networkMissing;
 				}
 				return value;
+			},
+			'color_scale': function (attr) {
+				var range_without_missing = _.without (attr.value_range,_networkMissing);
+				var color_scale = _.compose(d3.interpolateRgb("#ffffcc","#800026"),d3.scale.linear().domain ([range_without_missing[0],range_without_missing[range_without_missing.length-1]]).range([0,1]));
+				return function (v) {
+					if (v == _networkMissing) {
+						return _networkMissingColor;
+					}
+					return color_scale (v);
+				}
 			}
 		}
 	};
@@ -364,7 +389,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
             node.x = rescale_x(node.x);
             node.y = rescale_y(node.y);
         });
-
+        
     }
 
     self.width  = Math.min (Math.max (self.width, 200), 4000);
@@ -955,7 +980,18 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
             var degrees = d.children.map (function (c) {return c.degree;});
             degrees.sort (d3.ascending);
             d.degrees = datamonkey_describe_vector (degrees);
+            d.distances = [];
             });
+            
+            
+    self.edges.forEach (function (e,i) {
+    	self.clusters [cluster_mapping[self.nodes[e.target].cluster]].distances.push (e.length);
+    });
+
+    self.clusters.forEach (function (d,i) {
+            d.distances = datamonkey_describe_vector (d.distances);
+	});
+    //self.clusters
 
 
     self.update();
@@ -1047,13 +1083,6 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
         this_cell.append ("span").text (payload).style ("padding-right", "0.5em");
         this_cell.append ("button").classed ("btn btn-primary btn-xs pull-right", true).text ("Zoom").attr ("data-toggle","modal").attr("data-target", "#" + button_bar_ui + "_cluster_zoom").attr ("data-cluster", payload);
         this_cell.append ("button").classed ("btn btn-xs pull-right", true).text ("List").attr ("data-toggle","modal").attr("data-target", "#" + button_bar_ui + "_cluster_list").attr ("data-cluster", payload);
-        
-        
-        /*var text = this_cell.selectAll ("a").data ([payload]);
-        text.enter ().append ("a");
-        text.exit  ().remove();
-        text.text  (payload);
-        text.attr  ("href", "#").attr ("data-toggle","modal").attr("data-target", "#" + button_bar_ui + "_cluster_zoom").attr ("data-cluster", payload);*/
   }
 
   function _cluster_table_draw_buttons (element, payload) {
@@ -1120,7 +1149,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
         add_a_sortable_table (self.node_table,
                                 // headers
                               [[{value:"ID", sort : "value", help: "Node ID"},
-                                 {value: "Visibility", sort: "value"},
+                                 {value: "Status", sort: "value"},
                                  {value: "# of links", sort: "value", help: "Number of links (Node degree)"},
                                  {value: "Cluster", sort: "value", help: "Which cluster does the node belong to"}
                                ]],
@@ -1145,7 +1174,8 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
                               [[{value:"Cluster ID", sort : "value", help: "Unique cluster ID"},
                                  {value: "Visibility", sort: "value"},
                                  {value: "Size", sort: "value", help: "Number of nodes in the cluster"},
-                                 {value: "# links/node<br>Mean [Median, IQR]", html : true}
+                                 {value: "# links/node<br>Mean [Median, IQR]", html : true},
+                                 {value: "Genetic distance<br>Mean [Median, IQR]", help: "Genetic distance among nodes in the cluster", html: true}
                                ]],
                                 self.clusters.map (function (d, i) {
                                  // rows
@@ -1155,8 +1185,9 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
                                                 callback: _cluster_table_draw_buttons,
                                                 volatile : true
                                         },
-                                        {value :d.children.length},
-                                        {value : d.degrees, format: function (d) {return _defaultFloatFormat(d['mean']) + " [" + _defaultFloatFormat(d['median']) + ", " + _defaultFloatFormat(d['Q1']) + " - " + _defaultFloatFormat(d['Q3']) +"]"}}
+                                        {value : d.children.length},
+                                        {value : d.degrees, format: function (d) {return _defaultFloatFormat(d['mean']) + " [" + _defaultFloatFormat(d['median']) + ", " + _defaultFloatFormat(d['Q1']) + " - " + _defaultFloatFormat(d['Q3']) +"]"}},
+                                        {value : d.distances, format: function (d) {return _defaultFloatFormat(d['mean']) + " [" + _defaultFloatFormat(d['median']) + ", " + _defaultFloatFormat(d['Q1']) + " - " + _defaultFloatFormat(d['Q3']) +"]"}}
                                         ];
 
                                 })
@@ -1510,7 +1541,11 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
             self.colorizer['category'] = d3.scale.ordinal ().domain (domain).range (range);
 
         } else {
-            self.colorizer['category']    = graph_data [_networkGraphAttrbuteID][cat_id].dimension <= 10 ? d3.scale.category10() : d3.scale.category20c();
+        	if (graph_data[_networkGraphAttrbuteID][cat_id]['color_scale']) { 
+        		self.colorizer['category']    = graph_data[_networkGraphAttrbuteID][cat_id]['color_scale'] (graph_data[_networkGraphAttrbuteID][cat_id]);
+        	} else {
+            	self.colorizer['category']    = graph_data [_networkGraphAttrbuteID][cat_id].dimension <= 10 ? d3.scale.category10() : d3.scale.category20c();
+            }
         }
         self.colorizer['category_id'] = cat_id;
         self.colorizer['category_map'] = graph_data [_networkGraphAttrbuteID][cat_id]['value_map'];
@@ -1645,8 +1680,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
     });
 
     link.style ("opacity", function (d) {return Math.max (node_opacity (d.target), node_opacity (d.source))})
-
-
+    
 
     if (!soft) {
         currently_displayed_objects = rendered_clusters[0].length + rendered_nodes[0].length;
@@ -1662,6 +1696,13 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
               .attr("x2", function(d) { return d.target.x; })
               .attr("y2", function(d) { return d.target.y; });
         });
+    }  else {
+    	link.each (function (d) {
+    		d3.select(this).attr("x1", function(d) { return d.source.x; })
+              .attr("y1", function(d) { return d.source.y; })
+              .attr("x2", function(d) { return d.target.x; })
+              .attr("y2", function(d) { return d.target.y; })
+    	});
     }
   }
 
