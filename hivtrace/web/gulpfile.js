@@ -103,7 +103,8 @@ gulp.task('bs-fonts', function() {
             .pipe(gulp.dest('./static/fonts/'));
 });
 
-gulp.task('build', ['scripts', 'worker-scripts', 'hivtrace-scripts', 'css', 'fonts', 'bs-fonts']);
+//gulp.task('build', ['scripts', 'worker-scripts', 'hivtrace-scripts', 'css', 'fonts', 'bs-fonts']);
+gulp.task('build', ['hivtrace-scripts']);
 
 gulp.task('watch', function () {
     watch('static/**/*', function () {
