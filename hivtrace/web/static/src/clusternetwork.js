@@ -2381,6 +2381,9 @@ var hivtrace_cluster_graph_summary = function (graph, tag) {
 
     if (!summary_table.empty()) {
         _.each (graph["Network Summary"], function (value, key) {
+        	if (_is_CDC_ && key == "Edges") {
+        		key = "Links";
+        	}
             table_data.push ([key, value]);
         });
     }
