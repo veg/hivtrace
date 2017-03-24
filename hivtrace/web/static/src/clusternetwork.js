@@ -79,6 +79,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
     self.node_table = d3.select (nodes_table),
     self.needs_an_update = false,
     self.json = json,
+    self.hide_unselected = false,
     self.gradient_id = 0;
     
     self._networkPredefinedAttributeTransforms = {
@@ -314,7 +315,6 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
 
       expandedClusters = [];
       drawnNodes = [];
-
 
       self.clusters.forEach (function (x) {
           // Check if hxb2_linked is in a child
@@ -708,7 +708,28 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
 
          $("#" + button_bar_ui + "_filter").on ("input propertychange", _.throttle (function (e) {
                var filter_value = $(this).val();
-               self.filter (filter_value.split (" ").filter (function (d) {return d.length > 0;}).map (function (d) { return new RegExp (d,"i")}));
+               self.filter (filter_value.split (" ").filter (function (d) {return d.length > 0;}).map (function (d) { 
+               	if (d.length > 2) {
+                		if (d[0] == '"' && d[d.length-1] == '"') {
+               			return {type : 're' , value: new RegExp ("^" + d.substr (1, d.length-2) + "$","i")};
+               		} 
+               		if (d[0] == '<') {
+               			var distance_threshold = parseFloat (d.substr (1));
+               			if (distance_threshold > 0) {
+               				return {type: 'distance', value: distance_threshold};
+               			}
+               		}
+               		
+               	} 
+               	return {type : 're' , value: new RegExp (d,"i")};
+               }));
+               
+             }, 250));
+
+         $("#" + button_bar_ui + "_hide_filter").on ("change", _.throttle (function (e) {
+               self.hide_unselected = !self.hide_unselected;
+               self.filter_visibility ();
+               self.update (true);
             }, 250));
 
     }
@@ -1294,6 +1315,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
         .attr("transform", function(d) { return "translate(" + d.x + "," + d.y+ ")"; })
         .style('fill', function(d) { return node_color(d); })
         .style('opacity', function (d) {return node_opacity(d);})
+        .style('display', function (d) {if (d.is_hidden) return 'none'; return null;})
         .on ('click', handle_node_click)
         .on ('mouseover', node_pop_on)
         .on ('mouseout', node_pop_off)
@@ -1344,6 +1366,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
                         : d3.svg.arc().innerRadius(0).outerRadius(arc_radius))(d);
                 })
           .style ("fill", function (d,i) {return d.rim ? self.colorizer ['selected'] (d.name) : (the_cluster["gradient"] ? 'url(#' + the_cluster["gradient"] + ')' : cluster_color (the_cluster, d.name));})
+          .style('display', function (d) {if (the_cluster.is_hidden) return 'none'; return null;})
           ;
 
 
@@ -1652,18 +1675,57 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
     d3.event.preventDefault();
   }
 
-  self.filter = function (expressions, skip_update) {
+  self.filter_visibility = function () {
+  	 self.clusters.forEach (function (c) {
+        c.is_hidden = self.hide_unselected && !c.match_filter;
+    });
+  	 self.nodes.forEach (function (n) {
+        n.is_hidden = self.hide_unselected && !n.match_filter;
+    });
+  };
+
+
+  self.filter = function (conditions, skip_update) {
 
     var anything_changed = false;
+    
+    
+    conditions = _.map (['re', 'distance'], function (cnd) {
+		return _.map (_.filter (conditions, function (v) {
+			return v.type == cnd;
+		}), function (v) {return v.value;});
+	});
+    
+    
+	if (conditions[1].length) {
+			self.nodes.forEach (function (n) {
+				n.length_filter = false;
+			});
+
+		 _.each (self.edges, function (e) {
+			var did_match = _.some(conditions[1], function (d) {
+				return e.length <= d;
+			});		 
+			
+			if (did_match) {
+				self.nodes[e.source].length_filter = true;
+				self.nodes[e.target].length_filter = true;
+			}
+    	});	
+	}
+	
 
     self.clusters.forEach (function (c) {
         c.match_filter = 0;
     });
 
     self.nodes.forEach (function (n) {
-        var did_match = _.some(expressions, function (regexp) {
+    
+        var did_match = _.some(conditions[0], function (regexp) {
             return regexp.test (n.id) || _.some (n[_networkNodeAttributeID], function (attr) {return regexp.test (attr)});
         });
+
+		did_match = did_match || n.length_filter;
 
         if (did_match != n.match_filter) {
             n.match_filter = did_match;
@@ -1676,7 +1738,11 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
     });
 
 
-    if (anything_changed && !skip_update) {
+    if (anything_changed && !skip_update) {	
+    	if (self.hide_unselected) {
+           		self.filter_visibility ();
+        }
+
         self.update (true);
     }
 
@@ -1762,6 +1828,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
     });
 
     link.style ("opacity", function (d) {return Math.max (node_opacity (d.target), node_opacity (d.source))})
+    link.style ("display", function (d) {if (d.target.is_hidden || d.source.is_hidden) {return 'none'}; return null;})
     
 
     if (!soft) {

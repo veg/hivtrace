@@ -51,7 +51,7 @@
             <li><input type="file" id="json_file"></li>
           </ul>
         </li>
-      </ul>
+       </ul>
       <form class="navbar-form navbar-right">
       <div class = 'form-group'  id='network_status_string'>
       </div>
@@ -128,9 +128,9 @@
                         <span class="input-group-addon">
                             <i class = "fa fa-question" id = "network_ui_search_help"></i>
                         </span>
-                        <!--<span class="input-group-addon">
-                           Hide others <input type = 'checkbox' id = 'network_ui_search_hide_filter'> </input>
-                        </span>-->
+                        <span class="input-group-addon">
+                           Hide others <input type = 'checkbox' id = 'network_ui_bar_hide_filter'> </input>
+                        </span>
                     </div>
 
 
@@ -138,14 +138,14 @@
                 </div>
 
 
-                <div class="nav-trace" id = "network_ui_bar_sliders" style = "display: none">
+                <!--<div class="nav-trace" id = "network_ui_bar_sliders" style = "display: none">
                     <div class="input-group">
                         <label  id = "network_ui_bar_sliders_label_from">2001/01/01</label>
                             <input id = "network_ui_bar_sliders_from" class = "col-lg-3" type = "range" min = "0" max = "100" step = "0.1" value = "1"></input>
                             <input id = "network_ui_bar_sliders_to" class = "col-lg-3" type = "range" min = "0" max = "100" step = "0.1" value = "1"/>
                         <label class = "pull-right" id = "network_ui_bar_sliders_label_to">2012/01/01</label>
                     </div>
-                </div>
+                </div>-->
 
               </div>
             </div>
@@ -420,7 +420,9 @@ $(document).ready(function(){
         Type in text to search for clusters and nodes whose <em>attributes contain the term</em>. <p/>\
         For example, typing in <code>MSM</code> will highlight nodes and/or clusters that \
         have 'MSM' in any of the data fields. <p/>\
-        Typing in space separated terms (<code>MSM IDU</code>) will search for either term. <p/>\
+        Type in space separated terms (<code>MSM IDU</code>) to search for <b>either</b> term. <p/>\
+        Type in terms in quotes (<code>\"male\"</code>) will search for this <b>exact</b> term. <p/>\
+        Type in <code>&lt;0.01</code> to search for nodes that have edges which are 0.01 (1%) or shorter. Any positive threshold works <p/>\
         Matching node <svg width = '20' height = '20' style = 'vertical-align: bottom; display: inline'><circle cx = '10' cy = '10' r = '7' class = 'node selected_object'> </circle></svg><p/>\
         Cluster where 25% of nodes match the term <svg width = '28' height = '28' style = 'vertical-align: bottom; display: inline'><circle cx = '14' cy = '14' r = '8' class = 'cluster'> </circle>\
         <path d = 'M 2 14 A 12 12 0 0 1 14 2'/ style = 'fill: none; stroke: #337AB7; stroke-width: 3px;'>\
@@ -428,7 +430,7 @@ $(document).ready(function(){
         Cluster where 75% of nodes match the term <svg width = '28' height = '28' style = 'vertical-align: bottom; display: inline'><circle cx = '14' cy = '14' r = '8' class = 'cluster'> </circle>\
         <path d = 'M 2 14 A 12 12 0 1 1 14 26'/ style = 'fill: none; stroke: #337AB7; stroke-width: 3px;'>\
         </svg><p/> \
-        <!--Use the <code>Hide others</code> checkbox to automatically hide all clusters/nodes that do not match the search terms-->\
+        Use the <code>Hide others</code> checkbox to automatically hide all clusters/nodes that do not match the search terms\
         </div>\
      "
     }
