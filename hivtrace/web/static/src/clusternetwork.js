@@ -1588,6 +1588,8 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
                 points.push ({x : src, y : tgt, title: self.nodes[e.source].id + " (" + src + ") -- " + self.nodes[e.target].id + " (" + tgt + ")"});
             }
         });
+		d3.select ("#" + button_bar_ui + "_aux_svg_holder_enclosed").style ("display", null);
+
 
         datamonkey.hivtrace.scatterplot (points, 400, 400, "#" + button_bar_ui + "_aux_svg_holder", {x : "Source", y : "Target"});
 
