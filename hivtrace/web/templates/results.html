@@ -308,16 +308,32 @@
             </span>
           </div>
         </div>
-        <div class='col-lg-6'>
+        <div class='col-lg-6' id = "network_ui_bar_aux_svg_holder_enclosed" style = 'display: none'>
+            <div class = "row">
+				<button type="button" class="btn btn-info" id = "network_pairwise_chord_legend"><i class = "fa fa-question"></i></button>
+            </div>
+
               <div id='network_ui_bar_aux_svg_holder' class='row style = margin-left: 5px'>
-                  </div>
               </div>
-               <div class='col-lg-6 '>
-                   <span class = "pull-right" id = "network_ui_bar_attribute_table_export"> </span>
+        </div>
+        <div class='col-lg-6 ' id = 'network_ui_bar_attribute_table_enclosed' style = 'display: none'>
+            <div class = "row">
+            	 <div class = "col-lg-2">
+            	 <div class="input-group input-group-sm" >
+            	 	<span class="input-group-addon" id = "network_pairwise_table_legend">
+						<i class = "fa fa-question"></i></button>
+					</span>
+						<span class="input-group-addon">
+                           Show as % <input type = 'checkbox' id = 'network_ui_bar_pairwise_table_pecentage'> </input>
+                        </span>
+    				 </div>
+    			  </div>
+            </div>
+            <div class = "row">
                    <table class = "table table-striped table-condensed table-hover" id = "network_ui_bar_attribute_table">
                    </table>
-              </div>
-          </div>
+            </div>
+        </div>
       </div>
 
 
@@ -410,6 +426,60 @@ function in_progress() {
 }
 
 $(document).ready(function(){
+
+$("#network_pairwise_chord_legend").popover(
+{
+     'html' : true,
+     'trigger' : "click",
+     'placement' : "bottom",
+     'content' : "<div style = 'width : 250px'>\
+                    This panel will show either a <a href = 'https://en.wikipedia.org/wiki/Chord_diagram'><b>chord diagram</b></a> (for category values) \
+                    or a <b>scatterplot</b> (for continous values). They are useful to display the pairings \
+                    for node attributes across links. Mouse over a particular color to display what attribute it\ 
+                    corresponds to in <b>chord diagrams</b>. Mouse over a particular point to display what link \
+                    corresponds to in <b>histograms</b>. <p/> \
+                    To better understand a <b>chord diagram</b>, consider a network with 100 links. 40 of these links connect males to males, \
+                    10 of the links connect females to females, and 50 - males to females. Males will be allocated (40 x 2 + 50) / 200 = .65, of the \
+                    total circumference (pie slice size). The connection between males and females (with the males as the focus) will be given 50 / (50+40) = 5/9 of the \
+                    weight. The connection between females and males (with the females as the focus) will be given 50 / (50+10) = 5/6 of the weight.\
+        </div>\
+     "
+    }
+);
+
+$("#network_pairwise_table_legend").popover(
+{
+     'html' : true,
+     'trigger' : "hover",
+     'placement' : "bottom",
+     'content' : "<div style = 'width : 250px'>\
+		This table shows how many connections exist between each pair of attribute values. For example, if \
+		a link connects a node which is \"Male\" and a node that is \"Female\", this link contributes \
+		a count of 1 to both \"Male/Female\", and \"Female/Male\" cells of the table. A link connecting a \"Male\" node  \
+		to a \"Male\" node will contribute 2 counts to the Male/Male cell.\
+        </div>\
+     "
+    }
+);
+
+$("#network_pairwise_chart_legend").popover(
+{
+     'html' : true,
+     'trigger' : "click",
+     'placement' : "bottom",
+     'content' : "<div style = 'width : 250px'>\
+		This table shows how many connections exist between each pair of attribute values. For example, if\
+		a link connects a node which is \"Male\" and a node that is \"Female\", this link contributes\
+		a count of 1 to both \"Male/Female\", and \"Female/Male\" cells of the table. A link connecting a \"Male\" node\
+		to a \"Male\" node will contribute 2 counts to the Male/Male cell.\
+        </div>\
+     "
+    }
+);
+
+$("#network_pairwise_table_legend").on ("click", function (e) {
+	e.preventDefault();
+});	
 
  $("#network_ui_search_help").popover(
     {

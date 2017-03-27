@@ -80,6 +80,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
     self.needs_an_update = false,
     self.json = json,
     self.hide_unselected = false,
+    self.show_percent_in_pairwise_table = false,
     self.gradient_id = 0;
     
     self._networkPredefinedAttributeTransforms = {
@@ -732,6 +733,11 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
                self.update (true);
             }, 250));
 
+
+         $("#" + button_bar_ui + "_pairwise_table_pecentage").on ("change", _.throttle (function (e) {
+               self.show_percent_in_pairwise_table = !self.show_percent_in_pairwise_table;
+               render_binned_table  ("#" + button_bar_ui + "_attribute_table", self.colorizer['category_map'], self.colorizer['category_pairwise']);
+            }, 250));
     }
 
 
@@ -1257,7 +1263,7 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
         add_a_sortable_table (self.cluster_table,
                                 // headers
                               [[{value:"Cluster ID", sort : "value", help: "Unique cluster ID"},
-                                 {value: "Visibility", sort: "value"},
+                                 {value: "Visibility", sort: "value", help: "Visibility in the network tab"},
                                  {value: "Size", sort: "value", help: "Number of nodes in the cluster"},
                                  {value: "# links/node<br>Mean [Median, IQR]", html : true},
                                  {value: "Genetic distance<br>Mean [Median, IQR]", help: "Genetic distance among nodes in the cluster", html: true}
@@ -2041,6 +2047,8 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
     the_table.selectAll ("thead").remove();
     the_table.selectAll ("tbody").remove();
 
+	d3.select (id + "_enclosed").style ("display", matrix ? null : "none");
+
     if (matrix) {
 
         var fill = self.colorizer['category'];
@@ -2060,11 +2068,25 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
                 }
             }
         );
+        
+        if (self.show_percent_in_pairwise_table) {
+			var sum = _.map (matrix, function (row) {
+				return _.reduce (row, function (p, c) {return p + c;}, 0);
+			});
+		
+			matrix = _.map (matrix, function (row, row_index) {
+				return _.map (row, function (c) {return c/sum[row_index];});
+       		 });
+		}
+        
+        
+        
 
         var rows = the_table.append ("tbody").selectAll ("tr").data (matrix.map (function (d, i) {return [lookup[i]].concat (d);}));
+
         rows.enter ().append ("tr");
         rows.selectAll ("td").data (function (d) {return d}).enter().append ("td").html (function (d, i) {
-            return i == 0 ? ("<span>&nbsp;" + d + "</span>") : d;
+            return i == 0 ? ("<span>&nbsp;" + d + "</span>") : (self.show_percent_in_pairwise_table ? _defaultPercentFormat (d): d);
         }).each (function (d, i) {
                 if (i == 0) {
                     d3.select (this).insert ("i",":first-child")
@@ -2076,12 +2098,15 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
 
 
 
-    }
+    } 
   }
 
   function render_chord_diagram (id, the_map, matrix) {
 
         d3.select (id).selectAll ("svg").remove();
+
+		d3.select (id + "_enclosed").style ("display", matrix ? null : "none");
+
         if (matrix) {
 
             lookup = the_map(null, 'lookup');
@@ -2175,6 +2200,17 @@ var hivtrace_cluster_network_graph = function (json, network_container, network_
             the_matrix.pop();
             for (i = 0 ; i < dim - 1; i+=1) {
                 the_matrix[i].pop();
+            }
+        }
+        
+        // symmetrize the matrix
+	
+		dim = the_matrix.length;
+
+        for (i = 0 ; i < dim; i+=1) {
+            for (j = i; j < dim; j += 1){
+                the_matrix[i][j] += the_matrix[j][i];
+                the_matrix[j][i] = the_matrix[i][j];
             }
         }
 
