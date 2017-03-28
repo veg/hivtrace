@@ -530,6 +530,7 @@ function hiv_trace_export_table_to_text(parent_id, table_id, sep) {
     var the_button = d3.select(parent_id).append("a")
         .attr("target", "_blank")
         .on("click", function(data, element) {
+        	d3.event.preventDefault();
             var table_tag = d3.select(this).attr("data-table");
             var table_text = datamonkey.helpers.table_to_text(table_tag);
             datamonkey.helpers.export_handler(table_text, table_tag.substring(1) + ".tsv", "text/tab-separated-values");
