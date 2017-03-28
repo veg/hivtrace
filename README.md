@@ -1,6 +1,8 @@
 HIV-TRACE
 ==========
 
+[![Join the chat at https://gitter.im/veg/hivtrace](https://badges.gitter.im/veg/hivtrace.svg)](https://gitter.im/veg/hivtrace?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build Status](https://travis-ci.org/veg/hivtrace.svg)](https://travis-ci.org/veg/hivtrace)
 [![Coverage Status](https://coveralls.io/repos/veg/hivtrace/badge.png?branch=master)](https://coveralls.io/r/veg/hivtrace)
 
