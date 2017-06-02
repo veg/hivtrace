@@ -423,7 +423,12 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
 
     # Get singletons
     singletons = get_singleton_nodes(results_json['trace_results']['Nodes'], input)
+
     results_json['trace_results']['Singletons'] = singletons
+
+    # Place singleton count in Network Summary
+    results_json['trace_results']['Network Summary']['Singletons'] = len(singletons)
+
 
     if not compare_to_lanl:
         return results_json
