@@ -323,9 +323,7 @@ class TestHIVTrace(unittest.TestCase):
   def test_contaminant_annotations(self):
 
     this_dirname = os.path.join(os.path.dirname(os.path.realpath(__file__)))
-
     compare_to_lanl = False
-    #input_fn   = self.fn
     input_fn = path.join(this_dirname, 'rsrc/CONTAM.fasta')
     reference  = self.reference
     id = os.path.basename(input_fn)
@@ -337,6 +335,24 @@ class TestHIVTrace(unittest.TestCase):
 
     nodes = list(filter(lambda x: "HXB2" in x["id"], results["trace_results"]["Nodes"]))
     self.assertTrue(all('problematic' in n["attributes"] for n in nodes))
+
+  def test_contaminant_screening_separately(self):
+
+    this_dirname = os.path.join(os.path.dirname(os.path.realpath(__file__)))
+
+    compare_to_lanl = False
+    input_fn = path.join(this_dirname, 'rsrc/CONTAM.fasta')
+    reference =  path.join(this_dirname, 'rsrc/HXB2_1497.fasta');
+
+    id = os.path.basename(input_fn)
+
+    status_file = input_fn+'_status'
+
+    results = hivtrace.hivtrace(id, input_fn, reference, self.ambiguities,
+                      self.distance_threshold, self.min_overlap,
+                      False, '0.015', handle_contaminants='separately', filter_edges='remove', skip_alignment=True)
+
+    self.assertTrue("contaminant_sequences" in results["trace_results"]["Network Summary"])
 
 
 if __name__ == '__main__':

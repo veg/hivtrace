@@ -26,10 +26,11 @@ class status:
 class phases:
     ALIGNING                     = (0, "Aligning")
     BAM_FASTA_CONVERSION         = (1, "BAM to FASTA conversion")
-    COMPUTE_TN93_DISTANCE        = (2, "Computing pairwise TN93 distances")
-    INFERRING_NETWORK            = (3, "Inferring, filtering, and analyzing molecular transmission network")
-    PUBLIC_COMPUTE_TN93_DISTANCE = (4, "Computing pairwise TN93 distances against a public database")
-    PUBLIC_INFERRING_CONNECTIONS = (5, "Inferring connections to sequences in a public database")
+    FILTER_CONTAMINANTS          = (2, "Screening contaminants")
+    COMPUTE_TN93_DISTANCE        = (3, "Computing pairwise TN93 distances")
+    INFERRING_NETWORK            = (4, "Inferring, filtering, and analyzing molecular transmission network")
+    PUBLIC_COMPUTE_TN93_DISTANCE = (5, "Computing pairwise TN93 distances against a public database")
+    PUBLIC_INFERRING_CONNECTIONS = (6, "Inferring connections to sequences in a public database")
 
 def update_status(id, phase, status, msg = ""):
 
@@ -233,6 +234,7 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     PHASE 2)  Convert resulting bam file back to FASTA format
     PHASE 2b) Rename any duplicates in FASTA file
     PHASE 3)  Strip DRAMs if requested
+    PHASE 3b) Filtering contaminants before TN93 run if requested
     PHASE 4)  TN93 analysis on the supplied FASTA file alone
     PHASE 5)  Run hivclustercsv to return clustering information in JSON format
     PHASE 5b) Attribute annotations to results from (4)
@@ -288,8 +290,10 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     BAM_FN                        = os.path.join(tmp_path, basename+'_output.bam')
     OUTPUT_FASTA_FN               = input+'_output.fasta'
     OUTPUT_TN93_FN                = os.path.join(tmp_path, basename+'_user.tn93output.csv')
+    OUTPUT_TN93_CONTAM_FN         = os.path.join(tmp_path, basename+'_contam.tn93output.csv')
     DEST_TN93_FN                  = input+'_user.tn93output.csv'
     JSON_TN93_FN                  = os.path.join(tmp_path, basename+'_user.tn93output.json')
+    JSON_TN93_CONTAM_FN           = os.path.join(tmp_path, basename+'_contam.tn93output.json')
     OUTPUT_COMBINED_SEQUENCE_FILE = os.path.join(tmp_path, basename+"_combined_user_lanl.fasta")
     OUTPUT_CLUSTER_JSON           = os.path.join(tmp_path, basename+'_user.trace.json')
     LANL_OUTPUT_CLUSTER_JSON      = os.path.join(tmp_path, basename+'_lanl_user.trace.json')
@@ -303,7 +307,8 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
 
     EXCLUSION_LIST = None
 
-    # Check for incompatible statement
+    # Check for incompatible statements
+
     if skip_alignment and compare_to_lanl:
         raise Exception("You have passed arguments that are incompatible! You cannot compare to the public database if you elect to submit a pre-made alignment! Please consider the issue before trying again.")
 
@@ -358,13 +363,53 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     # PHASE 3
     # Strip DRAMS
     if strip_drams_flag:
-        #update_status(id, "Masking DRAM sites")
         OUTPUT_FASTA_FN_TMP = OUTPUT_FASTA_FN + ".spool"
         with open (str(OUTPUT_FASTA_FN_TMP),'w') as output_file:
             for (seq_id, data) in sd.strip_drams (OUTPUT_FASTA_FN, strip_drams_flag):
                 print (">%s\n%s" % (seq_id, data), file = output_file)
-
         shutil.move (OUTPUT_FASTA_FN_TMP, OUTPUT_FASTA_FN)
+
+    # PHASE 3b Filter contaminants
+    if handle_contaminants == 'separately':
+
+        update_status(id, phases.FILTER_CONTAMINANTS, status.RUNNING)
+
+        with open(JSON_TN93_CONTAM_FN, 'w') as tn93_contam_fh:
+            tn93_contam_process = [ TN93DIST,
+                            '-q',
+                            '-o', OUTPUT_TN93_CONTAM_FN,
+                            '-t', '0.015',
+                            '-a', 'resolve',
+                            '-l', min_overlap,
+                            '-g', '1.0',
+                            '-s', reference,
+                            '-f', OUTPUT_FORMAT,
+                            OUTPUT_FASTA_FN ]
+
+            print(' '.join(tn93_contam_process))
+            logging.debug(' '.join(tn93_contam_process))
+            subprocess.check_call(tn93_contam_process,stdout=tn93_contam_fh,stderr=tn93_contam_fh)
+            # shutil.copyfile(OUTPUT_TN93_FN, DEST_TN93_FN)
+            update_status(id, phases.FILTER_CONTAMINANTS, status.COMPLETED)
+
+        # Process output for contaminants and remove them from the file
+        # Store the contaminants for reporting later
+        with open(OUTPUT_TN93_CONTAM_FN, 'r') as tn93_contam_fh:
+            tn93reader = csv.reader(tn93_contam_fh, delimiter=',', quotechar='|')
+            tn93reader.__next__()
+            contams = [row[0] for row in tn93reader]
+
+            OUTPUT_FASTA_FN_TMP = OUTPUT_FASTA_FN + ".contam.tmp"
+
+            # Remove contams from FASTA file
+            with (open (OUTPUT_FASTA_FN, 'r')) as msa_fn:
+                msa = SeqIO.parse (msa_fn, 'fasta')
+                filtered_msa = filter(lambda x: x.id not in contams, msa)
+                # Write to new TMP file
+                with open(OUTPUT_FASTA_FN_TMP, "w") as output_handle:
+                        SeqIO.write(filtered_msa, output_handle, "fasta")
+
+            shutil.move (OUTPUT_FASTA_FN_TMP, OUTPUT_FASTA_FN)
 
     # PHASE 4
     update_status(id, phases.COMPUTE_TN93_DISTANCE, status.RUNNING)
@@ -397,7 +442,7 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     if filter_edges and filter_edges != 'no':
         hivnetworkcsv_process.extend (['-n',filter_edges, '-s', OUTPUT_FASTA_FN])
 
-    if handle_contaminants != 'no':
+    if handle_contaminants != 'no' and handle_contaminants != 'separately':
         hivnetworkcsv_process.extend (['-C', handle_contaminants, '-F', CONTAMINANT_ID_LIST])
 
     # hivclustercsv uses stderr for status updates
@@ -429,6 +474,9 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     # Place singleton count in Network Summary
     results_json['trace_results']['Network Summary']['Singletons'] = len(singletons)
 
+    # Place contaminant nodes in Network Summary
+    if handle_contaminants == 'separately':
+        results_json['trace_results']['Network Summary']['contaminant_sequences'] = contams
 
     if not compare_to_lanl:
         return results_json

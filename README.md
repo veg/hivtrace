@@ -99,11 +99,12 @@ highly ambiguous sequences.
 
 Screen for contaminants by marking or removing sequences that cluster with any of the contaminant IDs.
 
-| Option    | Description                                             |
-| --------- | --------------                                          |
-| remove    | Remove spurious edges from the inferred network         |
-| report    | Flag all sequences sharing a cluster with the reference |
-| none      | Do nothing                                              |
+| Option     | Description                                                     |
+| ---------  | --------------                                                  |
+| remove     | Remove spurious edges from the inferred network                 |
+| report     | Flag all sequences sharing a cluster with the reference         |
+| separately | Flag all sequences and report them via secondary tn93 command   |
+| none       | Do nothing                                                      |
 
 
 
