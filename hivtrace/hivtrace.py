@@ -475,7 +475,8 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     results_json['trace_results']['Network Summary']['Singletons'] = len(singletons)
 
     # Place contaminant nodes in Network Summary
-    results_json['trace_results']['Network Summary']['contaminant_sequences'] = contams
+    if handle_contaminants == 'separately':
+        results_json['trace_results']['Network Summary']['contaminant_sequences'] = contams
 
     if not compare_to_lanl:
         return results_json
