@@ -347,7 +347,7 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
         subprocess.check_call(bam_process, stdout=DEVNULL)
         update_status(id, phases.BAM_FASTA_CONVERSION, status.COMPLETED)
 
-    if handle_contaminants != 'no':
+    if handle_contaminants != 'no' and handle_contaminants !='separately':
         with (open (OUTPUT_FASTA_FN, 'r')) as msa:
             reference_name = next (SeqIO.parse (msa, 'fasta')).id
             logging.debug ('Reference name set to %s' % reference_name)
@@ -386,7 +386,6 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
                             '-f', OUTPUT_FORMAT,
                             OUTPUT_FASTA_FN ]
 
-            print(' '.join(tn93_contam_process))
             logging.debug(' '.join(tn93_contam_process))
             subprocess.check_call(tn93_contam_process,stdout=tn93_contam_fh,stderr=tn93_contam_fh)
             # shutil.copyfile(OUTPUT_TN93_FN, DEST_TN93_FN)
@@ -440,9 +439,9 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
                                    threshold, '-f', SEQUENCE_ID_FORMAT, '-j', '-o']
 
     if filter_edges and filter_edges != 'no':
-        hivnetworkcsv_process.extend (['-n',filter_edges, '-s', OUTPUT_FASTA_FN])
+        hivnetworkcsv_process.extend (['-n', filter_edges, '-s', OUTPUT_FASTA_FN])
 
-    if handle_contaminants != 'no' and handle_contaminants != 'separately':
+    if handle_contaminants == 'report' or handle_contaminants == 'remove':
         hivnetworkcsv_process.extend (['-C', handle_contaminants, '-F', CONTAMINANT_ID_LIST])
 
     # hivclustercsv uses stderr for status updates
@@ -540,7 +539,7 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
           lanl_hivnetworkcsv_process = [PYTHON, HIVNETWORKCSV, '-i', USER_LANL_TN93OUTPUT, '-t',
                                         threshold, '-f', SEQUENCE_ID_FORMAT, '-j', '-k', USER_FILTER_LIST]
 
-      if handle_contaminants != 'no':
+      if handle_contaminants == 'report' or handle_contaminants == 'remove':
           lanl_hivnetworkcsv_process.extend (['-C', handle_contaminants, '-F', CONTAMINANT_ID_LIST])
 
       logging.debug(' '.join(lanl_hivnetworkcsv_process))
