@@ -17,10 +17,16 @@ HIV Trace requires [tn93](https://github.com/veg/tn93) be installed and python 3
 ## Install using pip
 
 ```
+pip install --upgrade pip
+pip3 install wheel
+pip3 wheel pysam
+pip3 install pysam*.whl
 pip3 install numpy
 pip3 install biopython
 pip3 install hivtrace
 ```
+
+Tested with Python 3.5.1, 3.5.3, and 3.6.1.
 
 # Example Usage
 
