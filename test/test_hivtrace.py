@@ -354,6 +354,19 @@ class TestHIVTrace(unittest.TestCase):
 
     self.assertTrue("contaminant_sequences" in results["trace_results"]["Network Summary"])
 
+  def test_annotate_file_attributes(self):
+
+    this_dirname = os.path.join(os.path.dirname(os.path.realpath(__file__)))
+    trace_json_fn = path.join(this_dirname, 'rsrc/SD_2017.trace.json')
+    patient_attributes_fn =  path.join(this_dirname, 'rsrc/SD_2017.patient_attributes.json');
+
+    with open(trace_json_fn) as trace_json_fh:
+        trace_json = json.loads(trace_json_fh.read())
+
+    results = hivtrace.annotate_file_attributes(trace_json["trace_results"], patient_attributes_fn, "ehars_uid")
+    self.assertTrue("patient_attributes" in results["Nodes"][0])
+
+
 
 if __name__ == '__main__':
   unittest.main()

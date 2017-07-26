@@ -168,6 +168,7 @@ def id_to_attributes(csv_fn, attribute_map, delimiter):
     return id_dict
 
 def annotate_attributes(trace_json_fn, attributes):
+
     '''
     Annotate attributes created from id_to_attributes to hivclustercsv results
     for easy parsing in JavaScript
@@ -190,7 +191,31 @@ def annotate_attributes(trace_json_fn, attributes):
 
     return
 
+def annotate_file_attributes(trace_json, attributes_fn, key_id):
+
+    '''
+    Annotate attributes created from id_to_attributes to hivclustercsv results
+    for easy parsing in JavaScript
+    '''
+
+    with open(attributes_fn) as attributes_fh:
+        attributes_json = json.loads(attributes_fh.read())
+        attrs_by_id = {d[key_id]: d for d in attributes_json}
+        nodes = trace_json.get('Nodes')
+        [node.update({'patient_attributes' : attrs_by_id[node['id']]}) for node in nodes]
+
+        # Do the same for singletons
+        singletons = trace_json.get('Singletons')
+        [node.update({'patient_attributes' : attrs_by_id[node['id']]}) for node in singletons]
+
+        return trace_json
+
+
+    return
+
+
 def annotate_lanl(trace_json_fn, lanl_file):
+
     '''
     Annotate attributes created from id_to_attributes to hivclustercsv results
     for easy parsing in JavaScript
@@ -227,7 +252,7 @@ def get_singleton_nodes(nodes_in_results, original_fn):
 
 def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
              compare_to_lanl, fraction, strip_drams_flag = False, filter_edges = "no",
-             handle_contaminants = "remove", skip_alignment = False):
+             handle_contaminants = "remove", skip_alignment = False, attributes_file = None):
 
     """
     PHASE 1)  Pad sequence alignment to HXB2 length with bealign
@@ -477,6 +502,9 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     if handle_contaminants == 'separately':
         results_json['trace_results']['Network Summary']['contaminant_sequences'] = contams
 
+    if attributes_file != None:
+        annotate_file_attributes(trace_json, attributes_fn, 'ehars_uid')
+
     if not compare_to_lanl:
         return results_json
 
@@ -592,6 +620,7 @@ def main():
                                                      DRAM sites to remove: 'lewis' or 'wheeler'.")
     parser.add_argument('-c', '--compare', help='Compare to supplied FASTA file', action='store_true')
     parser.add_argument('--skip-alignment', help='Skip alignment', action='store_true')
+    parser.add_argument('--attributes-file', help='Annotate with attributes', action='store_true')
     parser.add_argument('--log', help='Write logs to specified directory')
 
 
@@ -613,11 +642,12 @@ def main():
     COMPARE_TO_LANL=args.compare
     FRACTION=args.fraction
     STRIP_DRAMS = args.strip_drams
+    ATTRIBUTES_FILE = args.attributes_file
 
     if STRIP_DRAMS != 'wheeler' and STRIP_DRAMS != 'lewis':
         STRIP_DRAMS = False
 
-    results = hivtrace(ID, FN, REFERENCE, AMBIGUITY_HANDLING, DISTANCE_THRESHOLD, MIN_OVERLAP, COMPARE_TO_LANL, FRACTION, strip_drams_flag =STRIP_DRAMS, filter_edges = args.filter, handle_contaminants = args.curate, skip_alignment=args.skip_alignment)
+    results = hivtrace(ID, FN, REFERENCE, AMBIGUITY_HANDLING, DISTANCE_THRESHOLD, MIN_OVERLAP, COMPARE_TO_LANL, FRACTION, strip_drams_flag =STRIP_DRAMS, filter_edges = args.filter, handle_contaminants = args.curate, skip_alignment=args.skip_alignment, attributes_file=ATTRIBUTES_FILE)
     print(json.dumps(results))
 
 
