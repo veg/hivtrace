@@ -367,7 +367,6 @@ class TestHIVTrace(unittest.TestCase):
     self.assertTrue("patient_attributes" in results["Nodes"][0])
 
 
-
 if __name__ == '__main__':
   unittest.main()
 

@@ -197,19 +197,19 @@ def annotate_file_attributes(trace_json, attributes_fn, key_id):
     Annotate attributes created from id_to_attributes to hivclustercsv results
     for easy parsing in JavaScript
     '''
-
     with open(attributes_fn) as attributes_fh:
         attributes_json = json.loads(attributes_fh.read())
-        attrs_by_id = {d[key_id]: d for d in attributes_json}
+        attrs_by_id = { d[key_id]: d for d in attributes_json }
         nodes = trace_json.get('Nodes')
-        [node.update({'patient_attributes' : attrs_by_id[node['id']]}) for node in nodes]
+        [node.update({'patient_attributes' : []}) for node in nodes if node['id'] not in attrs_by_id]
+        [node.update({'patient_attributes' : attrs_by_id[node['id']]}) for node in nodes if node['id'] in attrs_by_id]
 
         # Do the same for singletons
         singletons = trace_json.get('Singletons')
-        [node.update({'patient_attributes' : attrs_by_id[node['id']]}) for node in singletons]
+        [node.update({'patient_attributes' : []}) for node in singletons if node['id'] not in attrs_by_id]
+        [node.update({'patient_attributes' : attrs_by_id[node['id']]}) for node in singletons if node['id'] in attrs_by_id]
 
         return trace_json
-
 
     return
 
@@ -502,8 +502,8 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     if handle_contaminants == 'separately':
         results_json['trace_results']['Network Summary']['contaminant_sequences'] = contams
 
-    if attributes_file != None:
-        annotate_file_attributes(trace_json, attributes_fn, 'ehars_uid')
+    if attributes_file != None and attributes_file != False:
+        annotate_file_attributes(results_json['trace_results'], attributes_file, 'ehars_uid')
 
     if not compare_to_lanl:
         return results_json
@@ -620,7 +620,7 @@ def main():
                                                      DRAM sites to remove: 'lewis' or 'wheeler'.")
     parser.add_argument('-c', '--compare', help='Compare to supplied FASTA file', action='store_true')
     parser.add_argument('--skip-alignment', help='Skip alignment', action='store_true')
-    parser.add_argument('--attributes-file', help='Annotate with attributes', action='store_true')
+    parser.add_argument('--attributes-file', help='Annotate with attributes')
     parser.add_argument('--log', help='Write logs to specified directory')
 
 
