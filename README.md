@@ -93,7 +93,7 @@ included in distance calculations. Be sure to adjust this based on the length
 of the input sequences. You should aim to have at least 2/(distance threshold)
 aligned characters.
 
-## -f --fraction
+## -g --fraction
 
 Affects _only_ the **Resolve** option for handling ambiguities.
 Any sequence with no more than the selected proportion [0 - 1] will have its
