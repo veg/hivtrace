@@ -134,5 +134,5 @@ Retrieved periodically from the [Los Alamos HIV Sequence Database](http://hiv.la
 
 
 # Viewing JSON files
-You can either use the command `hivtrace_viz <path_to_json_file>` or visit `http://veg.github.io/hivtrace/results.html` and click Load File.
+You can either use the command `hivtrace_viz <path_to_json_file>` or visit `https://veg.github.io/hivtrace-viz/` and click Load File.
 
