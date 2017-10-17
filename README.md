@@ -30,7 +30,7 @@ Tested with Python 3.5.1, 3.5.3, and 3.6.1.
 
 # Example Usage
 
-`hivtrace -i ./INPUT.FASTA -a 500 -r HXB2_prrt -t .015 -m 500 -g .05 -c`
+`hivtrace -i ./INPUT.FASTA -a resolve -r HXB2_prrt -t .015 -m 500 -g .05 -c`
 
 # Options Summary
 
