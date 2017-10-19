@@ -12,7 +12,7 @@ potential links against the Los Alamos HIV Sequence Database.
 
 ## System Dependencies
 
-HIV Trace requires [tn93](https://github.com/veg/tn93) be installed and python3.
+HIV-TRACE requires [tn93](https://github.com/veg/tn93) be installed and python3.
 
 ## Install using pip
 
@@ -20,7 +20,7 @@ HIV Trace requires [tn93](https://github.com/veg/tn93) be installed and python3.
 pip3 install hivtrace
 ```
 
-Tested with Python 3.5.1, 3.5.3, and 3.6.1.
+Tested with Python `3.5.1`, `3.5.3`, and `3.6.1`.
 
 # Example Usage
 
@@ -50,7 +50,7 @@ For more details, please see the the [MBE paper](http://mbe.oxfordjournals.org/c
 
 ## -r --reference
 
-The sequence that will be used to align everything else to. It is assumed that
+The sequence that will be used to align all provided sequences to. It is assumed that
 the input sequences are in fact homologous to the reference and do not have too
 much indel variation.
 
@@ -116,6 +116,8 @@ A->B->C chains look like A-B-C triangles.
 
 ## -s --strip_drams
 
+Masks known DRAMs (Drug Resistance-Associated Mutation) positions from provided sequences.
+
 | Option    | Description                                                                                                                                      |
 | --------- | --------------                                                                                                                                   |
 | lewis     | Mask (with ---) the list of codon sites defined in [Lewis et al](http://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0050050). |
@@ -123,6 +125,7 @@ A->B->C chains look like A-B-C triangles.
 
  
 ## -c --compare
+
 Compare uploaded sequences to all public sequences. 
 Retrieved periodically from the [Los Alamos HIV Sequence Database](http://hiv.lanl.gov)
 
