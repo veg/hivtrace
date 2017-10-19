@@ -4,7 +4,7 @@ HIV-TRACE
 [![Build Status](https://travis-ci.org/veg/hivtrace.svg)](https://travis-ci.org/veg/hivtrace)
 [![Coverage Status](https://coveralls.io/repos/veg/hivtrace/badge.png?branch=master)](https://coveralls.io/r/veg/hivtrace)
 
-HIV TRACE is an application that identifies potential transmission
+HIV-TRACE is an application that identifies potential transmission
 clusters within a supplied FASTA file with an option to find
 potential links against the Los Alamos HIV Sequence Database. 
 
@@ -12,19 +12,22 @@ potential links against the Los Alamos HIV Sequence Database.
 
 ## System Dependencies
 
-HIV Trace requires [tn93](https://github.com/veg/tn93) be installed and python 3.
+HIV-TRACE requires [tn93](https://github.com/veg/tn93) be installed and python3.
 
 ## Install using pip
 
 ```
-pip3 install numpy
 pip3 install biopython
+pip3 install numpy
+pip3 install scipy
 pip3 install hivtrace
 ```
 
+Tested with Python `3.5.1`, `3.5.3`, and `3.6.1`.
+
 # Example Usage
 
-`hivtrace -i ./INPUT.FASTA -a 500 -r HXB2_prrt -t .015 -m 500 -g .05 -c`
+`hivtrace -i ./INPUT.FASTA -a resolve -r HXB2_prrt -t .015 -m 500 -g .05 -c`
 
 # Options Summary
 
@@ -50,7 +53,7 @@ For more details, please see the the [MBE paper](http://mbe.oxfordjournals.org/c
 
 ## -r --reference
 
-The sequence that will be used to align everything else to. It is assumed that
+The sequence that will be used to align all provided sequences to. It is assumed that
 the input sequences are in fact homologous to the reference and do not have too
 much indel variation.
 
@@ -87,7 +90,7 @@ included in distance calculations. Be sure to adjust this based on the length
 of the input sequences. You should aim to have at least 2/(distance threshold)
 aligned characters.
 
-## -f --fraction
+## -g --fraction
 
 Affects _only_ the **Resolve** option for handling ambiguities.
 Any sequence with no more than the selected proportion [0 - 1] will have its
@@ -116,6 +119,8 @@ A->B->C chains look like A-B-C triangles.
 
 ## -s --strip_drams
 
+Masks known DRAMs (Drug Resistance-Associated Mutation) positions from provided sequences.
+
 | Option    | Description                                                                                                                                      |
 | --------- | --------------                                                                                                                                   |
 | lewis     | Mask (with ---) the list of codon sites defined in [Lewis et al](http://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0050050). |
@@ -123,10 +128,11 @@ A->B->C chains look like A-B-C triangles.
 
  
 ## -c --compare
+
 Compare uploaded sequences to all public sequences. 
 Retrieved periodically from the [Los Alamos HIV Sequence Database](http://hiv.lanl.gov)
 
 
 # Viewing JSON files
-You can either use the command `hivtrace_viz <path_to_json_file>` or visit `http://veg.github.io/hivtrace/results.html` and click Load File.
+You can either use the command `hivtrace_viz <path_to_json_file>` or visit `https://veg.github.io/hivtrace-viz/` and click Load File.
 
