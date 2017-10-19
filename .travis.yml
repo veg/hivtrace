@@ -9,16 +9,26 @@ cache:
   directories:
       - $HOME/.pip-cache/
 
+compiler:
+  - gcc
+
 addons:
   apt:
+    sources:
+      - llvm-toolchain-precise
+      - ubuntu-toolchain-r-test
+      - george-edison55-precise-backports
     packages:
         - gfortran 
         - libopenblas-dev
         - liblapack-dev
         - cmake
+        - g++-6
+        - gcc-6
 
 before_install:
   - sudo chmod 777 /usr/local/bin
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-6" CC="gcc-6"; fi
   - git clone https://github.com/veg/tn93.git
   - cd tn93/ && cmake ./ && make install && cd ../
 

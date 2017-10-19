@@ -12,6 +12,10 @@ potential links against the Los Alamos HIV Sequence Database.
 
 ## System Dependencies
 
+* gcc >= 6.0.0
+* python3 >= 3.5.1
+* tn93 >= 1.0.0
+
 HIV-TRACE requires [tn93](https://github.com/veg/tn93) be installed and python3.
 
 ## Install using pip
