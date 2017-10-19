@@ -4,7 +4,7 @@ HIV-TRACE
 [![Build Status](https://travis-ci.org/veg/hivtrace.svg)](https://travis-ci.org/veg/hivtrace)
 [![Coverage Status](https://coveralls.io/repos/veg/hivtrace/badge.png?branch=master)](https://coveralls.io/r/veg/hivtrace)
 
-HIV TRACE is an application that identifies potential transmission
+HIV-TRACE is an application that identifies potential transmission
 clusters within a supplied FASTA file with an option to find
 potential links against the Los Alamos HIV Sequence Database. 
 
@@ -12,17 +12,11 @@ potential links against the Los Alamos HIV Sequence Database.
 
 ## System Dependencies
 
-HIV Trace requires [tn93](https://github.com/veg/tn93) be installed and python 3.
+HIV Trace requires [tn93](https://github.com/veg/tn93) be installed and python3.
 
 ## Install using pip
 
 ```
-pip install --upgrade pip
-pip3 install wheel
-pip3 wheel pysam
-pip3 install pysam*.whl
-pip3 install numpy
-pip3 install biopython
 pip3 install hivtrace
 ```
 
