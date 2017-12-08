@@ -25,10 +25,10 @@ def setup_package():
 
     setup(
         name='hivtrace',
-        version='0.3.2',
+        version='0.3.3',
         description='HIV-TRACE',
-        author='Steven Weaver',
-        author_email='steven@stevenweaver.org',
+        author='Joel Wertheim, Sergei Pond, and Steven Weaver',
+        author_email='sweaver@temple.edu',
         url='http://www.hivtrace.org',
         packages=['hivtrace'],
         package_data={
@@ -48,7 +48,7 @@ def setup_package():
             'biopython-extensions >= 0.18.3',
             'hyphy-helper >= 0.9.6',
             'tornado >= 4.3',
-            'hivclustering >= 1.2.0',
+            'hivclustering >= 1.2.7',
             ],
         entry_points={
             'console_scripts': [
