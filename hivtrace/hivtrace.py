@@ -622,6 +622,7 @@ def main():
     parser.add_argument('--skip-alignment', help='Skip alignment', action='store_true')
     parser.add_argument('--attributes-file', help='Annotate with attributes')
     parser.add_argument('--log', help='Write logs to specified directory')
+    parser.add_argument('-o', '--output', help='Specify output filename')
 
 
     args = parser.parse_args()
@@ -634,6 +635,7 @@ def main():
     logging.basicConfig (filename = log_fn, level=logging.DEBUG)
 
     FN=args.input
+    OUTPUT_FN = args.input + '.results.json'
     ID=os.path.basename(FN)
     REFERENCE = args.reference
     AMBIGUITY_HANDLING=args.ambiguities.lower()
@@ -644,11 +646,18 @@ def main():
     STRIP_DRAMS = args.strip_drams
     ATTRIBUTES_FILE = args.attributes_file
 
+    if args.output:
+        OUTPUT_FN = args.output
+
+
     if STRIP_DRAMS != 'wheeler' and STRIP_DRAMS != 'lewis':
         STRIP_DRAMS = False
 
     results = hivtrace(ID, FN, REFERENCE, AMBIGUITY_HANDLING, DISTANCE_THRESHOLD, MIN_OVERLAP, COMPARE_TO_LANL, FRACTION, strip_drams_flag =STRIP_DRAMS, filter_edges = args.filter, handle_contaminants = args.curate, skip_alignment=args.skip_alignment, attributes_file=ATTRIBUTES_FILE)
-    print(json.dumps(results))
+
+    # Write to output filename if specified
+    with open(OUTPUT_FN, 'w') as outfile:
+        json.dump(results, outfile)
 
 
 if __name__ == "__main__":
