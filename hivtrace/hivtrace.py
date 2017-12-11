@@ -272,25 +272,39 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     results_json = {}
 
     # Declare reference file
-    resource_dir =  os.path.join(os.path.dirname(os.path.realpath(__file__)), 'rsrc')
+    resource_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'rsrc')
 
-
-    #These should be defined in the user's environment
+    # These should be defined in the user's environment
     env_dir = os.path.dirname(sys.executable)
-    PYTHON=sys.executable
-    BEALIGN=os.path.join(env_dir, 'bealign')
-    BAM2MSA=os.path.join(env_dir, 'bam2msa')
-    TN93DIST='tn93'
-    HIVNETWORKCSV=os.path.join(env_dir, 'hivnetworkcsv')
+    PYTHON = sys.executable
+
+    # Try python's system executable first, then the user's path.
+
+    if(os.path.isfile(os.path.join(env_dir, 'bealign'))):
+        BEALIGN = os.path.join(env_dir, 'bealign')
+    else:
+        BEALIGN = 'bealign'
+
+    if(os.path.isfile(os.path.join(env_dir, 'bam2msa'))):
+        BAM2MSA = os.path.join(env_dir, 'bam2msa')
+    else:
+        BAM2MSA = 'bam2msa'
+
+    if(os.path.isfile(os.path.join(env_dir, 'hivnetworkcsv'))):
+        HIVNETWORKCSV = os.path.join(env_dir, 'hivnetworkcsv')
+    else:
+        HIVNETWORKCSV = 'hivnetworkcsv'
+
+    TN93DIST = 'tn93'
 
     # This will have to be another parameter
     LANL_FASTA = os.path.join(resource_dir, 'LANL.FASTA')
     LANL_TN93OUTPUT_CSV = os.path.join(resource_dir, 'LANL.TN93OUTPUT.csv')
-    DEFAULT_DELIMITER='|'
+    DEFAULT_DELIMITER = '|'
 
     # Check if LANL files exists. If not, then check if zip file exists,
     # otherwise throw error
-    try :
+    try:
         if not os.path.isfile(LANL_FASTA):
             lanl_zip = os.path.join(resource_dir, 'LANL.FASTA.gz')
             gunzip_file(lanl_zip, LANL_FASTA)
@@ -622,6 +636,7 @@ def main():
     parser.add_argument('--skip-alignment', help='Skip alignment', action='store_true')
     parser.add_argument('--attributes-file', help='Annotate with attributes')
     parser.add_argument('--log', help='Write logs to specified directory')
+    parser.add_argument('-o', '--output', help='Specify output filename')
 
 
     args = parser.parse_args()
@@ -634,6 +649,7 @@ def main():
     logging.basicConfig (filename = log_fn, level=logging.DEBUG)
 
     FN=args.input
+    OUTPUT_FN = args.input + '.results.json'
     ID=os.path.basename(FN)
     REFERENCE = args.reference
     AMBIGUITY_HANDLING=args.ambiguities.lower()
@@ -644,11 +660,18 @@ def main():
     STRIP_DRAMS = args.strip_drams
     ATTRIBUTES_FILE = args.attributes_file
 
+    if args.output:
+        OUTPUT_FN = args.output
+
+
     if STRIP_DRAMS != 'wheeler' and STRIP_DRAMS != 'lewis':
         STRIP_DRAMS = False
 
     results = hivtrace(ID, FN, REFERENCE, AMBIGUITY_HANDLING, DISTANCE_THRESHOLD, MIN_OVERLAP, COMPARE_TO_LANL, FRACTION, strip_drams_flag =STRIP_DRAMS, filter_edges = args.filter, handle_contaminants = args.curate, skip_alignment=args.skip_alignment, attributes_file=ATTRIBUTES_FILE)
-    print(json.dumps(results))
+
+    # Write to output filename if specified
+    with open(OUTPUT_FN, 'w') as outfile:
+        json.dump(results, outfile)
 
 
 if __name__ == "__main__":
