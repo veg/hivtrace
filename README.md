@@ -142,6 +142,9 @@ Masks known DRAMs (Drug Resistance-Associated Mutation) positions from provided 
 Compare uploaded sequences to all public sequences. 
 Retrieved periodically from the [Los Alamos HIV Sequence Database](http://hiv.lanl.gov)
 
+## -o --output
+Specify output filename. If no output filename is provided, then the output filename will be <input_filename>.results.json
+
 
 # Viewing JSON files
 You can either use the command `hivtrace_viz <path_to_json_file>` or visit `https://veg.github.io/hivtrace-viz/` and click Load File.
