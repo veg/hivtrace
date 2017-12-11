@@ -121,6 +121,12 @@ Use a phylogenetic test of conditional independence on each triangle in the
 network to remove spurious _transitive_ connections which make
 A->B->C chains look like A-B-C triangles. 
 
+| Option     | Description                                                     |
+| ---------  | --------------                                                  |
+| remove     | reports supurious _transitive_ connections                      |
+| report     | removes supurious _transitive_ connections                      |
+
+
 ## -s --strip_drams
 
 Masks known DRAMs (Drug Resistance-Associated Mutation) positions from provided sequences.
@@ -135,6 +141,9 @@ Masks known DRAMs (Drug Resistance-Associated Mutation) positions from provided 
 
 Compare uploaded sequences to all public sequences. 
 Retrieved periodically from the [Los Alamos HIV Sequence Database](http://hiv.lanl.gov)
+
+## -o --output
+Specify output filename. If no output filename is provided, then the output filename will be <input_filename>.results.json
 
 
 # Viewing JSON files
