@@ -272,25 +272,39 @@ def hivtrace(id, input, reference, ambiguities, threshold, min_overlap,
     results_json = {}
 
     # Declare reference file
-    resource_dir =  os.path.join(os.path.dirname(os.path.realpath(__file__)), 'rsrc')
+    resource_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'rsrc')
 
-
-    #These should be defined in the user's environment
+    # These should be defined in the user's environment
     env_dir = os.path.dirname(sys.executable)
-    PYTHON=sys.executable
-    BEALIGN=os.path.join(env_dir, 'bealign')
-    BAM2MSA=os.path.join(env_dir, 'bam2msa')
-    TN93DIST='tn93'
-    HIVNETWORKCSV=os.path.join(env_dir, 'hivnetworkcsv')
+    PYTHON = sys.executable
+
+    # Try python's system executable first, then the user's path.
+
+    if(os.path.isfile(os.path.join(env_dir, 'bealign'))):
+        BEALIGN = os.path.join(env_dir, 'bealign')
+    else:
+        BEALIGN = 'bealign'
+
+    if(os.path.isfile(os.path.join(env_dir, 'bam2msa'))):
+        BAM2MSA = os.path.join(env_dir, 'bam2msa')
+    else:
+        BAM2MSA = 'bam2msa'
+
+    if(os.path.isfile(os.path.join(env_dir, 'hivnetworkcsv'))):
+        HIVNETWORKCSV = os.path.join(env_dir, 'hivnetworkcsv')
+    else:
+        HIVNETWORKCSV = 'hivnetworkcsv'
+
+    TN93DIST = 'tn93'
 
     # This will have to be another parameter
     LANL_FASTA = os.path.join(resource_dir, 'LANL.FASTA')
     LANL_TN93OUTPUT_CSV = os.path.join(resource_dir, 'LANL.TN93OUTPUT.csv')
-    DEFAULT_DELIMITER='|'
+    DEFAULT_DELIMITER = '|'
 
     # Check if LANL files exists. If not, then check if zip file exists,
     # otherwise throw error
-    try :
+    try:
         if not os.path.isfile(LANL_FASTA):
             lanl_zip = os.path.join(resource_dir, 'LANL.FASTA.gz')
             gunzip_file(lanl_zip, LANL_FASTA)
