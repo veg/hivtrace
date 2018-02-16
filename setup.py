@@ -25,7 +25,7 @@ def setup_package():
 
     setup(
         name='hivtrace',
-        version='0.4.0',
+        version='0.4.1',
         description='HIV-TRACE',
         author='Joel Wertheim, Sergei Pond, and Steven Weaver',
         author_email='sweaver@temple.edu',
@@ -46,7 +46,7 @@ def setup_package():
         install_requires=[
             'biopython >= 1.58',
             'biopython-extensions >= 0.18.3',
-            'hyphy-helper >= 0.9.6',
+            'hyphy-helper >= 0.9.9',
             'tornado >= 4.3',
             'hivclustering >= 1.2.8',
             ],
