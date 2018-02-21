@@ -46,7 +46,7 @@ def setup_package():
         install_requires=[
             'biopython >= 1.58',
             'biopython-extensions >= 0.18.3',
-            'hyphy-helper >= 0.9.9',
+            'hppy >= 0.9.9',
             'tornado >= 4.3',
             'hivclustering >= 1.2.8',
             ],
