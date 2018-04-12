@@ -105,7 +105,7 @@ def rename_duplicates(fasta_fn, delimiter):
 
 def is_tn93_file_empty(tn93_fn):
     with open(tn93_fn) as fh:
-        test = next(islice(fh.readlines(), 2, 3), None)
+        test = next(islice(fh.readlines(), 1, 2), None)
     return test is None
 
 def concatenate_data(output, reference_fn, pairwise_fn, user_fn):
@@ -533,7 +533,10 @@ def hivtrace(id,
         shutil.copyfile(OUTPUT_TN93_FN, DEST_TN93_FN)
         update_status(id, phases.COMPUTE_TN93_DISTANCE, status.COMPLETED)
 
-    is_tn93_file_empty(DEST_TN93_FN)
+    # raise an exception if tn93 file is empty
+    if is_tn93_file_empty(DEST_TN93_FN):
+        raise Exception(' '.join(tn93_process) + "returned empty file")
+
 
     # send contents of tn93 to status page
 
