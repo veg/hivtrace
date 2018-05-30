@@ -48,7 +48,7 @@ def setup_package():
             'biopython-extensions >= 0.18.3',
             'hppy >= 0.9.9',
             'tornado >= 4.3',
-            'hivclustering >= 1.2.8',
+            'hivclustering == 1.2.8',
             ],
         entry_points={
             'console_scripts': [
