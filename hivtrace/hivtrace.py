@@ -15,7 +15,7 @@ from itertools import groupby, islice
 import json
 import logging
 import tempfile
-import hivtrace.strip_drams as sd
+import strip_drams as sd
 
 
 class status:
