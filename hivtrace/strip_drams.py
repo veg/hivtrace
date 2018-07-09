@@ -67,7 +67,7 @@ def main():
 
 
     for (id, data) in strip_drams (settings.input, settings.dram):
-        print (">%s\n%s" % (id, data), file = settings.output)
+        settings.output.write(">%s\n%s\n" % (id, data))
 
 
 if __name__ == '__main__':
