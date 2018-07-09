@@ -459,7 +459,7 @@ def hivtrace(id,
             reference_name = next(SeqIO.parse(msa, 'fasta')).id
             logging.debug('Reference name set to %s' % reference_name)
             with open(CONTAMINANT_ID_LIST, 'w') as contaminants:
-                print(reference_name, file=contaminants)
+                contaminants.write(reference_name + '\n')
 
     # Ensure unique ids
     # Warn of duplicates by annotating with an attribute
@@ -474,7 +474,7 @@ def hivtrace(id,
         with open(str(OUTPUT_FASTA_FN_TMP), 'w') as output_file:
             for (seq_id, data) in sd.strip_drams(OUTPUT_FASTA_FN,
                                                  strip_drams_flag):
-                print(">%s\n%s" % (seq_id, data), file=output_file)
+                output_file.write(">%s\n%s\n" % (seq_id, data))
         shutil.move(OUTPUT_FASTA_FN_TMP, OUTPUT_FASTA_FN)
 
     # PHASE 3b Filter contaminants
@@ -664,7 +664,7 @@ def hivtrace(id,
                 for f_path in (LANL_FASTA, OUTPUT_FASTA_FN):
                     with open(f_path) as src_file:
                         shutil.copyfileobj(src_file, combined_fasta)
-                        print("\n", file=combined_fasta)
+                        combined_fasta.write("\n\n")
 
             lanl_hivnetworkcsv_process = [
                 PYTHON, HIVNETWORKCSV, '-i', USER_LANL_TN93OUTPUT, '-t',
