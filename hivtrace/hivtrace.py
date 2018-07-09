@@ -15,7 +15,10 @@ from itertools import groupby, islice
 import json
 import logging
 import tempfile
-import strip_drams as sd
+try:
+    import hivtrace.strip_drams as sd
+except: # Python 2.7
+    import strip_drams as sd
 
 
 class status:
