@@ -61,23 +61,23 @@ The sequence that will be used to align all provided sequences to. It is assumed
 the input sequences are in fact homologous to the reference and do not have too
 much indel variation.
 
-| Option               | Description                     |
-| ---------            | --------------                  |
-| HXB2_vif             |                                 |
-| HXB2_vpu             |                                 |
-| HXB2_int             |                                 |
-| HXB2_vpr             |                                 |
-| HXB2_pr              |                                 |
-| HXB2_pol             |                                 |
-| HXB2_tat             |                                 |
-| HXB2_rt              |                                 |
-| NL4-3_prrt           |                                 |
-| HXB2_prrt            |                                 |
-| HXB2_nef             |                                 |
-| HXB2_gag             |                                 |
-| HXB2_env             |                                 |
-| HXB2_rev             |                                 |
-| Path/to/FASTA/file   | Path to a custom reference file |
+| Option               | Description                                                                                  |
+| ---------            | --------------                                                                               |
+| HXB2_vif             | Viral Infectivity Factor                                                                     |
+| HXB2_vpu             | Viral Protein U                                                                              |
+| HXB2_int             |                                                                                              |
+| HXB2_vpr             | Viral Protein R                                                                              |
+| HXB2_pr              |                                                                                              |
+| HXB2_pol             | The genomic region encoding the viral enzymes protease, reverse transcriptase, and integrase |
+| HXB2_tat             | Transactivator of HIV gene expression                                                        |
+| HXB2_rt              |                                                                                              |
+| NL4-3_prrt           |                                                                                              |
+| HXB2_prrt            |                                                                                              |
+| HXB2_nef             | 27-kd myristoylated protein produced by an ORF located at the 3' end of primate lentiviruses |
+| HXB2_gag             | The genomic region encoding the capsid proteins (group specific antigens)                    |
+| HXB2_env             | Viral glycoproteins produced as a precursor (gp160)                                          |
+| HXB2_rev             | The second necessary regulatory factor for HIV expression                                    |
+| Path/to/FASTA/file   | Path to a custom reference file                                                              |
 
 Please reference the [landmarks of the HIV-1 genome](http://www.hiv.lanl.gov/content/sequence/HIV/MAP/landmark.html) if the presets seem foreign to you.
 
