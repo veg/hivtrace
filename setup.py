@@ -48,7 +48,7 @@ def setup_package():
             'bioext >= 0.19.4',
             'hppy >= 0.9.9',
             'tornado >= 4.3',
-            'hivclustering == 1.2.8',
+            'hivclustering == 1.3.2',
             ],
         entry_points={
             'console_scripts': [
