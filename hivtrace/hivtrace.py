@@ -727,7 +727,6 @@ def hivtrace(id,
 
 def main():
 
-    print("debugging")
     parser = argparse.ArgumentParser(description='HIV TRACE')
     parser.add_argument('-i', '--input', help='FASTA file', required=True)
     parser.add_argument(
