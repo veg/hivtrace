@@ -37,6 +37,8 @@ install:
   - pip install --upgrade wheel
   - pip install biopython
   - pip install numpy
+  - pip install cython
+  - pip install -r requires.txt
   - travis_wait
   - pip -v install scipy
   - pip install coveralls
