@@ -308,6 +308,7 @@ def hivtrace(id,
              filter_edges="no",
              handle_contaminants="remove",
              skip_alignment=False,
+             save_intermediate=True,
              attributes_file=None):
     """
     PHASE 1)  Pad sequence alignment to HXB2 length with bealign
@@ -383,24 +384,43 @@ def hivtrace(id,
     basename = os.path.basename(input)
 
     BAM_FN = os.path.join(tmp_path, basename + '_output.bam')
-    OUTPUT_FASTA_FN = input + '_output.fasta'
+
+    # Check if save output_fasta_fn
+    OUTPUT_FASTA_FN = os.path.join(tmp_path, basename + '_output.fasta')
+
+    if save_intermediate:
+        OUTPUT_FASTA_FN = input + '_output.fasta'
+
     OUTPUT_TN93_FN = os.path.join(tmp_path, basename + '_user.tn93output.csv')
+
     OUTPUT_TN93_CONTAM_FN = os.path.join(tmp_path,
                                          basename + '_contam.tn93output.csv')
-    DEST_TN93_FN = input + '_user.tn93output.csv'
+
+    DEST_TN93_FN = OUTPUT_TN93_FN
+
+    if save_intermediate:
+        DEST_TN93_FN = input + '_user.tn93output.csv'
+
     JSON_TN93_FN = os.path.join(tmp_path, basename + '_user.tn93output.json')
+
     JSON_TN93_CONTAM_FN = os.path.join(tmp_path,
                                        basename + '_contam.tn93output.json')
+
     OUTPUT_COMBINED_SEQUENCE_FILE = os.path.join(
         tmp_path, basename + "_combined_user_lanl.fasta")
+
     OUTPUT_CLUSTER_JSON = os.path.join(tmp_path, basename + '_user.trace.json')
+
     LANL_OUTPUT_CLUSTER_JSON = os.path.join(tmp_path,
                                             basename + '_lanl_user.trace.json')
+
     OUTPUT_USERTOLANL_TN93_FN = os.path.join(
         tmp_path, basename + '_usertolanl.tn93output.csv')
+
     USER_LANL_TN93OUTPUT = os.path.join(tmp_path,
                                         basename + '_userlanl.tn93output.csv')
     USER_FILTER_LIST = os.path.join(tmp_path, basename + '_user_filter.csv')
+
     CONTAMINANT_ID_LIST = os.path.join(tmp_path,
                                        basename + '_contaminants.csv')
 
@@ -530,7 +550,10 @@ def hivtrace(id,
 
         logging.debug(' '.join(tn93_process))
         subprocess.check_call(tn93_process, stdout=tn93_fh, stderr=tn93_fh)
-        shutil.copyfile(OUTPUT_TN93_FN, DEST_TN93_FN)
+
+        if OUTPUT_TN93_FN != DEST_TN93_FN:
+            shutil.copyfile(OUTPUT_TN93_FN, DEST_TN93_FN)
+
         update_status(id, phases.COMPUTE_TN93_DISTANCE, status.COMPLETED)
 
     # raise an exception if tn93 file is empty
@@ -760,6 +783,12 @@ def main():
         '--compare',
         help='Compare to supplied FASTA file',
         action='store_true')
+
+    parser.add_argument(
+        '--do-not-store-intermediate',
+        help='Store intermediate files',
+        action='store_true')
+
     parser.add_argument(
         '--skip-alignment', help='Skip alignment', action='store_true')
     parser.add_argument('--attributes-file', help='Annotate with attributes')
@@ -777,6 +806,7 @@ def main():
 
     FN = args.input
     OUTPUT_FN = args.input + '.results.json'
+
     ID = os.path.basename(FN)
     REFERENCE = args.reference
     AMBIGUITY_HANDLING = args.ambiguities.lower()
@@ -806,6 +836,7 @@ def main():
         filter_edges=args.filter,
         handle_contaminants=args.curate,
         skip_alignment=args.skip_alignment,
+        save_intermediate=(not args.do_not_store_intermediate),
         attributes_file=ATTRIBUTES_FILE)
 
     # Write to output filename if specified
