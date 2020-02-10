@@ -311,7 +311,9 @@ def hivtrace(id,
              skip_alignment=False,
              save_intermediate=True,
              cycle_report_fn='',
-             attributes_file=None):
+             attributes_file=None,
+             prior=None
+             ):
     """
     PHASE 1)  Pad sequence alignment to HXB2 length with bealign
     PHASE 2)  Convert resulting bam file back to FASTA format
@@ -596,6 +598,10 @@ def hivtrace(id,
     if cycle_report_fn:
         hivnetworkcsv_process.extend(['--cycle-report-file', cycle_report_fn])
 
+    if prior:
+        hivnetworkcsv_process.extend(
+            ['--prior', prior])
+
     # hivclustercsv uses stderr for status updates
     complete_stderr = ''
     returncode = None
@@ -817,6 +823,7 @@ def main():
     parser.add_argument('--log', help='Write logs to specified directory')
 
     parser.add_argument('-o', '--output', help='Specify output filename')
+    parser.add_argument('-p', '--prior', help='Prior network configuration')
 
     parser.add_argument('--cycle-report-fn', help='cycle report output')
 
@@ -842,6 +849,10 @@ def main():
     STRIP_DRAMS = args.strip_drams
     ATTRIBUTES_FILE = args.attributes_file
     CYCLE_REPORT_FN = None
+    PRIOR = None
+
+    if(args.prior):
+        PRIOR = args.prior
 
     if args.output:
         OUTPUT_FN = args.output
@@ -869,6 +880,8 @@ def main():
         save_intermediate=(not args.do_not_store_intermediate),
         cycle_report_fn=CYCLE_REPORT_FN,
         attributes_file=ATTRIBUTES_FILE)
+        prior=PRIOR
+        )
 
     # Write to output filename if specified
     with open(OUTPUT_FN, 'w') as outfile:
