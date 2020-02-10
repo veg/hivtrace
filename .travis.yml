@@ -3,7 +3,7 @@ branches:
 only:
   - master
 python:
-  - "3.5"
+  - "3.7"
 
 cache:
   directories:
@@ -23,13 +23,13 @@ addons:
         - libopenblas-dev
         - liblapack-dev
         - cmake
-        - g++-6
-        - gcc-6
+        - g++-8
+        - gcc-8
 
 before_install:
   - sudo chmod 777 /usr/local/bin
   - git clone https://github.com/veg/tn93.git
-  - export CXX="g++-6" CC="gcc-6"
+  - export CXX="g++-8" CC="gcc-8"
   - cd tn93/ && cmake -DCMAKE_C_COMPILER=gcc-6 ./ && make install && cd ../
 
 install:
