@@ -30,7 +30,7 @@ before_install:
   - sudo chmod 777 /usr/local/bin
   - git clone https://github.com/veg/tn93.git
   - export CXX="g++-8" CC="gcc-8"
-  - cd tn93/ && cmake -DCMAKE_C_COMPILER=gcc-6 ./ && make install && cd ../
+  - cd tn93/ && cmake -DCMAKE_C_COMPILER=gcc-8 ./ && make install && cd ../
 
 install:
   - pip install --upgrade pip
