@@ -31,7 +31,7 @@ before_install:
   - git clone https://github.com/veg/tn93.git
   - git clone https://github.com/veg/hyphy-python.git
   - export CXX="g++-7" CC="gcc-7"
-  - cd tn93/ && cmake -DCMAKE_C_COMPILER=gcc-8 ./ && make install && cd ../
+  - cd tn93/ && cmake -DCMAKE_C_COMPILER=gcc-7 ./ && make install && cd ../
 
 install:
   - pip install --upgrade pip
@@ -53,8 +53,6 @@ notifications:
     email:
         recipients:
             - steven@stevenweaver.org
-            - jwertheim@ucsd.edu
-            - spond@temple.edu
         on_success: change
         on_failure: always
 
