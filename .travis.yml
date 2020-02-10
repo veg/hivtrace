@@ -23,13 +23,14 @@ addons:
         - libopenblas-dev
         - liblapack-dev
         - cmake
-        - g++-8
-        - gcc-8
+        - g++-7
+        - gcc-7
 
 before_install:
   - sudo chmod 777 /usr/local/bin
   - git clone https://github.com/veg/tn93.git
-  - export CXX="g++-8" CC="gcc-8"
+  - git clone https://github.com/veg/hyphy-python.git
+  - export CXX="g++-7" CC="gcc-7"
   - cd tn93/ && cmake -DCMAKE_C_COMPILER=gcc-8 ./ && make install && cd ../
 
 install:
@@ -39,6 +40,7 @@ install:
   - pip install numpy
   - pip install cython
   - pip install -r requires.txt
+  - cd hyphy-python/ && CC=gcc CXX=g++ python setup.py install && cd ../
   - travis_wait
   - pip -v install scipy
   - pip install coveralls
