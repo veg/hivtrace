@@ -309,7 +309,9 @@ def hivtrace(id,
              handle_contaminants="remove",
              skip_alignment=False,
              save_intermediate=True,
-             attributes_file=None):
+             attributes_file=None,
+             prior=None
+             ):
     """
     PHASE 1)  Pad sequence alignment to HXB2 length with bealign
     PHASE 2)  Convert resulting bam file back to FASTA format
@@ -588,6 +590,10 @@ def hivtrace(id,
         hivnetworkcsv_process.extend(
             ['-C', handle_contaminants, '-F', CONTAMINANT_ID_LIST])
 
+    if prior:
+        hivnetworkcsv_process.extend(
+            ['--prior', prior])
+
     # hivclustercsv uses stderr for status updates
     complete_stderr = ''
     returncode = None
@@ -794,6 +800,7 @@ def main():
     parser.add_argument('--attributes-file', help='Annotate with attributes')
     parser.add_argument('--log', help='Write logs to specified directory')
     parser.add_argument('-o', '--output', help='Specify output filename')
+    parser.add_argument('-p', '--prior', help='Prior network configuration')
 
     args = parser.parse_args()
 
@@ -816,6 +823,10 @@ def main():
     FRACTION = args.fraction
     STRIP_DRAMS = args.strip_drams
     ATTRIBUTES_FILE = args.attributes_file
+    PRIOR = None
+
+    if(args.prior):
+        PRIOR = args.prior
 
     if args.output:
         OUTPUT_FN = args.output
@@ -837,7 +848,9 @@ def main():
         handle_contaminants=args.curate,
         skip_alignment=args.skip_alignment,
         save_intermediate=(not args.do_not_store_intermediate),
-        attributes_file=ATTRIBUTES_FILE)
+        attributes_file=ATTRIBUTES_FILE,
+        prior=PRIOR
+        )
 
     # Write to output filename if specified
     with open(OUTPUT_FN, 'w') as outfile:
