@@ -3,7 +3,7 @@ branches:
 only:
   - master
 python:
-  - "3.5"
+  - "3.7"
 
 cache:
   directories:
@@ -23,14 +23,15 @@ addons:
         - libopenblas-dev
         - liblapack-dev
         - cmake
-        - g++-6
-        - gcc-6
+        - g++-7
+        - gcc-7
 
 before_install:
   - sudo chmod 777 /usr/local/bin
   - git clone https://github.com/veg/tn93.git
-  - export CXX="g++-6" CC="gcc-6"
-  - cd tn93/ && cmake -DCMAKE_C_COMPILER=gcc-6 ./ && make install && cd ../
+  - git clone https://github.com/veg/hyphy-python.git
+  - export CXX="g++-7" CC="gcc-7"
+  - cd tn93/ && cmake -DCMAKE_C_COMPILER=gcc-7 ./ && make install && cd ../
 
 install:
   - pip install --upgrade pip
@@ -39,6 +40,7 @@ install:
   - pip install numpy
   - pip install cython
   - pip install -r requires.txt
+  - cd hyphy-python/ && CC=gcc CXX=g++ python setup.py install && cd ../
   - travis_wait
   - pip -v install scipy
   - pip install coveralls
@@ -51,8 +53,6 @@ notifications:
     email:
         recipients:
             - steven@stevenweaver.org
-            - jwertheim@ucsd.edu
-            - spond@temple.edu
         on_success: change
         on_failure: always
 
