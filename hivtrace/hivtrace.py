@@ -292,7 +292,6 @@ def hivtrace(id,
              handle_contaminants="remove",
              skip_alignment=False,
              save_intermediate=True,
-             attributes_file=None,
              prior=None
              ):
     """
@@ -793,7 +792,6 @@ def main():
     COMPARE_TO_LANL = args.compare
     FRACTION = args.fraction
     STRIP_DRAMS = args.strip_drams
-    ATTRIBUTES_FILE = args.attributes_file
     PRIOR = None
 
     if(args.prior):
@@ -819,7 +817,6 @@ def main():
         handle_contaminants=args.curate,
         skip_alignment=args.skip_alignment,
         save_intermediate=(not args.do_not_store_intermediate),
-        attributes_file=ATTRIBUTES_FILE,
         prior=PRIOR
         )
 
