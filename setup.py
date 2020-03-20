@@ -25,7 +25,7 @@ def setup_package():
 
     setup(
         name='hivtrace',
-        version='0.6.0',
+        version='0.6.1',
         description='HIV-TRACE',
         author='Joel Wertheim, Sergei Pond, and Steven Weaver',
         author_email='sweaver@temple.edu',

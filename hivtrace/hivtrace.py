@@ -231,19 +231,6 @@ def annotate_file_attributes(trace_json, attributes_fn, key_id):
             }) for node in nodes if node['id'] in attrs_by_id
         ]
 
-        # Do the same for singletons
-        singletons = trace_json.get('Singletons')
-        [
-            node.update({
-                'patient_attributes': []
-            }) for node in singletons if node['id'] not in attrs_by_id
-        ]
-        [
-            node.update({
-                'patient_attributes': attrs_by_id[node['id']]
-            }) for node in singletons if node['id'] in attrs_by_id
-        ]
-
         return trace_json
 
     return
@@ -526,7 +513,7 @@ def hivtrace(id,
 
     with open(JSON_TN93_FN, 'w') as tn93_fh:
         tn93_process = [
-            TN93DIST, '-q', '-o', OUTPUT_TN93_FN, '-t', threshold, '-a',
+            TN93DIST, '-q', '-0', '-o', OUTPUT_TN93_FN, '-t', threshold, '-a',
             ambiguities, '-l', min_overlap, '-g', fraction
             if ambiguities == 'resolve' else '1.0', '-f', OUTPUT_FORMAT,
             OUTPUT_FASTA_FN
@@ -561,7 +548,7 @@ def hivtrace(id,
 
     hivnetworkcsv_process = [
         HIVNETWORKCSV, '-i', OUTPUT_TN93_FN, '-t', threshold, '-f',
-        SEQUENCE_ID_FORMAT, '-J', '-o'
+        SEQUENCE_ID_FORMAT, '-J', '-o', '-q'
     ]
 
     if filter_edges and filter_edges != 'no':
@@ -608,10 +595,10 @@ def hivtrace(id,
 
     # Place singleton count in Network Summary
 
-    # # Place contaminant nodes in Network Summary
-    # if handle_contaminants == 'separately':
-    #     results_json['trace_results']['Network Summary'][
-    #         'contaminant_sequences'] = contams
+    # Place contaminant nodes in Network Summary
+    if handle_contaminants == 'separately':
+        results_json['trace_results']['Network Summary'][
+            'contaminant_sequences'] = contams
 
     if not compare_to_lanl:
         return results_json
@@ -667,7 +654,7 @@ def hivtrace(id,
 
             lanl_hivnetworkcsv_process = [
                 PYTHON, HIVNETWORKCSV, '-i', USER_LANL_TN93OUTPUT, '-t',
-                threshold, '-f', SEQUENCE_ID_FORMAT, '-J', '-k',
+                threshold, '-f', SEQUENCE_ID_FORMAT, '-J', '-q', '-k',
                 USER_FILTER_LIST, '-n', filter_edges, '-s',
                 OUTPUT_COMBINED_SEQUENCE_FILE
             ]
@@ -675,7 +662,7 @@ def hivtrace(id,
         else:
             lanl_hivnetworkcsv_process = [
                 PYTHON, HIVNETWORKCSV, '-i', USER_LANL_TN93OUTPUT, '-t',
-                threshold, '-f', SEQUENCE_ID_FORMAT, '-J', '-k',
+                threshold, '-f', SEQUENCE_ID_FORMAT, '-J', '-q', '-k',
                 USER_FILTER_LIST
             ]
 
