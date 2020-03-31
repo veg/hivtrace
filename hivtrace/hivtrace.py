@@ -548,7 +548,7 @@ def hivtrace(id,
 
     hivnetworkcsv_process = [
         HIVNETWORKCSV, '-i', OUTPUT_TN93_FN, '-t', threshold, '-f',
-        SEQUENCE_ID_FORMAT, '-J', '-o', '-q'
+        SEQUENCE_ID_FORMAT, '-J', '-q'
     ]
 
     if filter_edges and filter_edges != 'no':
