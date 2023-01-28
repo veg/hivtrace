@@ -1,9 +1,6 @@
 HIV-TRACE
 ==========
 
-[![Build Status](https://travis-ci.org/veg/hivtrace.svg)](https://travis-ci.org/veg/hivtrace)
-[![Coverage Status](https://coveralls.io/repos/veg/hivtrace/badge.png?branch=master)](https://coveralls.io/r/veg/hivtrace)
-
 HIV-TRACE is an application that identifies potential transmission
 clusters within a supplied FASTA file with an option to find
 potential links against the Los Alamos HIV Sequence Database. 
