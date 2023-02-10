@@ -25,7 +25,7 @@ pip3 install cython
 pip3 install hivtrace
 ```
 
-Tested with Python `3.5.1`, `3.5.3`, and `3.6.1`.
+Tested with Python `3.5.1`, `3.5.3`, `3.6.1`, and `3.9.*`.
 
 # Example Usage
 
