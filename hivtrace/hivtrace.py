@@ -341,9 +341,8 @@ def hivtrace(id,
             lanl_tn93output_zip = os.path.join(resource_dir,
                                                'LANL.TN93OUTPUT.csv.gz')
             gunzip_file(lanl_tn93output_zip, LANL_TN93OUTPUT_CSV)
-    except e:  # pragma: no cover
-        print("Oops, missing a resource file")
-        raise
+    except Exception as e:
+        raise Exception("Oops, missing a resource file") from e
 
     # Python Parameters
     SCORE_MATRIX = 'HIV_BETWEEN_F'
