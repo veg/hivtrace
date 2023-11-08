@@ -65,8 +65,9 @@ def fasta_iter(fasta_name):
 
 
 def gunzip_file(zip_file, out_file):
-    with gzip.open(zip_file, 'rb') as f_in:
-        with open(out_file, 'wb') as f_out:
+    """Unzip an archive to a destination if the destination doesn't exist."""
+    if not os.path.isfile(out_file):
+        with gzip.open(zip_file, 'rb') as f_in, open(out_file, 'wb') as f_out:
             f_out.writelines(f_in)
 
 
