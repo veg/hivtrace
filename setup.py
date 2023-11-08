@@ -25,7 +25,7 @@ def setup_package():
 
     setup(
         name='hivtrace',
-        version='0.5.1',
+        version='0.6.3',
         description='HIV-TRACE',
         author='Joel Wertheim, Sergei Pond, and Steven Weaver',
         author_email='sweaver@temple.edu',
@@ -45,10 +45,10 @@ def setup_package():
             },
         install_requires=[
             'biopython >= 1.58',
-            'bioext >= 0.19.7',
+            'bioext >= 0.20.5',
             'hppy >= 0.9.9',
             'tornado >= 4.3',
-            'hivclustering >= 1.5.1',
+            'hivclustering >= 1.6.5',
             ],
         entry_points={
             'console_scripts': [

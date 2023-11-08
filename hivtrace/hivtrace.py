@@ -231,19 +231,6 @@ def annotate_file_attributes(trace_json, attributes_fn, key_id):
             }) for node in nodes if node['id'] in attrs_by_id
         ]
 
-        # Do the same for singletons
-        singletons = trace_json.get('Singletons')
-        [
-            node.update({
-                'patient_attributes': []
-            }) for node in singletons if node['id'] not in attrs_by_id
-        ]
-        [
-            node.update({
-                'patient_attributes': attrs_by_id[node['id']]
-            }) for node in singletons if node['id'] in attrs_by_id
-        ]
-
         return trace_json
 
     return
@@ -278,23 +265,6 @@ def annotate_lanl(trace_json_fn, lanl_file):
 
     shutil.move(trace_json_cp_fn, trace_json_fn)
     return
-
-
-def get_singleton_nodes(nodes_in_results, original_fn):
-
-    seqs = list(map(lambda x: x[0], fasta_iter(original_fn)))
-    node_names = list(map(lambda x: x['id'], nodes_in_results))
-    singletons = list(filter(lambda x: x not in node_names, seqs))
-    node_objects = [{
-        'edi': None,
-        'attributes': [],
-        'cluster': None,
-        'id': node_name,
-        'baseline': None
-    } for node_name in singletons]
-
-    return node_objects
-
 
 def hivtrace(id,
              input,
@@ -546,7 +516,7 @@ def hivtrace(id,
 
     with open(JSON_TN93_FN, 'w') as tn93_fh:
         tn93_process = [
-            TN93DIST, '-q', '-o', OUTPUT_TN93_FN, '-t', threshold, '-a',
+            TN93DIST, '-q', '-0', '-o', OUTPUT_TN93_FN, '-t', threshold, '-a',
             ambiguities, '-l', min_overlap, '-g', fraction
             if ambiguities == 'resolve' else '1.0', '-f', OUTPUT_FORMAT,
             OUTPUT_FASTA_FN
@@ -581,7 +551,7 @@ def hivtrace(id,
 
     hivnetworkcsv_process = [
         HIVNETWORKCSV, '-i', OUTPUT_TN93_FN, '-t', threshold, '-f',
-        SEQUENCE_ID_FORMAT, '-j', '-o'
+        SEQUENCE_ID_FORMAT, '-J', '-q'
     ]
 
     if filter_edges and filter_edges != 'no':
@@ -592,12 +562,12 @@ def hivtrace(id,
         hivnetworkcsv_process.extend(
             ['-C', handle_contaminants, '-F', CONTAMINANT_ID_LIST])
 
+
     if filter_cycles:
         hivnetworkcsv_process.extend(['-l'])
 
     if cycle_report_fn:
         hivnetworkcsv_process.extend(['--cycle-report-file', cycle_report_fn])
-
     if prior:
         hivnetworkcsv_process.extend(
             ['--prior', prior])
@@ -632,24 +602,12 @@ def hivtrace(id,
     results_json["trace_results"] = json.loads(
         open(OUTPUT_CLUSTER_JSON, 'r').read())
 
-    # Get singletons
-    singletons = get_singleton_nodes(results_json['trace_results']['Nodes'],
-                                     input)
-
-    results_json['trace_results']['Singletons'] = singletons
-
     # Place singleton count in Network Summary
-    results_json['trace_results']['Network Summary']['Singletons'] = len(
-        singletons)
 
     # Place contaminant nodes in Network Summary
     if handle_contaminants == 'separately':
         results_json['trace_results']['Network Summary'][
             'contaminant_sequences'] = contams
-
-    if attributes_file != None and attributes_file != False:
-        annotate_file_attributes(results_json['trace_results'],
-                                 attributes_file, 'ehars_uid')
 
     if not compare_to_lanl:
         return results_json
@@ -705,7 +663,7 @@ def hivtrace(id,
 
             lanl_hivnetworkcsv_process = [
                 PYTHON, HIVNETWORKCSV, '-i', USER_LANL_TN93OUTPUT, '-t',
-                threshold, '-f', SEQUENCE_ID_FORMAT, '-j', '-k',
+                threshold, '-f', SEQUENCE_ID_FORMAT, '-J', '-q', '-k',
                 USER_FILTER_LIST, '-n', filter_edges, '-s',
                 OUTPUT_COMBINED_SEQUENCE_FILE
             ]
@@ -713,7 +671,7 @@ def hivtrace(id,
         else:
             lanl_hivnetworkcsv_process = [
                 PYTHON, HIVNETWORKCSV, '-i', USER_LANL_TN93OUTPUT, '-t',
-                threshold, '-f', SEQUENCE_ID_FORMAT, '-j', '-k',
+                threshold, '-f', SEQUENCE_ID_FORMAT, '-J', '-q', '-k',
                 USER_FILTER_LIST
             ]
 
