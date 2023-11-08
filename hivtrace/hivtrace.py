@@ -65,8 +65,9 @@ def fasta_iter(fasta_name):
 
 
 def gunzip_file(zip_file, out_file):
-    with gzip.open(zip_file, 'rb') as f_in:
-        with open(out_file, 'wb') as f_out:
+    """Unzip an archive to a destination if the destination doesn't exist."""
+    if not os.path.isfile(out_file):
+        with gzip.open(zip_file, 'rb') as f_in, open(out_file, 'wb') as f_out:
             f_out.writelines(f_in)
 
 
@@ -341,9 +342,8 @@ def hivtrace(id,
             lanl_tn93output_zip = os.path.join(resource_dir,
                                                'LANL.TN93OUTPUT.csv.gz')
             gunzip_file(lanl_tn93output_zip, LANL_TN93OUTPUT_CSV)
-    except e:  # pragma: no cover
-        print("Oops, missing a resource file")
-        raise
+    except Exception as e:
+        raise Exception("Oops, missing a resource file") from e
 
     # Python Parameters
     SCORE_MATRIX = 'HIV_BETWEEN_F'
