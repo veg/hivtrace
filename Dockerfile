@@ -3,7 +3,7 @@ FROM ubuntu:20.04
 
 # Set up environment and install dependencies
 RUN apt-get update && apt-get -y upgrade && \
-    DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y cmake gcc g++ git make python3 python3-pip wget && \
+    DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y cmake gcc g++ git libcurl4-openssl-dev libssl-dev make python3 python3-pip wget && \
 
     # Update pip and use it to install Python packages
     python3 -m pip install --upgrade pip && \
