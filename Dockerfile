@@ -1,4 +1,4 @@
-# Docker image for tn93
+# Docker image for HIV-TRACE
 FROM ubuntu:20.04
 
 # Set up environment and install dependencies
