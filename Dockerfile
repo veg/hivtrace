@@ -1,5 +1,5 @@
 # Docker image for an HIV-TRACE development environment
-FROM ubuntu:20.04
+FROM oraclelinux:8
 
 # Set up environment and install dependencies
 RUN yum -y update && \
