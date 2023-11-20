@@ -3,7 +3,7 @@ FROM oraclelinux:8
 
 # Set up environment and install dependencies
 RUN yum -y update && \
-    yum install -y bzip2-devel cmake gcc gcc-c++ git libcurl-devel make openssl-devel python3.11 python3.11-devel python3.11-pip wget xz-devel && \
+    yum install -y bzip2-devel cmake gcc gcc-c++ gcc-toolset-10 git libcurl-devel make openssl-devel oracle-epel-release-el8 python3.11 python3.11-devel python3.11-pip wget xz-devel && \
     echo 'source /opt/rh/gcc-toolset-10/enable' > ~/.bashrc && \
     source ~/.bashrc && \
 
