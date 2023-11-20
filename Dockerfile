@@ -1,9 +1,11 @@
-# Docker image for HIV-TRACE
-FROM ubuntu:20.04
+# Docker image for an HIV-TRACE development environment
+FROM oraclelinux:8
 
 # Set up environment and install dependencies
-RUN apt-get update && apt-get -y upgrade && \
-    DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y cmake gcc g++ git libcurl4-openssl-dev libssl-dev make python3 python3-pip wget && \
+RUN yum -y update && \
+    yum install -y bzip2-devel cmake gcc gcc-c++ gcc-toolset-10 git libcurl-devel make openssl-devel oracle-epel-release-el8 python3.11 python3.11-devel python3.11-pip wget xz-devel && \
+    echo 'source /opt/rh/gcc-toolset-10/enable' > ~/.bashrc && \
+    source ~/.bashrc && \
 
     # Update pip and use it to install Python packages
     python3 -m pip install --upgrade pip && \
@@ -19,3 +21,6 @@ RUN apt-get update && apt-get -y upgrade && \
 
     # Clean up
     rm -rf ~/.cache /tmp/* ~/.wget-hsts
+
+# To compile HIV-TRACE within the development environment:
+#   python3 setup.py develop
