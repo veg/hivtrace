@@ -281,7 +281,7 @@ def hivtrace(id,
              skip_alignment=False,
              save_intermediate=True,
              cycle_report_fn='',
-             attributes_file=None):
+             attributes_file=None,
              prior=None
              ):
     """
@@ -561,6 +561,7 @@ def hivtrace(id,
     if handle_contaminants == 'report' or handle_contaminants == 'remove':
         hivnetworkcsv_process.extend(
             ['-C', handle_contaminants, '-F', CONTAMINANT_ID_LIST])
+
 
     if filter_cycles:
         hivnetworkcsv_process.extend(['-l'])
