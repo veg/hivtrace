@@ -2,8 +2,7 @@ HIV-TRACE
 ==========
 
 HIV-TRACE is an application that identifies potential transmission
-clusters within a supplied FASTA file with an option to find
-potential links against the Los Alamos HIV Sequence Database. 
+clusters within a supplied FASTA file.
 
 # Installation
 

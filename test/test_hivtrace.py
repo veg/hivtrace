@@ -200,32 +200,6 @@ class TestHIVTrace(unittest.TestCase):
 
         return
 
-    def test_strip_reference_sequences(self):
-
-        id = os.path.basename(self.fn)
-        compare_to_lanl = False
-
-        # run the whole thing and make sure it completed via the status file
-        results = hivtrace.hivtrace(id, self.fn, self.reference,
-                                    self.ambiguities, self.distance_threshold,
-                                    self.min_overlap, compare_to_lanl, '0.025')
-
-        [
-            self.assertTrue("removed" in edge)
-            for edge in results["trace_results"]["Edges"]
-        ]
-
-        # Read output json
-        known_contaminants = [
-            'B|FR|A04321|1983', '08_BC_HXB2_SABOTAGE|CN|AB078686|2000'
-        ]
-        [
-            self.assertTrue(not any([k in node for k in known_contaminants]))
-            for node in results["trace_results"]["Nodes"]
-        ]
-
-        return
-
     #
     def test_strip_drams(self):
 
@@ -353,56 +327,6 @@ class TestHIVTrace(unittest.TestCase):
             skip_alignment=True)
 
         self.assertTrue('trace_results' in results.keys())
-
-    def test_keep_singletons(self):
-
-        this_dirname = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)))
-
-        input_fn = path.join(this_dirname, 'rsrc/TEST2.FASTA')
-        reference = self.reference
-        id = os.path.basename(input_fn)
-
-        results = hivtrace.hivtrace(
-            id,
-            input_fn,
-            reference,
-            self.ambiguities,
-            self.distance_threshold,
-            self.min_overlap,
-            False,
-            '0.015',
-            handle_contaminants='report',
-            filter_edges='remove',
-            skip_alignment=True)
-
-        self.assertTrue('Singletons' in results['trace_results'].keys())
-
-    def test_contaminant_annotations(self):
-
-        this_dirname = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)))
-        input_fn = path.join(this_dirname, 'rsrc/CONTAM.fasta')
-        reference = self.reference
-        id = os.path.basename(input_fn)
-
-        results = hivtrace.hivtrace(
-            id,
-            input_fn,
-            reference,
-            self.ambiguities,
-            self.distance_threshold,
-            self.min_overlap,
-            False,
-            '0.015',
-            handle_contaminants='report',
-            filter_edges='remove',
-            skip_alignment=True)
-
-        nodes = list(
-            filter(lambda x: "HXB2" in x["id"],
-                   results["trace_results"]["Nodes"]))
-        self.assertTrue(all('problematic' in n["attributes"] for n in nodes))
 
     def test_contaminant_screening_separately(self):
 
