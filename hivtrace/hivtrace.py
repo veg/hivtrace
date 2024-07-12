@@ -277,9 +277,12 @@ def hivtrace(id,
              fraction,
              strip_drams_flag=False,
              filter_edges="no",
+             filter_cycles=False,
              handle_contaminants="remove",
              skip_alignment=False,
              save_intermediate=True,
+             cycle_report_fn='',
+             attributes_file=None,
              prior=None
              ):
     """
@@ -559,6 +562,12 @@ def hivtrace(id,
         hivnetworkcsv_process.extend(
             ['-C', handle_contaminants, '-F', CONTAMINANT_ID_LIST])
 
+
+    if filter_cycles:
+        hivnetworkcsv_process.extend(['-l'])
+
+    if cycle_report_fn:
+        hivnetworkcsv_process.extend(['--cycle-report-file', cycle_report_fn])
     if prior:
         hivnetworkcsv_process.extend(
             ['--prior', prior])
@@ -714,25 +723,36 @@ def hivtrace(id,
 def main():
 
     parser = argparse.ArgumentParser(description='HIV TRACE')
+
     parser.add_argument('-i', '--input', help='FASTA file', required=True)
+
     parser.add_argument(
         '-a',
         '--ambiguities',
         help='handle ambiguous nucleotides using the specified strategy',
         required=True)
+
     parser.add_argument(
         '-r', '--reference', help='reference to align to', required=True)
+
     parser.add_argument(
         '-t',
         '--threshold',
         help='Only count edges where the distance is less than this threshold',
         required=True)
+
     parser.add_argument(
         '-m', '--minoverlap', help='Minimum Overlap', required=True)
+
     parser.add_argument('-g', '--fraction', help='Fraction', required=True)
+
     parser.add_argument('-u', '--curate', help='Filter contaminants')
+
     parser.add_argument(
         '-f', '--filter', help='Edge filtering option', default="no", type=str)
+
+    parser.add_argument('--filter-cycles', help='Filters cycles', action='store_true')
+
     parser.add_argument(
         '-s',
         '--strip_drams',
@@ -741,6 +761,7 @@ def main():
                                                      with these sites removed. It requires input/output file names along with the list of \
                                                      DRAM sites to remove: 'lewis' or 'wheeler'."
     )
+
     parser.add_argument(
         '-c',
         '--compare',
@@ -754,10 +775,15 @@ def main():
 
     parser.add_argument(
         '--skip-alignment', help='Skip alignment', action='store_true')
+
     parser.add_argument('--attributes-file', help='Annotate with attributes')
+
     parser.add_argument('--log', help='Write logs to specified directory')
+
     parser.add_argument('-o', '--output', help='Specify output filename')
     parser.add_argument('-p', '--prior', help='Prior network configuration')
+
+    parser.add_argument('--cycle-report-fn', help='cycle report output')
 
     args = parser.parse_args()
 
@@ -779,6 +805,7 @@ def main():
     COMPARE_TO_LANL = args.compare
     FRACTION = args.fraction
     STRIP_DRAMS = args.strip_drams
+    CYCLE_REPORT_FN = None
     PRIOR = None
 
     if(args.prior):
@@ -786,6 +813,9 @@ def main():
 
     if args.output:
         OUTPUT_FN = args.output
+
+    if args.cycle_report_fn:
+        CYCLE_REPORT_FN = args.cycle_report_fn
 
     if STRIP_DRAMS != 'wheeler' and STRIP_DRAMS != 'lewis':
         STRIP_DRAMS = False
@@ -801,9 +831,11 @@ def main():
         FRACTION,
         strip_drams_flag=STRIP_DRAMS,
         filter_edges=args.filter,
+        filter_cycles=args.filter_cycles,
         handle_contaminants=args.curate,
         skip_alignment=args.skip_alignment,
         save_intermediate=(not args.do_not_store_intermediate),
+        cycle_report_fn=CYCLE_REPORT_FN,
         prior=PRIOR
         )
 
