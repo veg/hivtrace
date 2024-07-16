@@ -176,9 +176,20 @@ def run_tn93(seqs_new, seqs_old, out_dists_file, to_add, to_replace, to_keep, re
             run(tn93_command_new_old, input=old_fasta_data, stdout=out_dists_file)
             write_thread.join()
 
-def true_append(seqs_new, seqs_old, input_old_dists, output_dists, tn93_args=DEFAULT_TN93_ARGS, tn93_path=DEFAULT_TN93_PATH):
+# main True Append program
+def true_append(seqs_new=None, seqs_old=None, input_old_dists=None, output_dists=None, tn93_args=DEFAULT_TN93_ARGS, tn93_path=DEFAULT_TN93_PATH):
     print_log("Running HIV-TRACE True Append v%s" % HIVTRACE_TRUE_APPEND_VERSION)
-    print_log("Command: %s" % ' '.join(argv))
+    if seqs_new is None: # args not provided, so parse from command line
+        args = parse_args()
+        print_log("Command: %s" % ' '.join(argv))
+        print_log("Parsing user table: %s" % args.input_user_table)
+        seqs_new = parse_table(args.input_user_table)
+        print_log("Parsing old table: %s" % args.input_old_table)
+        seqs_old = parse_table(args.input_old_table)
+        output_dists = args.output_dists
+        input_old_dists = args.input_old_dists
+        tn93_args = args.tn93_args
+        tn93_path = args.tn93_path
     check_tn93_version(tn93_path)
     print_log("- Num New Sequences: %s" % len(seqs_new))
     print_log("- Num Old Sequences: %s" % (len(seqs_old)))
@@ -195,31 +206,6 @@ def true_append(seqs_new, seqs_old, input_old_dists, output_dists, tn93_args=DEF
     print_log("Calculating all new pairwise TN93 distances...")
     run_tn93(seqs_new, seqs_old, output_dists_file, to_add, to_replace, to_keep, remove_header=True, tn93_args=tn93_args, tn93_path=tn93_path)
 
-# main program
-def main():
-    print_log("Running HIV-TRACE True Append v%s" % VERSION)
-    args = parse_args()
-    print_log("Command: %s" % ' '.join(argv))
-    check_tn93_version(args.tn93_path)
-    print_log("Parsing user table: %s" % args.input_user_table)
-    seqs_new = parse_table(args.input_user_table)
-    print_log("- Num Sequences: %s" % len(seqs_new))
-    print_log("Parsing old table: %s" % args.input_old_table)
-    seqs_old = parse_table(args.input_old_table)
-    print_log("- Num Sequences: %s" % (len(seqs_old)))
-    print_log("Determining deltas between user table and old table...")
-    to_add, to_replace, to_delete, to_keep = determine_deltas(seqs_new, seqs_old)
-    print_log("- Add: %s" % len(to_add))
-    print_log("- Replace: %s" % len(to_replace))
-    print_log("- Delete: %s" % len(to_delete))
-    print_log("- Do nothing: %s" % (len(to_keep)))
-    print_log("Creating output TN93 distances CSV: %s" % args.output_dists)
-    output_dists_file = open_file(args.output_dists, 'w')
-    print_log("Copying old TN93 distances from: %s" % args.input_old_dists)
-    remove_IDs_tn93(args.input_old_dists, output_dists_file, to_keep, remove_header=False)
-    print_log("Calculating all new pairwise TN93 distances...")
-    run_tn93(seqs_new, seqs_old, output_dists_file, to_add, to_replace, to_keep, remove_header=True, tn93_args=args.tn93_args, tn93_path=args.tn93_path)
-
 # run main program
 if __name__ == "__main__":
-    main()
+    true_append() # running with default args will use argparse
