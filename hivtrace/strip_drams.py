@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 # This PYTHON script will read in an aligned Fasta file (HIV prot/rt sequences) and remove
 # DRAM (drug resistance associated mutation) codon sites. It will output a new alignment
 # with these sites removed. It requires input/output file names along with the list of
