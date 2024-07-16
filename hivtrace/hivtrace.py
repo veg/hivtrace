@@ -524,10 +524,12 @@ def hivtrace(id,
         seqs_new = fasta_to_dict(SeqIO.parse(OUTPUT_FASTA_FN, format="fasta"))  # Example function to parse new sequences
         seqs_old = fasta_to_dict(SeqIO.parse(prior_fasta, format="fasta"))  # Example function to parse old sequences
 
-        tn93_args = ['-q', '-0', '-o', OUTPUT_TN93_FN, '-t', threshold, '-a',
+        tn93_args = ['-q', '-0', '-t', threshold, '-a',
                 ambiguities, '-l', min_overlap, '-g', fraction
                 if ambiguities == 'resolve' else '1.0', '-f', OUTPUT_FORMAT
             ]
+
+        print(OUTPUT_TN93_FN)
 
         ta.true_append(seqs_new=seqs_new,
                     seqs_old=seqs_old, 
