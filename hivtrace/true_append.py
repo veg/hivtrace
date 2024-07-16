@@ -4,17 +4,20 @@ True Append for HIV-TRACE
 '''
 
 # imports
+from contextlib import contextmanager
 from csv import reader
 from datetime import datetime
 from gzip import open as gopen
+from os import mkfifo, rmdir, unlink
 from os.path import isfile
 from subprocess import run
 from sys import argv, stderr, stdin, stdout
-from tempfile import NamedTemporaryFile
+from tempfile import mkdtemp
+from threading import Thread
 import argparse
 
 # constants
-VERSION = '0.0.1'
+HIVTRACE_TRUE_APPEND_VERSION = '0.0.2'
 DEFAULT_TN93_ARGS = ''
 DEFAULT_TN93_PATH = 'tn93'
 MIN_TN93_VERSION = '1.0.14'
@@ -48,6 +51,15 @@ def open_file(fn, mode='r', text=True):
         return gopen(fn, mode)
     else:
         return open(fn, mode)
+
+# create and yield a temporary FIFO as a context manager: https://stackoverflow.com/a/54895027/2134991
+@contextmanager
+def create_fifo():
+    tmp_d = mkdtemp(); tmp_fn = '%s/fifo' % tmp_d; mkfifo(tmp_fn)
+    try:
+        yield tmp_fn
+    finally:
+        unlink(tmp_fn); rmdir(tmp_d)
 
 # parse user args
 def parse_args():
@@ -154,13 +166,18 @@ def run_tn93(seqs_new, seqs_old, out_dists_file, to_add, to_replace, to_keep, re
     # calculate new-old distances
     if len(new_fasta_data) != 0 and len(to_keep) != 0:
         old_fasta_data = ''.join('>%s\n%s\n' % (k,seqs_old[k]) for k in to_keep).encode('utf-8')
-        new_fasta_tmp_file = NamedTemporaryFile(mode='wb'); new_fasta_tmp_file.write(new_fasta_data); new_fasta_tmp_file.flush()
-        tn93_command_new_old = tn93_base_command + ['-n', '-s', new_fasta_tmp_file.name]
-        run(tn93_command_new_old, input=old_fasta_data)
-        new_fasta_tmp_file.close()
+        with create_fifo() as tmp_fifo_fn:
+            def write_to_fifo(data):
+                with open(tmp_fifo_fn, 'wb') as tmp_fifo:
+                    tmp_fifo.write(data)
+            write_thread = Thread(target=write_to_fifo, args=(new_fasta_data,))
+            write_thread.start()
+            tn93_command_new_old = tn93_base_command + ['-n', '-s', tmp_fifo_fn]
+            run(tn93_command_new_old, input=old_fasta_data, stdout=out_dists_file)
+            write_thread.join()
 
 def true_append(seqs_new, seqs_old, input_old_dists, output_dists, tn93_args=DEFAULT_TN93_ARGS, tn93_path=DEFAULT_TN93_PATH):
-    print_log("Running HIV-TRACE True Append v%s" % VERSION)
+    print_log("Running HIV-TRACE True Append v%s" % HIVTRACE_TRUE_APPEND_VERSION)
     print_log("Command: %s" % ' '.join(argv))
     check_tn93_version(tn93_path)
     print_log("- Num New Sequences: %s" % len(seqs_new))
