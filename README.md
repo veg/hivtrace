@@ -9,7 +9,7 @@ clusters within a supplied FASTA file.
 ## System Dependencies
 
 * gcc >= 6.0.0
-* python3 >= 3.5.1
+* python3 >= 3.9
 * tn93 >= 1.0.6
 
 HIV-TRACE requires [tn93](https://github.com/veg/tn93) be installed and python3.
@@ -24,7 +24,7 @@ pip3 install cython
 pip3 install hivtrace
 ```
 
-Tested with Python `3.5.1`, `3.5.3`, `3.6.1`, `3.9.*`, `3.11`.
+Tested with Python `3.9.*`, `3.11`.
 
 # Example Usage
 
