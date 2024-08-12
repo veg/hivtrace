@@ -16,6 +16,7 @@ import json
 import logging
 import tempfile
 import hivtrace.strip_drams as sd
+import hivtrace.true_append as ta
 
 
 class status:
@@ -51,6 +52,11 @@ def update_status(id, phase, status, msg=""):
 
     logging.info(json.dumps(msg))
 
+def fasta_to_dict(fasta_iterator):
+    fasta_dict = {}
+    for record in fasta_iterator:
+        fasta_dict[record.id] = str(record.seq)
+    return fasta_dict
 
 def fasta_iter(fasta_name):
     """
@@ -280,7 +286,10 @@ def hivtrace(id,
              handle_contaminants="remove",
              skip_alignment=False,
              save_intermediate=True,
-             prior=None
+             prior=None,
+             true_append=False,
+             prior_tn93=None,
+             prior_fasta=None
              ):
     """
     PHASE 1)  Pad sequence alignment to HXB2 length with bealign
@@ -511,25 +520,47 @@ def hivtrace(id,
     # PHASE 4
     update_status(id, phases.COMPUTE_TN93_DISTANCE, status.RUNNING)
 
-    with open(JSON_TN93_FN, 'w') as tn93_fh:
-        tn93_process = [
-            TN93DIST, '-q', '-0', '-o', OUTPUT_TN93_FN, '-t', threshold, '-a',
-            ambiguities, '-l', min_overlap, '-g', fraction
-            if ambiguities == 'resolve' else '1.0', '-f', OUTPUT_FORMAT,
-            OUTPUT_FASTA_FN
-        ]
+    if true_append:
+        seqs_new = fasta_to_dict(SeqIO.parse(OUTPUT_FASTA_FN, format="fasta"))  # Example function to parse new sequences
+        seqs_old = fasta_to_dict(SeqIO.parse(prior_fasta, format="fasta"))  # Example function to parse old sequences
 
-        logging.debug(' '.join(tn93_process))
-        subprocess.check_call(tn93_process, stdout=tn93_fh, stderr=tn93_fh)
+        tn93_args = ['-q', '-0', '-t', threshold, '-a',
+                ambiguities, '-l', min_overlap, '-g', fraction
+                if ambiguities == 'resolve' else '1.0', '-f', OUTPUT_FORMAT
+            ]
+
+        print(OUTPUT_TN93_FN)
+
+        ta.true_append(seqs_new=seqs_new,
+                    seqs_old=seqs_old, 
+                    input_old_dists=prior_tn93, 
+                    output_dists=OUTPUT_TN93_FN, 
+                    tn93_args=tn93_args,
+                    tn93_path=TN93DIST)
 
         if OUTPUT_TN93_FN != DEST_TN93_FN:
             shutil.copyfile(OUTPUT_TN93_FN, DEST_TN93_FN)
 
-        update_status(id, phases.COMPUTE_TN93_DISTANCE, status.COMPLETED)
+    else:
+        with open(JSON_TN93_FN, 'w') as tn93_fh:
+            tn93_process = [
+                TN93DIST, '-q', '-0', '-o', OUTPUT_TN93_FN, '-t', threshold, '-a',
+                ambiguities, '-l', min_overlap, '-g', fraction
+                if ambiguities == 'resolve' else '1.0', '-f', OUTPUT_FORMAT,
+                OUTPUT_FASTA_FN
+            ]
+
+            logging.debug(' '.join(tn93_process))
+            subprocess.check_call(tn93_process, stdout=tn93_fh, stderr=tn93_fh)
+
+    if OUTPUT_TN93_FN != DEST_TN93_FN:
+        shutil.copyfile(OUTPUT_TN93_FN, DEST_TN93_FN)
+
+    update_status(id, phases.COMPUTE_TN93_DISTANCE, status.COMPLETED)
 
     # raise an exception if tn93 file is empty
     if is_tn93_file_empty(DEST_TN93_FN):
-        raise Exception(' '.join(tn93_process) + "returned empty file")
+        raise Exception("tn93 returned empty file")
 
 
     # send contents of tn93 to status page
@@ -758,6 +789,9 @@ def main():
     parser.add_argument('--log', help='Write logs to specified directory')
     parser.add_argument('-o', '--output', help='Specify output filename')
     parser.add_argument('-p', '--prior', help='Prior network configuration')
+    parser.add_argument('--true-append', required=False, action='store_true', help="Use a previous HIV-TRACE run to only compute tn93 on the differences")
+    parser.add_argument('-iD', '--input-old-dists', required=False, type=str, help="Input: Old TN93 distances (CSV)")
+    parser.add_argument('-iT', '--input-old-fasta', required=False, type=str, help="Input: Old Fasta (FASTA)")
 
     args = parser.parse_args()
 
@@ -767,6 +801,10 @@ def main():
         log_fn = "hivtrace.log"
 
     logging.basicConfig(filename=log_fn, level=logging.DEBUG)
+
+    if args.true_append:
+        if not args.input_old_dists or not args.input_old_fasta:
+            parser.error("--true-append requires --input_old_dists and --input_old_fasta to be set")
 
     FN = args.input
     OUTPUT_FN = args.input + '.results.json'
@@ -780,9 +818,17 @@ def main():
     FRACTION = args.fraction
     STRIP_DRAMS = args.strip_drams
     PRIOR = None
+    PRIOR_TN93 = None
+    PRIOR_FASTA = None
 
     if(args.prior):
         PRIOR = args.prior
+
+    if(args.input_old_dists):
+        PRIOR_TN93 = args.input_old_dists
+
+    if(args.input_old_fasta):
+        PRIOR_FASTA = args.input_old_fasta
 
     if args.output:
         OUTPUT_FN = args.output
@@ -804,7 +850,10 @@ def main():
         handle_contaminants=args.curate,
         skip_alignment=args.skip_alignment,
         save_intermediate=(not args.do_not_store_intermediate),
-        prior=PRIOR
+        prior=PRIOR,
+        true_append=args.true_append,
+        prior_tn93=PRIOR_TN93,
+        prior_fasta=PRIOR_FASTA
         )
 
     # Write to output filename if specified
