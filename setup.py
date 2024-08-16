@@ -45,7 +45,7 @@ def setup_package():
             },
         install_requires=[
             'biopython >= 1.58',
-            'bioext >= 0.21.0',
+            'bioext >= 0.21.8',
             'hppy >= 0.9.9',
             'tornado >= 4.3',
             'hivclustering[edgefiltering] >= 1.6.8',
