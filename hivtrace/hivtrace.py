@@ -299,7 +299,7 @@ def hivtrace(id,
              skip_alignment=False,
              save_intermediate=True,
              prior=None,
-             trim_length=1497,
+             trim_length=None,
              true_append=False,
              prior_tn93=None,
              prior_fasta=None
@@ -468,7 +468,8 @@ def hivtrace(id,
         update_status(id, phases.BAM_FASTA_CONVERSION, status.COMPLETED)
 
         # Trim step after alignment, using a default or specified trim length
-        trim_sequences(OUTPUT_FASTA_FN, trim_length)
+        if trim_length:
+            trim_sequences(OUTPUT_FASTA_FN, trim_length)
 
     if handle_contaminants != 'no' and handle_contaminants != 'separately':
         with (open(OUTPUT_FASTA_FN, 'r')) as msa:
@@ -811,7 +812,6 @@ def main():
     parser.add_argument(
     '--trim-length', 
     type=int, 
-    default=1497, 
     help='Length to trim each sequence after alignment')
 
     args = parser.parse_args()
