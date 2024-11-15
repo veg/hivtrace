@@ -52,6 +52,18 @@ def update_status(id, phase, status, msg=""):
 
     logging.info(json.dumps(msg))
 
+# New trim_sequences function
+def trim_sequences(fasta_filename, trim_length):
+    """
+    Trim each sequence in the FASTA file to the specified trim length.
+    """
+    trimmed_file = fasta_filename + '.trimmed'
+    with open(fasta_filename, 'r') as input_fasta, open(trimmed_file, 'w') as output_fasta:
+        for record in SeqIO.parse(input_fasta, 'fasta'):
+            trimmed_seq = record.seq[:trim_length]
+            output_fasta.write(f">{record.id}\n{trimmed_seq}\n")
+    shutil.move(trimmed_file, fasta_filename)
+
 def fasta_to_dict(fasta_iterator):
     fasta_dict = {}
     for record in fasta_iterator:
@@ -287,6 +299,7 @@ def hivtrace(id,
              skip_alignment=False,
              save_intermediate=True,
              prior=None,
+             trim_length=1497,
              true_append=False,
              prior_tn93=None,
              prior_fasta=None
@@ -453,6 +466,9 @@ def hivtrace(id,
         logging.debug(' '.join(bam_process))
         subprocess.check_call(bam_process, stdout=DEVNULL)
         update_status(id, phases.BAM_FASTA_CONVERSION, status.COMPLETED)
+
+        # Trim step after alignment, using a default or specified trim length
+        trim_sequences(OUTPUT_FASTA_FN, trim_length)
 
     if handle_contaminants != 'no' and handle_contaminants != 'separately':
         with (open(OUTPUT_FASTA_FN, 'r')) as msa:
@@ -792,6 +808,11 @@ def main():
     parser.add_argument('--true-append', required=False, action='store_true', help="Use a previous HIV-TRACE run to only compute tn93 on the differences")
     parser.add_argument('-iD', '--input-old-dists', required=False, type=str, help="Input: Old TN93 distances (CSV)")
     parser.add_argument('-iT', '--input-old-fasta', required=False, type=str, help="Input: Old Fasta (FASTA)")
+    parser.add_argument(
+    '--trim-length', 
+    type=int, 
+    default=1497, 
+    help='Length to trim each sequence after alignment')
 
     args = parser.parse_args()
 
@@ -851,6 +872,7 @@ def main():
         skip_alignment=args.skip_alignment,
         save_intermediate=(not args.do_not_store_intermediate),
         prior=PRIOR,
+        trim_length=args.trim_length,
         true_append=args.true_append,
         prior_tn93=PRIOR_TN93,
         prior_fasta=PRIOR_FASTA
