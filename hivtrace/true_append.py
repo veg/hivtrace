@@ -8,6 +8,7 @@ from contextlib import contextmanager
 from csv import reader
 from datetime import datetime
 from gzip import open as gopen
+import os
 from os import mkfifo, rmdir, unlink
 from os.path import isfile
 from subprocess import run
@@ -128,9 +129,16 @@ def determine_deltas(seqs_new, seqs_old):
 def remove_IDs_tn93(in_dists_fn, out_dists_file, to_keep, remove_header=True):
     with open_file(in_dists_fn) as infile:
         for row_num, line in enumerate(infile):
-            row = [v.strip() for v in line.split(',')]
-            if (row_num == 0 and not remove_header) or (row_num != 0 and row[0] in to_keep and row[1] in to_keep):
-                out_dists_file.write(line)
+            # First row is always the header
+            if row_num == 0:
+                # Keep header if requested
+                if not remove_header:
+                    out_dists_file.write(line)
+            else:
+                # For data rows, check if both IDs are in to_keep
+                row = [v.strip() for v in line.split(',')]
+                if len(to_keep) == 0 or (row[0] in to_keep and row[1] in to_keep):
+                    out_dists_file.write(line)
 
 # run tn93 on all new-new and new-old pairs
 # Argument: `seqs_new` = `dict` where keys are user-uploaded sequence IDs and values are sequences
@@ -151,7 +159,8 @@ def run_tn93(seqs_new, seqs_old, out_dists_file, to_add, to_replace, to_keep, re
         tn93_command_new_new = list(tn93_base_command)
         if remove_header:
             tn93_command_new_new.append('-n')
-        run(tn93_command_new_new, input=new_fasta_data)
+        # We need to redirect output to the same file handle
+        run(tn93_command_new_new, input=new_fasta_data, stdout=out_dists_file)
 
     # calculate new-old distances
     if len(new_fasta_data) != 0 and len(to_keep) != 0:
@@ -191,10 +200,40 @@ def true_append(seqs_new=None, seqs_old=None, input_old_dists=None, output_dists
     print_log("- Do nothing: %s" % (len(to_keep)))
     print_log("Creating output TN93 distances CSV: %s" % output_dists)
     print_log("Copying old TN93 distances from: %s" % input_old_dists)
-    with open_file(output_dists, 'w') as output_dists_file:
-        remove_IDs_tn93(input_old_dists, output_dists_file, to_keep, remove_header=False)
+    import tempfile
+    
+    # Create a temporary file for new distances
+    fd, tmp_dists_fn = tempfile.mkstemp(suffix='.csv', prefix='tn93_new_')
+    os.close(fd)
+    
+    try:
+        # First calculate all new-new and new-old distances to a temp file
         print_log("Calculating all new pairwise TN93 distances...")
-        run_tn93(seqs_new, seqs_old, output_dists_file, to_add, to_replace, to_keep, remove_header=True, tn93_args=tn93_args, tn93_path=tn93_path)
+        with open_file(tmp_dists_fn, 'w') as tmp_dists_file:
+            run_tn93(seqs_new, seqs_old, tmp_dists_file, to_add, to_replace, to_keep, remove_header=False, tn93_args=tn93_args, tn93_path=tn93_path)
+            
+        # Verify temporary file was created successfully
+        if not os.path.exists(tmp_dists_fn) or os.path.getsize(tmp_dists_fn) == 0:
+            print_log("WARNING: Temporary TN93 output file is empty or not created")
+            
+        # Now create the final output file with the header
+        with open_file(output_dists, 'w') as output_dists_file:
+            # Write the header first
+            output_dists_file.write("ID1,ID2,Distance\n")
+            
+            # Add data from old TN93 file (skip header)
+            remove_IDs_tn93(input_old_dists, output_dists_file, to_keep, remove_header=True)
+            
+            # Add new TN93 data (skip header)
+            remove_IDs_tn93(tmp_dists_fn, output_dists_file, set(), remove_header=True)
+    finally:
+        # Clean up temporary file
+        if os.path.exists(tmp_dists_fn):
+            os.unlink(tmp_dists_fn)
+
+    # Verify the final output file was created successfully
+    if not os.path.exists(output_dists) or os.path.getsize(output_dists) == 0:
+        print_log("ERROR: Final TN93 output file is empty or not created - this will cause downstream issues")
 
 # run main program
 if __name__ == "__main__":

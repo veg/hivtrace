@@ -630,8 +630,9 @@ def hivtrace(id,
         p.wait()
 
     if p.returncode != 0:
+        logging.error("HIVNETWORKCSV ERROR: " + complete_stderr)
         raise subprocess.CalledProcessError(
-            returncode, ' '.join(hivnetworkcsv_process), complete_stderr)
+            p.returncode, ' '.join(hivnetworkcsv_process), complete_stderr)
 
     update_status(id, phases.INFERRING_NETWORK, status.COMPLETED,
                   complete_stderr)
