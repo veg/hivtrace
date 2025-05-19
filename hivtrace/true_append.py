@@ -85,28 +85,19 @@ def parse_args():
 # Argument: `input_table` = path to input table CSV
 # Return: `dict` in which keys are EHARS UIDs and values are clean_seqs
 def parse_table(input_table_fn):
-    # set things up
     header_row = None; col2ind = None; seqs = dict()
-    infile = open_file(input_table_fn)
-
-    # load sequences from table (and potentially write output FASTA)
-    for row in reader(infile):
-        # parse header row
-        if header_row is None:
-            header_row = row; col2ind = {k:i for i,k in enumerate(header_row)}
-            for k in ['ehars_uid', 'clean_seq']:
-                if k not in col2ind:
-                    raise ValueError("Column '%s' missing from input user table: %s" % (k, input_user_table))
-
-        # parse sequence row
-        else:
-            ehars_uid = row[col2ind['ehars_uid']].strip(); clean_seq = row[col2ind['clean_seq']].strip().upper()
-            if ehars_uid in seqs:
-                raise ValueError("Duplicate EHARS UID (%s) in file: %s" % (ehars_uid, input_table))
-            seqs[ehars_uid] = clean_seq
-
-    # clean up and return
-    infile.close()
+    with open_file(input_table_fn) as infile:
+        for row in reader(infile):
+            if header_row is None: # parse header row
+                header_row = row; col2ind = {k:i for i,k in enumerate(header_row)}
+                for k in ['ehars_uid', 'clean_seq']:
+                    if k not in col2ind:
+                        raise ValueError("Column '%s' missing from input user table: %s" % (k, input_user_table))
+            else: # parse sequence row
+                ehars_uid = row[col2ind['ehars_uid']].strip(); clean_seq = row[col2ind['clean_seq']].strip().upper()
+                if ehars_uid in seqs:
+                    raise ValueError("Duplicate EHARS UID (%s) in file: %s" % (ehars_uid, input_table))
+                seqs[ehars_uid] = clean_seq
     return seqs
 
 # determine dataset deltas
@@ -135,12 +126,11 @@ def determine_deltas(seqs_new, seqs_old):
 # Argument: `to_keep` = `set` containing IDs to keep in TN93 distances file
 # Argument: `remove_header` = `True` to remove the header in the output file, otherwise `False`
 def remove_IDs_tn93(in_dists_fn, out_dists_file, to_keep, remove_header=True):
-    infile = open_file(in_dists_fn)
-    for row_num, line in enumerate(infile):
-        row = [v.strip() for v in line.split(',')]
-        if (row_num == 0 and not remove_header) or (row_num != 0 and row[0] in to_keep and row[1] in to_keep):
-            out_dists_file.write(line)
-    infile.close()
+    with open_file(in_dists_fn) as infile:
+        for row_num, line in enumerate(infile):
+            row = [v.strip() for v in line.split(',')]
+            if (row_num == 0 and not remove_header) or (row_num != 0 and row[0] in to_keep and row[1] in to_keep):
+                out_dists_file.write(line)
 
 # run tn93 on all new-new and new-old pairs
 # Argument: `seqs_new` = `dict` where keys are user-uploaded sequence IDs and values are sequences
@@ -200,11 +190,11 @@ def true_append(seqs_new=None, seqs_old=None, input_old_dists=None, output_dists
     print_log("- Delete: %s" % len(to_delete))
     print_log("- Do nothing: %s" % (len(to_keep)))
     print_log("Creating output TN93 distances CSV: %s" % output_dists)
-    output_dists_file = open_file(output_dists, 'w')
     print_log("Copying old TN93 distances from: %s" % input_old_dists)
-    remove_IDs_tn93(input_old_dists, output_dists_file, to_keep, remove_header=False)
-    print_log("Calculating all new pairwise TN93 distances...")
-    run_tn93(seqs_new, seqs_old, output_dists_file, to_add, to_replace, to_keep, remove_header=True, tn93_args=tn93_args, tn93_path=tn93_path)
+    with open_file(output_dists, 'w') as output_dists_file:
+        remove_IDs_tn93(input_old_dists, output_dists_file, to_keep, remove_header=False)
+        print_log("Calculating all new pairwise TN93 distances...")
+        run_tn93(seqs_new, seqs_old, output_dists_file, to_add, to_replace, to_keep, remove_header=True, tn93_args=tn93_args, tn93_path=tn93_path)
 
 # run main program
 if __name__ == "__main__":
