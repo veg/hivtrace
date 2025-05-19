@@ -8,9 +8,8 @@ from contextlib import contextmanager
 from csv import reader
 from datetime import datetime
 from gzip import open as gopen
-import os
 from os import mkfifo, rmdir, unlink
-from os.path import isfile
+from os.path import getsize, isfile
 from subprocess import run
 from sys import argv, stderr, stdin, stdout
 from tempfile import mkdtemp
@@ -131,7 +130,6 @@ def remove_IDs_tn93(in_dists_fn, out_dists_file, to_keep, remove_header=True):
         for row_num, line in enumerate(infile):
             # First row is always the header
             if row_num == 0:
-                # Keep header if requested
                 if not remove_header:
                     out_dists_file.write(line)
             else:
@@ -159,7 +157,6 @@ def run_tn93(seqs_new, seqs_old, out_dists_file, to_add, to_replace, to_keep, re
         tn93_command_new_new = list(tn93_base_command)
         if remove_header:
             tn93_command_new_new.append('-n')
-        # We need to redirect output to the same file handle
         run(tn93_command_new_new, input=new_fasta_data, stdout=out_dists_file)
 
     # calculate new-old distances
@@ -191,7 +188,7 @@ def true_append(seqs_new=None, seqs_old=None, input_old_dists=None, output_dists
         tn93_path = args.tn93_path
     check_tn93_version(tn93_path)
     print_log("- Num New Sequences: %s" % len(seqs_new))
-    print_log("- Num Old Sequences: %s" % (len(seqs_old)))
+    print_log("- Num Old Sequences: %s" % len(seqs_old))
     print_log("Determining deltas between new seqs and old seqs ...")
     to_add, to_replace, to_delete, to_keep = determine_deltas(seqs_new, seqs_old)
     print_log("- Add: %s" % len(to_add))
@@ -199,41 +196,17 @@ def true_append(seqs_new=None, seqs_old=None, input_old_dists=None, output_dists
     print_log("- Delete: %s" % len(to_delete))
     print_log("- Do nothing: %s" % (len(to_keep)))
     print_log("Creating output TN93 distances CSV: %s" % output_dists)
-    print_log("Copying old TN93 distances from: %s" % input_old_dists)
-    import tempfile
-    
-    # Create a temporary file for new distances
-    fd, tmp_dists_fn = tempfile.mkstemp(suffix='.csv', prefix='tn93_new_')
-    os.close(fd)
-    
-    try:
-        # First calculate all new-new and new-old distances to a temp file
+    with open_file(output_dists, 'w') as output_dists_file:
+        print_log("Copying old TN93 distances from: %s" % input_old_dists)
+        remove_IDs_tn93(input_old_dists, output_dists_file, to_keep, remove_header=False)
         print_log("Calculating all new pairwise TN93 distances...")
-        with open_file(tmp_dists_fn, 'w') as tmp_dists_file:
-            run_tn93(seqs_new, seqs_old, tmp_dists_file, to_add, to_replace, to_keep, remove_header=False, tn93_args=tn93_args, tn93_path=tn93_path)
-            
-        # Verify temporary file was created successfully
-        if not os.path.exists(tmp_dists_fn) or os.path.getsize(tmp_dists_fn) == 0:
-            print_log("WARNING: Temporary TN93 output file is empty or not created")
-            
-        # Now create the final output file with the header
-        with open_file(output_dists, 'w') as output_dists_file:
-            # Write the header first
-            output_dists_file.write("ID1,ID2,Distance\n")
-            
-            # Add data from old TN93 file (skip header)
-            remove_IDs_tn93(input_old_dists, output_dists_file, to_keep, remove_header=True)
-            
-            # Add new TN93 data (skip header)
-            remove_IDs_tn93(tmp_dists_fn, output_dists_file, set(), remove_header=True)
-    finally:
-        # Clean up temporary file
-        if os.path.exists(tmp_dists_fn):
-            os.unlink(tmp_dists_fn)
+        run_tn93(seqs_new, seqs_old, output_dists_file, to_add, to_replace, to_keep, remove_header=True, tn93_args=tn93_args, tn93_path=tn93_path)
 
     # Verify the final output file was created successfully
-    if not os.path.exists(output_dists) or os.path.getsize(output_dists) == 0:
-        print_log("ERROR: Final TN93 output file is empty or not created - this will cause downstream issues")
+    if not isfile(output_dists):
+        raise RuntimeError("Final TN93 output file was not created: %s" % output_dists)
+    elif getsize(output_dists) == 0:
+        raise RuntimeError("Final TN93 output file is empty: %s" % output_dists)
 
 # run main program
 if __name__ == "__main__":
