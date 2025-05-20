@@ -10,7 +10,7 @@ from datetime import datetime
 from gzip import open as gopen
 from os import mkfifo, rmdir, unlink
 from os.path import getsize, isfile
-from subprocess import run
+from subprocess import DEVNULL, run
 from sys import argv, stderr, stdin, stdout
 from tempfile import mkdtemp
 from threading import Thread
@@ -137,6 +137,7 @@ def remove_IDs_tn93(in_dists_fn, out_dists_file, to_keep, remove_header=True):
                 row = [v.strip() for v in line.split(',')]
                 if len(to_keep) == 0 or (row[0] in to_keep and row[1] in to_keep):
                     out_dists_file.write(line)
+    out_dists_file.flush()
 
 # run tn93 on all new-new and new-old pairs
 # Argument: `seqs_new` = `dict` where keys are user-uploaded sequence IDs and values are sequences
@@ -157,7 +158,8 @@ def run_tn93(seqs_new, seqs_old, out_dists_file, to_add, to_replace, to_keep, re
         tn93_command_new_new = list(tn93_base_command)
         if remove_header:
             tn93_command_new_new.append('-n')
-        run(tn93_command_new_new, input=new_fasta_data, stdout=out_dists_file)
+        run(tn93_command_new_new, input=new_fasta_data, stdout=out_dists_file, stderr=DEVNULL)
+        out_dists_file.flush()
 
     # calculate new-old distances
     if len(new_fasta_data) != 0 and len(to_keep) != 0:
@@ -169,8 +171,9 @@ def run_tn93(seqs_new, seqs_old, out_dists_file, to_add, to_replace, to_keep, re
             write_thread = Thread(target=write_to_fifo, args=(new_fasta_data,))
             write_thread.start()
             tn93_command_new_old = tn93_base_command + ['-n', '-s', tmp_fifo_fn]
-            run(tn93_command_new_old, input=old_fasta_data, stdout=out_dists_file)
+            run(tn93_command_new_old, input=old_fasta_data, stdout=out_dists_file, stderr=DEVNULL)
             write_thread.join()
+            out_dists_file.flush()
 
 # main True Append program
 def true_append(seqs_new=None, seqs_old=None, input_old_dists=None, output_dists=None, tn93_args=DEFAULT_TN93_ARGS, tn93_path=DEFAULT_TN93_PATH):
