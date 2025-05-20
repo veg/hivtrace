@@ -9,15 +9,15 @@ from csv import reader
 from datetime import datetime
 from gzip import open as gopen
 from os import mkfifo, rmdir, unlink
-from os.path import isfile
-from subprocess import run
+from os.path import getsize, isfile
+from subprocess import DEVNULL, run
 from sys import argv, stderr, stdin, stdout
 from tempfile import mkdtemp
 from threading import Thread
 import argparse
 
 # constants
-HIVTRACE_TRUE_APPEND_VERSION = '0.0.2'
+TN93_TRUE_APPEND_VERSION = '0.0.2'
 DEFAULT_TN93_ARGS = ''
 DEFAULT_TN93_PATH = 'tn93'
 MIN_TN93_VERSION = '1.0.14'
@@ -85,28 +85,19 @@ def parse_args():
 # Argument: `input_table` = path to input table CSV
 # Return: `dict` in which keys are EHARS UIDs and values are clean_seqs
 def parse_table(input_table_fn):
-    # set things up
     header_row = None; col2ind = None; seqs = dict()
-    infile = open_file(input_table_fn)
-
-    # load sequences from table (and potentially write output FASTA)
-    for row in reader(infile):
-        # parse header row
-        if header_row is None:
-            header_row = row; col2ind = {k:i for i,k in enumerate(header_row)}
-            for k in ['ehars_uid', 'clean_seq']:
-                if k not in col2ind:
-                    raise ValueError("Column '%s' missing from input user table: %s" % (k, input_user_table))
-
-        # parse sequence row
-        else:
-            ehars_uid = row[col2ind['ehars_uid']].strip(); clean_seq = row[col2ind['clean_seq']].strip().upper()
-            if ehars_uid in seqs:
-                raise ValueError("Duplicate EHARS UID (%s) in file: %s" % (ehars_uid, input_table))
-            seqs[ehars_uid] = clean_seq
-
-    # clean up and return
-    infile.close()
+    with open_file(input_table_fn) as infile:
+        for row in reader(infile):
+            if header_row is None: # parse header row
+                header_row = row; col2ind = {k:i for i,k in enumerate(header_row)}
+                for k in ['ehars_uid', 'clean_seq']:
+                    if k not in col2ind:
+                        raise ValueError("Column '%s' missing from input user table: %s" % (k, input_user_table))
+            else: # parse sequence row
+                ehars_uid = row[col2ind['ehars_uid']].strip(); clean_seq = row[col2ind['clean_seq']].strip().upper()
+                if ehars_uid in seqs:
+                    raise ValueError("Duplicate EHARS UID (%s) in file: %s" % (ehars_uid, input_table))
+                seqs[ehars_uid] = clean_seq
     return seqs
 
 # determine dataset deltas
@@ -135,12 +126,18 @@ def determine_deltas(seqs_new, seqs_old):
 # Argument: `to_keep` = `set` containing IDs to keep in TN93 distances file
 # Argument: `remove_header` = `True` to remove the header in the output file, otherwise `False`
 def remove_IDs_tn93(in_dists_fn, out_dists_file, to_keep, remove_header=True):
-    infile = open_file(in_dists_fn)
-    for row_num, line in enumerate(infile):
-        row = [v.strip() for v in line.split(',')]
-        if (row_num == 0 and not remove_header) or (row_num != 0 and row[0] in to_keep and row[1] in to_keep):
-            out_dists_file.write(line)
-    infile.close()
+    with open_file(in_dists_fn) as infile:
+        for row_num, line in enumerate(infile):
+            # First row is always the header
+            if row_num == 0:
+                if not remove_header:
+                    out_dists_file.write(line)
+            else:
+                # For data rows, check if both IDs are in to_keep
+                row = [v.strip() for v in line.split(',')]
+                if len(to_keep) == 0 or (row[0] in to_keep and row[1] in to_keep):
+                    out_dists_file.write(line)
+    out_dists_file.flush()
 
 # run tn93 on all new-new and new-old pairs
 # Argument: `seqs_new` = `dict` where keys are user-uploaded sequence IDs and values are sequences
@@ -161,7 +158,8 @@ def run_tn93(seqs_new, seqs_old, out_dists_file, to_add, to_replace, to_keep, re
         tn93_command_new_new = list(tn93_base_command)
         if remove_header:
             tn93_command_new_new.append('-n')
-        run(tn93_command_new_new, input=new_fasta_data)
+        run(tn93_command_new_new, input=new_fasta_data, stdout=out_dists_file, stderr=DEVNULL)
+        out_dists_file.flush()
 
     # calculate new-old distances
     if len(new_fasta_data) != 0 and len(to_keep) != 0:
@@ -173,12 +171,13 @@ def run_tn93(seqs_new, seqs_old, out_dists_file, to_add, to_replace, to_keep, re
             write_thread = Thread(target=write_to_fifo, args=(new_fasta_data,))
             write_thread.start()
             tn93_command_new_old = tn93_base_command + ['-n', '-s', tmp_fifo_fn]
-            run(tn93_command_new_old, input=old_fasta_data, stdout=out_dists_file)
+            run(tn93_command_new_old, input=old_fasta_data, stdout=out_dists_file, stderr=DEVNULL)
             write_thread.join()
+            out_dists_file.flush()
 
 # main True Append program
 def true_append(seqs_new=None, seqs_old=None, input_old_dists=None, output_dists=None, tn93_args=DEFAULT_TN93_ARGS, tn93_path=DEFAULT_TN93_PATH):
-    print_log("Running HIV-TRACE True Append v%s" % HIVTRACE_TRUE_APPEND_VERSION)
+    print_log("Running TN93 True Append v%s" % TN93_TRUE_APPEND_VERSION)
     if seqs_new is None: # args not provided, so parse from command line
         args = parse_args()
         print_log("Command: %s" % ' '.join(argv))
@@ -192,7 +191,7 @@ def true_append(seqs_new=None, seqs_old=None, input_old_dists=None, output_dists
         tn93_path = args.tn93_path
     check_tn93_version(tn93_path)
     print_log("- Num New Sequences: %s" % len(seqs_new))
-    print_log("- Num Old Sequences: %s" % (len(seqs_old)))
+    print_log("- Num Old Sequences: %s" % len(seqs_old))
     print_log("Determining deltas between new seqs and old seqs ...")
     to_add, to_replace, to_delete, to_keep = determine_deltas(seqs_new, seqs_old)
     print_log("- Add: %s" % len(to_add))
@@ -200,11 +199,17 @@ def true_append(seqs_new=None, seqs_old=None, input_old_dists=None, output_dists
     print_log("- Delete: %s" % len(to_delete))
     print_log("- Do nothing: %s" % (len(to_keep)))
     print_log("Creating output TN93 distances CSV: %s" % output_dists)
-    output_dists_file = open_file(output_dists, 'w')
-    print_log("Copying old TN93 distances from: %s" % input_old_dists)
-    remove_IDs_tn93(input_old_dists, output_dists_file, to_keep, remove_header=False)
-    print_log("Calculating all new pairwise TN93 distances...")
-    run_tn93(seqs_new, seqs_old, output_dists_file, to_add, to_replace, to_keep, remove_header=True, tn93_args=tn93_args, tn93_path=tn93_path)
+    with open_file(output_dists, 'w') as output_dists_file:
+        print_log("Copying old TN93 distances from: %s" % input_old_dists)
+        remove_IDs_tn93(input_old_dists, output_dists_file, to_keep, remove_header=False)
+        print_log("Calculating all new pairwise TN93 distances...")
+        run_tn93(seqs_new, seqs_old, output_dists_file, to_add, to_replace, to_keep, remove_header=True, tn93_args=tn93_args, tn93_path=tn93_path)
+
+    # Verify the final output file was created successfully
+    if not isfile(output_dists):
+        raise RuntimeError("Final TN93 output file was not created: %s" % output_dists)
+    elif getsize(output_dists) == 0:
+        raise RuntimeError("Final TN93 output file is empty: %s" % output_dists)
 
 # run main program
 if __name__ == "__main__":
