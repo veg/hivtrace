@@ -17,7 +17,7 @@ from threading import Thread
 import argparse
 
 # constants
-HIVTRACE_TRUE_APPEND_VERSION = '0.0.2'
+TN93_TRUE_APPEND_VERSION = '0.0.2'
 DEFAULT_TN93_ARGS = ''
 DEFAULT_TN93_PATH = 'tn93'
 MIN_TN93_VERSION = '1.0.14'
@@ -177,7 +177,7 @@ def run_tn93(seqs_new, seqs_old, out_dists_file, to_add, to_replace, to_keep, re
 
 # main True Append program
 def true_append(seqs_new=None, seqs_old=None, input_old_dists=None, output_dists=None, tn93_args=DEFAULT_TN93_ARGS, tn93_path=DEFAULT_TN93_PATH):
-    print_log("Running HIV-TRACE True Append v%s" % HIVTRACE_TRUE_APPEND_VERSION)
+    print_log("Running TN93 True Append v%s" % TN93_TRUE_APPEND_VERSION)
     if seqs_new is None: # args not provided, so parse from command line
         args = parse_args()
         print_log("Command: %s" % ' '.join(argv))
