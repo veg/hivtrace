@@ -11,8 +11,13 @@ import csv
 import logging
 import tempfile
 import shutil
+import pytest
 
 logging.basicConfig(level=logging.DEBUG)
+
+# Check if tn93 is available in PATH
+TN93_AVAILABLE = shutil.which('tn93') is not None
+skip_if_no_tn93 = pytest.mark.skipif(not TN93_AVAILABLE, reason="tn93 not available")
 
 
 class TestHIVTrace(unittest.TestCase):
@@ -200,7 +205,7 @@ class TestHIVTrace(unittest.TestCase):
 
         return
 
-    #
+    @skip_if_no_tn93
     def test_strip_drams(self):
 
         # run the whole thing and make sure it completed via the status file
@@ -221,7 +226,7 @@ class TestHIVTrace(unittest.TestCase):
 
         return
 
-    # TODO: Expand test
+    @skip_if_no_tn93
     def test_env(self):
 
         id = os.path.basename(self.env_fn)
@@ -234,6 +239,7 @@ class TestHIVTrace(unittest.TestCase):
 
         self.assertTrue(True)
 
+    @skip_if_no_tn93
     def test_custom_reference(self):
 
         input_fn = self.fn
@@ -257,6 +263,7 @@ class TestHIVTrace(unittest.TestCase):
             for node in results["trace_results"]["Nodes"]
         ]
 
+    @skip_if_no_tn93
     def test_empty_contaminants(self):
 
         input_fn = self.fn
@@ -276,6 +283,7 @@ class TestHIVTrace(unittest.TestCase):
             handle_contaminants='remove',
             filter_edges='remove')
 
+    @skip_if_no_tn93
     def test_premade_alignment(self):
 
         compare_to_lanl = True
@@ -328,6 +336,7 @@ class TestHIVTrace(unittest.TestCase):
 
         self.assertTrue('trace_results' in results.keys())
 
+    @skip_if_no_tn93
     def test_contaminant_screening_separately(self):
 
         this_dirname = os.path.join(
