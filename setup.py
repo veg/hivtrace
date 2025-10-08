@@ -43,6 +43,7 @@ def setup_package():
                 'web/static/fonts/*'
                 ]
             },
+        python_requires='>=3.10',
         install_requires=[
             'biopython >= 1.58',
             'bioext >= 0.21.8',
