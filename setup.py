@@ -59,7 +59,7 @@ def setup_package():
             ]
         },
         tests_require=[
-            'nose'
+            'pytest'
         ]
 
     )

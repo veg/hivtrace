@@ -42,11 +42,11 @@ jobs:
 
     - name: Install test dependencies
       run: |
-        pip install nose pytest
+        pip install pytest
 
-    - name: Run tests with nose
+    - name: Run tests with pytest
       run: |
-        nosetests
+        pytest test/
       continue-on-error: ${{ matrix.python-version == '3.14' }}
 
     - name: Test installation
