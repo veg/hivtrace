@@ -46,7 +46,6 @@ def setup_package():
         python_requires='>=3.10',
         install_requires=[
             'biopython >= 1.58',
-            'bioext >= 0.21.8',
             'hppy >= 0.9.9',
             'tornado >= 4.3',
             'hivclustering[edgefiltering] >= 1.6.8',
@@ -70,4 +69,5 @@ if __name__ == '__main__':
     setup_package()
 
 # Non-Python/non-PyPI plugin dependencies:
+# cawlign (v1.0.3+)
 # tn93

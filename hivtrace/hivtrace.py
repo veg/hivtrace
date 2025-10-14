@@ -28,16 +28,15 @@ class status:
 # List phases
 class phases:
     ALIGNING = (0, "Aligning")
-    BAM_FASTA_CONVERSION = (1, "BAM to FASTA conversion")
-    FILTER_CONTAMINANTS = (2, "Screening contaminants")
-    COMPUTE_TN93_DISTANCE = (3, "Computing pairwise TN93 distances")
+    FILTER_CONTAMINANTS = (1, "Screening contaminants")
+    COMPUTE_TN93_DISTANCE = (2, "Computing pairwise TN93 distances")
     INFERRING_NETWORK = (
-        4,
+        3,
         "Inferring, filtering, and analyzing molecular transmission network")
     PUBLIC_COMPUTE_TN93_DISTANCE = (
-        5, "Computing pairwise TN93 distances against a public database")
+        4, "Computing pairwise TN93 distances against a public database")
     PUBLIC_INFERRING_CONNECTIONS = (
-        6, "Inferring connections to sequences in a public database")
+        5, "Inferring connections to sequences in a public database")
 
 
 def update_status(id, phase, status, msg=""):
@@ -285,6 +284,22 @@ def annotate_lanl(trace_json_fn, lanl_file):
     shutil.move(trace_json_cp_fn, trace_json_fn)
     return
 
+def validate_cawlign(cawlign_path):
+    """Check that cawlign is available and warn if not found"""
+    # Check if cawlign exists in PATH or as specified path
+    if not shutil.which(cawlign_path) and not os.path.isfile(cawlign_path):
+        logging.warning(
+            f"WARNING: cawlign not found at '{cawlign_path}'. "
+            f"Alignment will fail if cawlign is not installed or not in PATH. "
+            f"Install cawlign v1.0.3+ or use --cawlign to specify path"
+        )
+        print(
+            f"WARNING: cawlign not found at '{cawlign_path}'.\n"
+            f"Alignment will fail if cawlign is not installed.\n"
+            f"Install cawlign v1.0.3+ or use --cawlign to specify correct path.",
+            file=sys.stderr
+        )
+
 def hivtrace(id,
              input,
              reference,
@@ -302,12 +317,13 @@ def hivtrace(id,
              trim_length=None,
              true_append=False,
              prior_tn93=None,
-             prior_fasta=None
+             prior_fasta=None,
+             cawlign_path='cawlign',
+             score_matrix='HIV_BETWEEN_F'
              ):
     """
-    PHASE 1)  Pad sequence alignment to HXB2 length with bealign
-    PHASE 2)  Convert resulting bam file back to FASTA format
-    PHASE 2b) Rename any duplicates in FASTA file
+    PHASE 1)  Align sequences to reference using cawlign
+    PHASE 2)  Rename any duplicates in FASTA file
     PHASE 3)  Strip DRAMs if requested
     PHASE 3b) Filtering contaminants before TN93 run if requested
     PHASE 4)  TN93 analysis on the supplied FASTA file alone
@@ -329,17 +345,13 @@ def hivtrace(id,
     env_dir = os.path.dirname(sys.executable)
     PYTHON = sys.executable
 
-    # Try python's system executable first, then the user's path.
-
-    if (os.path.isfile(os.path.join(env_dir, 'bealign'))):
-        BEALIGN = os.path.join(env_dir, 'bealign')
+    # Try python's system executable first, then use provided path or default
+    if (os.path.isfile(os.path.join(env_dir, 'cawlign'))):
+        CAWLIGN = os.path.join(env_dir, 'cawlign')
     else:
-        BEALIGN = 'bealign'
+        CAWLIGN = cawlign_path
 
-    if (os.path.isfile(os.path.join(env_dir, 'bam2msa'))):
-        BAM2MSA = os.path.join(env_dir, 'bam2msa')
-    else:
-        BAM2MSA = 'bam2msa'
+    SCORE_MATRIX = score_matrix
 
     if (os.path.isfile(os.path.join(env_dir, 'hivnetworkcsv'))):
         HIVNETWORKCSV = os.path.join(env_dir, 'hivnetworkcsv')
@@ -368,7 +380,6 @@ def hivtrace(id,
         raise Exception("Oops, missing a resource file") from e
 
     # Python Parameters
-    SCORE_MATRIX = 'HIV_BETWEEN_F'
     OUTPUT_FORMAT = 'csv'
     SEQUENCE_ID_FORMAT = 'plain'
 
@@ -376,9 +387,7 @@ def hivtrace(id,
     tmp_path = tempfile.mkdtemp(prefix='hivtrace-')
     basename = os.path.basename(input)
 
-    BAM_FN = os.path.join(tmp_path, basename + '_output.bam')
-
-    # Check if save output_fasta_fn
+    # cawlign outputs FASTA directly (no BAM file needed)
     OUTPUT_FASTA_FN = os.path.join(tmp_path, basename + '_output.fasta')
 
     if save_intermediate:
@@ -442,30 +451,29 @@ def hivtrace(id,
         shutil.copyfile(input, OUTPUT_FASTA_FN)
 
     else:
-        # PHASE 1
+        # PHASE 1: Align sequences using cawlign
         update_status(id, phases.ALIGNING, status.RUNNING)
 
         if handle_contaminants is None:
             handle_contaminants = 'no'
 
-        bealign_process = [
-            BEALIGN, '-q', '-r', reference, '-m', SCORE_MATRIX, '-R', input,
-            BAM_FN
+        # Build cawlign command
+        # cawlign outputs FASTA directly, using refmap format (default)
+        # -I flag includes reference sequence in output (equivalent to bealign's -K)
+        # -t codon for codon-aware alignment (required for HIV_BETWEEN_F score matrix)
+        cawlign_process = [
+            CAWLIGN, '-s', SCORE_MATRIX, '-t', 'codon', '-I', '-r', reference
         ]
 
-        if handle_contaminants != 'no':
-            bealign_process.insert(-3, '-K')
+        logging.debug(' '.join(cawlign_process))
 
-        logging.debug(' '.join(bealign_process))
-        subprocess.check_call(bealign_process, stdout=DEVNULL)
+        # Run cawlign with input file redirected to stdin, output to file
+        with open(input, 'r') as input_file, open(OUTPUT_FASTA_FN, 'w') as output_file:
+            result = subprocess.run(cawlign_process, stdin=input_file, stdout=output_file, stderr=subprocess.PIPE, text=True)
+            if result.returncode != 0:
+                raise RuntimeError(f"cawlign failed:\n{result.stderr}")
+
         update_status(id, phases.ALIGNING, status.COMPLETED)
-
-        # PHASE 2
-        update_status(id, phases.BAM_FASTA_CONVERSION, status.RUNNING)
-        bam_process = [BAM2MSA, BAM_FN, OUTPUT_FASTA_FN]
-        logging.debug(' '.join(bam_process))
-        subprocess.check_call(bam_process, stdout=DEVNULL)
-        update_status(id, phases.BAM_FASTA_CONVERSION, status.COMPLETED)
 
         # Trim step after alignment, using a default or specified trim length
         if trim_length:
@@ -811,9 +819,17 @@ def main():
     parser.add_argument('-iD', '--input-old-dists', required=False, type=str, help="Input: Old TN93 distances (CSV)")
     parser.add_argument('-iT', '--input-old-fasta', required=False, type=str, help="Input: Old Fasta (FASTA)")
     parser.add_argument(
-    '--trim-length', 
-    type=int, 
+    '--trim-length',
+    type=int,
     help='Length to trim each sequence after alignment')
+    parser.add_argument(
+        '--cawlign',
+        default='cawlign',
+        help='Path to cawlign executable (default: cawlign in PATH)')
+    parser.add_argument(
+        '--score-matrix',
+        default='HIV_BETWEEN_F',
+        help='Score matrix for alignment (default: HIV_BETWEEN_F)')
 
     args = parser.parse_args()
 
@@ -823,6 +839,10 @@ def main():
         log_fn = "hivtrace.log"
 
     logging.basicConfig(filename=log_fn, level=logging.DEBUG)
+
+    # Validate cawlign availability (unless skipping alignment)
+    if not hasattr(args, 'skip_alignment') or not args.skip_alignment:
+        validate_cawlign(args.cawlign)
 
     if args.true_append:
         if not args.input_old_dists or not args.input_old_fasta:
@@ -876,7 +896,9 @@ def main():
         trim_length=args.trim_length,
         true_append=args.true_append,
         prior_tn93=PRIOR_TN93,
-        prior_fasta=PRIOR_FASTA
+        prior_fasta=PRIOR_FASTA,
+        cawlign_path=args.cawlign,
+        score_matrix=args.score_matrix
         )
 
     # Write to output filename if specified
