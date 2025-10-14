@@ -24,7 +24,7 @@ try:
     VERSION = version('hivtrace')
 except Exception:
     # Fallback if package not installed (e.g., development mode)
-    VERSION = "0.10.0"
+    VERSION = "0.10.1"
 
 
 class status:
