@@ -18,6 +18,14 @@ import tempfile
 import hivtrace.strip_drams as sd
 import hivtrace.true_append as ta
 
+# Version tracking - get from package metadata
+try:
+    from importlib.metadata import version
+    VERSION = version('hivtrace')
+except Exception:
+    # Fallback if package not installed (e.g., development mode)
+    VERSION = "0.10.0"
+
 
 class status:
     PENDING = 1
@@ -336,6 +344,7 @@ def hivtrace(id,
     """
 
     results_json = {}
+    results_json["hivtrace_version"] = VERSION
 
     # Declare reference file
     resource_dir = os.path.join(
