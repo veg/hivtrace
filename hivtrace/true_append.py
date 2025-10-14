@@ -146,11 +146,16 @@ def remove_IDs_tn93(in_dists_fn, out_dists_file, to_keep, remove_header=True):
 # Argument: `to_add` = `set` containing IDs to add to TN93 distances file
 # Argument: `to_replace` = `set` containing IDs in `seqs_old` whose sequences need to be updated with those in `seqs_new`
 # Argument: `to_keep` = `set` containing IDs to keep in TN93 distances file
-# Argument: `tn93_args` = string containing optional tn93 arguments
+# Argument: `tn93_args` = string (CLI) or list (programmatic) containing optional tn93 arguments
 # Argument: `tn93_path` = path to tn93 executable
 def run_tn93(seqs_new, seqs_old, out_dists_file, to_add, to_replace, to_keep, remove_header=True, tn93_args=DEFAULT_TN93_ARGS, tn93_path=DEFAULT_TN93_PATH):
     # set things up
-    tn93_base_command = [tn93_path] + [v.strip() for v in tn93_args]
+    # Handle tn93_args as either a string (from CLI) or a list (from programmatic call)
+    if isinstance(tn93_args, str):
+        tn93_base_command = [tn93_path] + (tn93_args.split() if tn93_args else [])
+    else:
+        # Assume it's a list, convert all elements to strings
+        tn93_base_command = [tn93_path] + [str(v) for v in tn93_args]
     new_fasta_data = ''.join('>%s\n%s\n' % (k,seqs_new[k]) for k in (to_add | to_replace)).encode('utf-8')
 
     # calculate new-new distances
